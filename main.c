@@ -250,8 +250,9 @@ TODO: ARE WE SURE THE DESIRED DIRECTION (e) IS EQUAL TO THE REAL DIRECTION?
 */
 
 /*
-  This function updates the repulsion between every pair of people in the set.
-  This function corresponds to formula (4) from the paper
+  This function updates the repulsion between every pair of people in the 
+  set wrt the relative position.
+  This function corresponds to formulae (4), (7) and (8) from the paper
 
   Assumptions: none
 
@@ -268,6 +269,8 @@ void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
     {
       double rx_ab                = People[i * N_FEATURES] - People[j * N_FEATURES];
       double ry_ab                = People[i * N_FEATURES + 1] - People[j * N_FEATURES + 1];
+      double ex_a                 = People[i * N_FEATURES + 3];
+      double ey_a                 = People[i * N_FEATURES + 4];
 
       double r_ab_norm            = sqrt(rx_ab * rx_ab + ry_ab * ry_ab);                      //(1)
 
@@ -285,14 +288,18 @@ void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
       double b                    = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) 
                                       - ((People[j * N_FEATURES + 2] * DELTA_T) * (People[j * N_FEATURES + 2] * DELTA_T))) / 2;
       
-      repulsion_x                *=  exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
-      repulsion_x                *=  V_ALPHA_BETA / 4.0 / SIGMA / b;
+      repulsion_x                *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
+      repulsion_x                *= V_ALPHA_BETA / 4.0 / SIGMA / b;
 
-      repulsion_y                *=  exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
-      repulsion_y                *=  V_ALPHA_BETA / 4.0 / SIGMA / b;
+      repulsion_y                *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
+      repulsion_y                *= V_ALPHA_BETA / 4.0 / SIGMA / b;
 
-      Repulsion_term[i * n + 2 * j]     = repulsion_x;
-      Repulsion_term[i * n + 2 * j + 1] = repulsion_y;
+      double check                = ex_a * (-1.0 * repulsion_x) + ey_a * (-1.0 * repulsion_y);
+      double threshold            = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI);
+      double w                    = check >= threshold ? 1 : INFLUENCE;
+
+      Repulsion_term[i * n + 2 * j]     = w * repulsion_x;
+      Repulsion_term[i * n + 2 * j + 1] = w * repulsion_y;
     }
   }
 }
@@ -333,40 +340,6 @@ void update_border_repulsion_term(double *People, double* borders, double *borde
 
       border_repulsion_term[i * n + 2 * j]     = repulsion_x;
       border_repulsion_term[i * n + 2 * j + 1] = repulsion_y;
-    }
-  }
-}
-
-/*
-  This function updates the repulsion between every pair of people 
-  based on the relative position of the people considered.
-  This function corresponds to formulae (7) and (8) from the paper.
-
-  Assumptions: none
-
-  Parameters:   People: array of people
-        repulsion_term: matrix containing the force of repulsion between a and b
-       Repulsive_force: matrix containing the force based on position between a and b
-                     n: number of people
-*/
-void update_repulsive_force(double *People, double *Repulsion_term, double *Repulsive_force, int n) 
-{
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < n; j++)
-    {
-      double rx_a                         = People[i * N_FEATURES];
-      double ry_a                         = People[i * N_FEATURES + 1];
-
-      double mfx_ab                       = -1.0 * Repulsion_term[i * n + 2 * j];
-      double mfy_ab                       = -1.0 * Repulsion_term[i * n + 2 * j + 1];
-
-      double check                        = rx_a * mfx_ab + ry_a * mfy_ab;
-      double threshold                    = sqrt(mfx_ab * mfx_ab + mfy_ab * mfy_ab) * cos(PSI);   //using -f or f is the same
-      double w                            = check >= threshold ? 1 : INFLUENCE;
-
-      Repulsive_force[i * n + 2 * j]      = w * Repulsion_term[i * n + 2 * j];
-      Repulsive_force[i * n + 2 * j + 1]  = w * Repulsion_term[i * n + 2 * j + 1];
     }
   }
 }
