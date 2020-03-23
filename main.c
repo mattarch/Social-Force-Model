@@ -46,7 +46,9 @@ void destroy(double *m);
 void update_direction_of_motion(double *People, int n);
 void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n);
 void compute_actual_velocity(double *People, double *actual_velocity, int n);
-void update_repulsive_force(double *People, double *Repulsion_term, double *Repulsive_force, int n) ;
+void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
+void update_border_repulsion_term(double *People, double* borders, double *border_repulsion_term, int n, int n_borders);
+void run_simulation();
 
 
 // main function
@@ -342,4 +344,83 @@ void update_border_repulsion_term(double *People, double* borders, double *borde
       border_repulsion_term[i * n + 2 * j + 1] = repulsion_y;
     }
   }
+}
+
+
+/*
+  This function runs the simulation 
+*/
+void run_simulation()
+{
+  // allocate memory
+  double *People                  = (double *) calloc(NUMBER_OF_PEOPLE * N_FEATURES, sizeof(double));
+  double *borders                 = (double *) calloc(N_BORDERS, sizeof(double));
+  double *actual_velocity         = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *acceleration_term       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *people_repulsion_term   = (double *) calloc(NUMBER_OF_PEOPLE * NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *border_repulsion_term   = (double *) calloc(NUMBER_OF_PEOPLE * N_BORDERS * 2, sizeof(double));
+  double *social_force            = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+
+  // check if calloc worked correctly
+  if (People == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL 
+  || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL)
+  {
+    printf("Error: calloc failed\n");
+    return;
+  }
+
+  // initialize arrays
+  initialize_people(People, NUMBER_OF_PEOPLE);
+  initialize_borders(borders, N_BORDERS);
+
+  // start simulation
+  printf("Start simulation with %d persons\n", NUMBER_OF_PEOPLE);
+
+  // simulate steps
+  for(int step = 0; step < N_TIMESTEP; step++)
+  {
+    // update variables
+    compute_actual_velocity(People, actual_velocity, NUMBER_OF_PEOPLE);
+    update_direction_of_motion(People, NUMBER_OF_PEOPLE);
+    update_acceleration_term(People, acceleration_term, actual_velocity, NUMBER_OF_PEOPLE);
+    update_people_repulsion_term(People, people_repulsion_term, NUMBER_OF_PEOPLE);
+    update_border_repulsion_term(People, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
+
+    // compute the social force for each person
+    for(int p = 0; p < NUMBER_OF_PEOPLE; p++)
+    {
+      // acceleration term
+      social_force[2 * p]     = acceleration_term[2 * p];
+      social_force[2 * p + 1] = acceleration_term[2 * p + 1];
+
+      // add repulsive terms toward other people
+      for(int beta = 0; beta < NUMBER_OF_PEOPLE; beta++)
+      {
+        // leave out term if beta = p
+        if(beta == p){
+          continue;
+        }
+
+        // add repulsive term towards person beta
+        social_force[2 * p]     += people_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * beta];
+        social_force[2 * p + 1] += people_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * beta + 1];
+      }
+
+      // add repulsive terms of borders
+      for(int b = 0; b < N_BORDERS; b++)
+      {
+        social_force[2 * p]     += border_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * b];
+        social_force[2 * p + 1] += border_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * b + 1];
+      }
+
+      // TODO Wait for function implementing (10), (11) and (12)
+
+    }
+
+    printf("Finished iteration %d\n", (step+1));
+  }
+
+  printf("Simulation terminated\n");
+
+
 }
