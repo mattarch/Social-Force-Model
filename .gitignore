@@ -1,0 +1,8 @@
+# ignore macOS metadata files
+*.DS_Store
+
+# ignore Windows executables
+*.exe
+
+# ignore object files
+*.o
