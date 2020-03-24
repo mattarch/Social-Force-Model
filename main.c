@@ -129,8 +129,8 @@ void initialize_borders(double *borders, int n)
   }
   else
   {
-    borders[0] = 0.0;
-    borders[1] = WALK_WAY_WIDTH;
+    borders[0] = WALK_WAY_WIDTH;
+    borders[1] = 0.0;
   }
   
 }
