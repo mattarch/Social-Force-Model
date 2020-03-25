@@ -48,6 +48,7 @@ void update_acceleration_term(double *People, double *acceleration_terms, double
 void compute_actual_velocity(double *People, double *actual_velocity, int n);
 void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
 void update_border_repulsion_term(double *People, double* borders, double *border_repulsion_term, int n, int n_borders);
+void update_position(double *People, double *social_force, double *prefered_velocity, int n);
 void run_simulation();
 
 
@@ -346,7 +347,49 @@ void update_border_repulsion_term(double *People, double* borders, double *borde
   }
 }
 
+/*
+  This function computes the new velocity according to the social force and updates the position of every person
+  It implements formulas 10 to 12 in the paper
+  Assumptions: sozial force is computed before calling this fuinction
 
+  input: People = array of people
+        sozial_force = the sozial force vectors for every person
+        prefered_velocity = just a 2*n array for storing the prefered velocity
+        n = number of people
+*/
+void update_position(double *People, double *social_force, double *prefered_velocity, int n)
+{
+  double control_value;
+  double norm_value;
+  for(int i = 0; i<n;i++){
+    control_value             = 1.0;
+    //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
+    prefered_velocity[2*i]    = People[N_FEATURES*i +2]*People[N_FEATURES*i +3] + social_force[2*i]*TIMESTEP;
+    prefered_velocity[2*i+1]  = People[N_FEATURES*i +2]*People[N_FEATURES*i +4] + social_force[2*i+1]*TIMESTEP;
+
+    //compute the norm of the preferd velocity
+    norm_value                = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
+
+    //fromula 12 in the paper --> compute control_value according to norm 
+    if(norm_value > MAX_SPEED)
+      {
+        control_value         = MAX_SPEED/norm_value;
+      }
+    
+    //apply control value
+    prefered_velocity[2*i]    *=control_value;
+    prefered_velocity[2*i +1] *=control_value;
+
+    //update speed term in People matrix --> this is the new speed
+    People[N_FEATURES*i + 2]  = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
+
+    //update position QUESTION: should I use the computed velocity or should I use the updated speed times the desired direction? 
+    // they might not be equal because the social force term is not included in the desired direction of movement
+    People[N_FEATURES*i]      += prefered_velocity[2*i]*TIMESTEP;
+    People[N_FEATURES*i + 1]  += prefered_velocity[2*i+1]*TIMESTEP;
+  }
+
+}
 /*
   This function runs the simulation 
 */
