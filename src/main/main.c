@@ -43,7 +43,7 @@ void initialize_people(double *people, int n);
 void initialize_borders(double *borders, int n);
 void initialize_vector_to_zero(double *m, int n);
 void destroy(double *m);
-void update_direction_of_motion(double *People, int n);
+void update_desired_direction(double *People, int n);
 void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n);
 void compute_actual_velocity(double *People, double *actual_velocity, int n);
 void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
@@ -164,7 +164,7 @@ void destroy(double *m)
 }
 
 /*
-  This function updates the direction of motion for all Persons in the People array.
+  This function updates the desired direction for all Persons in the People array.
   This function corresponds to formula (1) from the paper
 
   Assumptions: only one edge in the direction polygon (use target People array)
@@ -172,29 +172,29 @@ void destroy(double *m)
   Parameters:   People: array of people
                      n: number of people
 */
-void update_direction_of_motion(double *People, int n)
+void update_desired_direction(double *People, int n)
 {
   // iterate over all persons and update direction
   for(int i=0; i<n; i++)
-    {
-      // get current position and target
-      double current_x = People[7*i];
-      double current_y = People[7*i + 1];
-      double target_x = People[7*i + 5];
-      double target_y = People[7*i + 6];
-      
-      // compute differences
-      double delta_x  = target_x - current_x;
-      double delta_y = target_y - current_y;
+  {
+    // get current position and target
+    double current_x = People[N_FEATURES*i];
+    double current_y = People[N_FEATURES*i + 1];
+    double target_x = People[N_FEATURES*i + 5];
+    double target_y = People[N_FEATURES*i + 6];
+    
+    // compute differences
+    double delta_x  = target_x - current_x;
+    double delta_y = target_y - current_y;
 
-      // normalization constant
-      double d = delta_x * delta_x + delta_y * delta_y;
-      double normalizer = sqrt(d);
+    // normalization constant
+    double d = delta_x * delta_x + delta_y * delta_y;
+    double normalizer = sqrt(d);
 
-      // update direction
-      People[7*i + 3] = delta_x / normalizer;
-      People[7*i + 4] = delta_y / normalizer;
-    }
+    // update direction
+    People[N_FEATURES*i + 3] = delta_x / normalizer;
+    People[N_FEATURES*i + 4] = delta_y / normalizer;
+  }
 }
 
 /*
@@ -223,7 +223,7 @@ void compute_actual_velocity(double *People, double *actual_velocity, int n)
   This function is part of formula (2) from the paper
 
   Assumptions: The RELAX_TIME is never 0.
-               The function compute_actual_velocity and update_direction_of_motion was called in advance in THIS order!!!
+               The function compute_actual_velocity and update_desired_direction was called in advance in THIS order!!!
 
   Parameters:   People: array of people
     acceleration_terms: array of x- and y-acceleration for every person
@@ -232,7 +232,7 @@ void compute_actual_velocity(double *People, double *actual_velocity, int n)
 */
 void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n)
 {
-  //!ATTENTION: function compute_actual_velocity and update_direction_of_motion have to be called befor this function in this order
+  //!ATTENTION: function compute_actual_velocity and uupdate_desired_direction have to be called befor this function in this order
 
   // compute the new acceleration terms for every person
   // iterate over every person
@@ -471,7 +471,7 @@ void run_simulation()
   {
     // update variables
     compute_actual_velocity(People, actual_velocity, NUMBER_OF_PEOPLE);
-    update_direction_of_motion(People, NUMBER_OF_PEOPLE);
+    update_desired_direction(People, NUMBER_OF_PEOPLE);
     update_acceleration_term(People, acceleration_term, actual_velocity, NUMBER_OF_PEOPLE);
     update_people_repulsion_term(People, people_repulsion_term, NUMBER_OF_PEOPLE);
     update_border_repulsion_term(People, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
