@@ -48,6 +48,7 @@ void update_acceleration_term(double *People, double *acceleration_terms, double
 void compute_actual_velocity(double *People, double *actual_velocity, int n);
 void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
 void update_border_repulsion_term(double *People, double* borders, double *border_repulsion_term, int n, int n_borders);
+void compute_social_force(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
 void update_position(double *People, double *social_force, double *prefered_velocity, int n);
 void run_simulation();
 
@@ -348,6 +349,51 @@ void update_border_repulsion_term(double *People, double* borders, double *borde
 }
 
 /*
+  This function computes the social force for each person and stores the results in the array soacial_force
+  This function corresponds to formula (9) of the paper
+
+  Assumption: acceleration, people, and border terms have been computed before
+
+  input:      acceleration_term: array with acceleration terms
+          people_repulsion_term: array with people repulsion terms
+          border_repulsion_term: array with border repulsion terms
+                    social_fore: array containing the social forces
+                              n: number of people
+                      n_borders: number of borders
+
+*/
+void compute_social_force(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
+{
+  // compute the social force for each person
+  for(int p = 0; p < n; p++)
+  {
+    // acceleration term
+    social_force[2 * p]     = acceleration_term[2 * p];
+    social_force[2 * p + 1] = acceleration_term[2 * p + 1];
+
+    // add repulsive terms toward other people
+    for(int beta = 0; beta < n; beta++)
+    {
+      // leave out term if beta = p
+      if(beta == p){
+        continue;
+      }
+
+      // add repulsive term towards person beta
+      social_force[2 * p]     += people_repulsion_term[p * n + 2 * beta];
+      social_force[2 * p + 1] += people_repulsion_term[p * n + 2 * beta + 1];
+    }
+
+    // add repulsive terms of borders
+    for(int b = 0; b < n_borders; b++)
+    {
+      social_force[2 * p]     += border_repulsion_term[p * n + 2 * b];
+      social_force[2 * p + 1] += border_repulsion_term[p * n + 2 * b + 1];
+    }
+  }
+}
+
+/*
   This function computes the new velocity according to the social force and updates the position of every person
   It implements formulas 10 to 12 in the paper
   Assumptions: sozial force is computed before calling this fuinction
@@ -403,6 +449,7 @@ void run_simulation()
   double *people_repulsion_term   = (double *) calloc(NUMBER_OF_PEOPLE * NUMBER_OF_PEOPLE * 2, sizeof(double));
   double *border_repulsion_term   = (double *) calloc(NUMBER_OF_PEOPLE * N_BORDERS * 2, sizeof(double));
   double *social_force            = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *prefered_velocity       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
 
   // check if calloc worked correctly
   if (People == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL 
@@ -428,42 +475,11 @@ void run_simulation()
     update_acceleration_term(People, acceleration_term, actual_velocity, NUMBER_OF_PEOPLE);
     update_people_repulsion_term(People, people_repulsion_term, NUMBER_OF_PEOPLE);
     update_border_repulsion_term(People, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
-
-    // compute the social force for each person
-    for(int p = 0; p < NUMBER_OF_PEOPLE; p++)
-    {
-      // acceleration term
-      social_force[2 * p]     = acceleration_term[2 * p];
-      social_force[2 * p + 1] = acceleration_term[2 * p + 1];
-
-      // add repulsive terms toward other people
-      for(int beta = 0; beta < NUMBER_OF_PEOPLE; beta++)
-      {
-        // leave out term if beta = p
-        if(beta == p){
-          continue;
-        }
-
-        // add repulsive term towards person beta
-        social_force[2 * p]     += people_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * beta];
-        social_force[2 * p + 1] += people_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * beta + 1];
-      }
-
-      // add repulsive terms of borders
-      for(int b = 0; b < N_BORDERS; b++)
-      {
-        social_force[2 * p]     += border_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * b];
-        social_force[2 * p + 1] += border_repulsion_term[p * NUMBER_OF_PEOPLE + 2 * b + 1];
-      }
-
-      // TODO Wait for function implementing (10), (11) and (12)
-
-    }
+    compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, NUMBER_OF_PEOPLE, N_BORDERS);
+    update_position(People, social_force, prefered_velocity, NUMBER_OF_PEOPLE);
 
     printf("Finished iteration %d\n", (step+1));
   }
 
   printf("Simulation terminated\n");
-
-
 }
