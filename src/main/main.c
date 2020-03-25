@@ -372,7 +372,7 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
     social_force[2 * p + 1] = acceleration_term[2 * p + 1];
 
     // add repulsive terms toward other people
-    for(int beta = 0;   < n; beta++)
+    for(int beta = 0;  beta < n; beta++)
     {
       // leave out term if beta = p
       if(beta == p){
