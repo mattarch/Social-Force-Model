@@ -54,12 +54,12 @@ void run_simulation();
 
 
 // main function
-int main()
-{
-  printf("Test\n");
+// int main()
+// {
+//   printf("Test\n");
   
-  return 0;
-}
+//   return 0;
+// }
 
 // implementation of functions
 //------------------------------------------------------------------------------------------
@@ -266,11 +266,11 @@ TODO: ARE WE SURE THE DESIRED DIRECTION (e) IS EQUAL TO THE REAL DIRECTION?
 */
 void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
 {
-
   for(int i = 0; i < n; i++)
   {
     for(int j = 0; j < n; j++)
     {
+      if(i==j)continue;
       double rx_ab                = People[i * N_FEATURES] - People[j * N_FEATURES];
       double ry_ab                = People[i * N_FEATURES + 1] - People[j * N_FEATURES + 1];
       double ex_a                 = People[i * N_FEATURES + 3];
@@ -302,8 +302,8 @@ void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
       double threshold            = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI);
       double w                    = check >= threshold ? 1 : INFLUENCE;
 
-      Repulsion_term[i * n + 2 * j]     = w * repulsion_x;
-      Repulsion_term[i * n + 2 * j + 1] = w * repulsion_y;
+      Repulsion_term[i * (2*n) + 2 * j]     = w * repulsion_x;
+      Repulsion_term[i * (2*n) + 2 * j + 1] = w * repulsion_y;
     }
   }
 }
