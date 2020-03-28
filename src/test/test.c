@@ -22,7 +22,7 @@
 #define N_FEATURES 7          // number of featutres stored in the People matrix for every person
 #define N_BORDERS 2           // number of biarders used in the scenario
 #define TIMESTEP 0.5            // in [seconds]; timestep for simulation
-#define N_TIMESTEP 200          // number of timesteps being simulated
+#define N_TIMESTEP 10          // number of timesteps being simulated
 
 // parameters model PAGE 8
 #define V_ALPHA_BETA 2.1   // in m^{2}s^{-2}
