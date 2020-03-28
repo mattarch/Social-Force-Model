@@ -38,11 +38,8 @@
 
 
 // function prototypes
-void allocate_memory(double **m, int n);
 void initialize_people(double *people, int n);
 void initialize_borders(double *borders, int n);
-void initialize_vector_to_zero(double *m, int n);
-void destroy(double *m);
 void update_desired_direction(double *People, int n);
 void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n);
 void compute_actual_velocity(double *People, double *actual_velocity, int n);
@@ -63,19 +60,6 @@ void run_simulation();
 
 // implementation of functions
 //------------------------------------------------------------------------------------------
-/*
-  This function allocates memory for an array of size n filled with doubles.
-   after calling this function *m points to the first element of the array.
-
-  Assumptions:  array will be accessed by doubles.
-
-  Parameters: m: pointer to a pointer to a double
-              n: size of the array
-*/
-void allocate_memory(double **m, int n)
-{
-  *m = (double *)(malloc(n * sizeof(double)));
-}
 
 /*
   This function fills the People array with reasonable starting values.
@@ -135,32 +119,6 @@ void initialize_borders(double *borders, int n)
     borders[1] = 0.0;
   }
   
-}
-
-/*
-  This function fills the  array with zeros as starting values.
-
-  Assumptions: none
- Parameters:   m: array
-               n: length of m
-*/
-void initialize_vector_to_zero(double *m, int n)
-{
-  for(int i = 0; i<n;i++)
-  {
-    m[i] = 0.0;
-  }
-}
-/*
-  This function frees the memory allocated in location m
-
-  Assumptions:  *m was recieved form a previous malloc or calloc function
-
-  Parameters: m: initial address of memory to be freed
-*/
-void destroy(double *m)
-{
-  free(m);
 }
 
 /*
