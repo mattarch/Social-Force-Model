@@ -347,7 +347,8 @@ void update_position(double *People, double *social_force, double *prefered_velo
 
     //update speed term in People matrix --> this is the new speed
     People[N_FEATURES*i + 2]  = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
-
+    People[N_FEATURES*i + 3]  = prefered_velocity[2*i]/People[N_FEATURES*i + 2];
+    People[N_FEATURES*i + 4]  = prefered_velocity[2*i+1]/People[N_FEATURES*i + 2];
     //update position QUESTION: should I use the computed velocity or should I use the updated speed times the desired direction? 
     // they might not be equal because the social force term is not included in the desired direction of movement
     People[N_FEATURES*i]      += prefered_velocity[2*i]*TIMESTEP;
