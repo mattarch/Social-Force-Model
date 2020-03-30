@@ -8,6 +8,7 @@
 #endif
 
 #include <time.h>
+#include <stdio.h>
 
 // default values
 #define AVG_SPEED 1.34        // in basic scenario this is the desired speed of every person
@@ -35,12 +36,9 @@
 
 static char filename_global[40];
 
-void allocate_memory(double **m, int n);
 void initialize_people(double *people, int n);
 void initialize_borders(double *borders, int n);
-void initialize_vector_to_zero(double *m, int n);
-void destroy(double *m);
-void update_direction_of_motion(double *People, int n);
+void update_desired_direction(double *People, int n);
 void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n);
 void compute_actual_velocity(double *People, double *actual_velocity, int n);
 void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
@@ -54,7 +52,6 @@ void output_to_file_initial_state(char*,double*,int,int,int);
 void output_to_file_persons(char*,double*,int,int,int);
 void output_to_file_constants(char*);
 void get_filename();
-
 
 /*
   This function outputs the initial state of the Person matrix to the given filename
@@ -159,7 +156,7 @@ void get_filename()
     time_t now = time(NULL);
     timenow = gmtime(&now);
 
-    strftime(filename_global, sizeof(filename_global), "../../test/basic_%Y-%m-%d_%H:%M:%S.txt", timenow);
+    strftime(filename_global, sizeof(filename_global), "../../test/basic_%Y-%m-%d_%H-%M-%S", timenow);
 }
 
 #endif

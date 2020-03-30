@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "main.h"
+#include "social_force_model_basic.h"
 
 // main function
 int main()
