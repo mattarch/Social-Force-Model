@@ -54,6 +54,14 @@ textstr = '\n'.join((
 
 axs[0].text(0.5, 0.5, textstr, transform=axs[0].transAxes, fontsize=12,verticalalignment='center',horizontalalignment='center')
 axs[0].axis('off')
+axs[1].axis('equal')
+
+categories = []
+
+color1=(0.69411766529083252, 0.3490196168422699, 0.15686275064945221, 1.0)
+color2=(0.65098041296005249, 0.80784314870834351, 0.89019608497619629, 1.0)
+
+colormap = np.array([color1,color2])
 
 #-------------------------------right plot--------------------------------
 
@@ -69,6 +77,11 @@ v_initial = []
 x_dest = []
 y_dest = []
 for i in range(NUMBER_OF_PEOPLE):
+    if(i % 2):
+        categories.append(0)
+    else:
+        categories.append(1)
+
     line = fileAsList[i+offset].split()
     speed = 1 #float(line[2])
     x_initial.append(float(line[0])) #x position
@@ -79,7 +92,7 @@ for i in range(NUMBER_OF_PEOPLE):
     y_dest.append(float(line[6]))
 
 # plot inital points
-scat = axs[1].scatter(x_initial,y_initial,marker='o', color="red")
+scat = axs[1].scatter(x_initial,y_initial,marker='o', c=colormap[categories])
 
 # plot destination points
 scat_dest = axs[1].scatter(x_dest,y_dest,marker='o', color="blue")
@@ -106,15 +119,16 @@ def read_data(iter):
     y = []
     u = []
     v = []
+    speed = 1.0
     for i in range(NUMBER_OF_PEOPLE):
         line = fileAsList[i+offset].split()
-        speed = float(line[2])
         x.append(float(line[0])) #x position
         y.append(float(line[1])) #y position
-        u.append(speed * float(line[3])) 
-        v.append(speed * float(line[4]))
-
+        u.append(speed * float(line[7])) 
+        v.append(speed * float(line[8]))
     return x, y, u, v
+   
+         
 
 
 # slider functions   

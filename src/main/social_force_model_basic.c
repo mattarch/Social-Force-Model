@@ -259,8 +259,8 @@ void update_border_repulsion_term(double *People, double* borders, double *borde
       double repulsion_y          =  exp(-r_aB_norm / R) * (ry_aB/r_aB_norm);
       repulsion_y                 *= U_ALPHA_B / (double) R;
 
-      border_repulsion_term[i * (2*n) + 2 * j]     = repulsion_x;
-      border_repulsion_term[i * (2*n) + 2 * j + 1] = repulsion_y;
+      border_repulsion_term[i * (2*n_borders) + 2 * j]     = repulsion_x;
+      border_repulsion_term[i * (2*n_borders) + 2 * j + 1] = repulsion_y;
     }
   }
 }
@@ -304,8 +304,8 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
     // add repulsive terms of borders
     for(int b = 0; b < n_borders; b++)
     {
-      social_force[2 * p]     += border_repulsion_term[p * (2*n) + 2 * b];
-      social_force[2 * p + 1] += border_repulsion_term[p * (2*n) + 2 * b + 1];
+      social_force[2 * p]     += border_repulsion_term[p * (2*n_borders) + 2 * b];
+      social_force[2 * p + 1] += border_repulsion_term[p * (2*n_borders) + 2 * b + 1];
     }
   }
 }
@@ -383,7 +383,7 @@ void run_simulation()
 
   #ifdef DEBUG
   get_filename();
-  output_to_file_initial_state(filename_global,People,NUMBER_OF_PEOPLE,N_FEATURES,N_TIMESTEP);
+  output_to_file_initial_state(filename_global,People,prefered_velocity,NUMBER_OF_PEOPLE,N_FEATURES,N_TIMESTEP);
   #endif
 
   // start simulation
@@ -403,7 +403,7 @@ void run_simulation()
     CONSOLE_PRINT(("Finished iteration %d\n", (step+1)));
 
     #ifdef DEBUG
-      output_to_file_persons(filename_global,People,NUMBER_OF_PEOPLE,N_FEATURES,N_TIMESTEP);
+      output_to_file_persons(filename_global,People,prefered_velocity,NUMBER_OF_PEOPLE,N_FEATURES,N_TIMESTEP);
     #endif
   }
 
