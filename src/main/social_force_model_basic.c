@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
+
 
 #include "social_force_model_basic.h"
 
@@ -167,17 +169,12 @@ void update_acceleration_term(double *People, double *acceleration_terms, double
   }
 }
 
-
-/*
-TODO: ARE WE SURE THE DESIRED DIRECTION (e) IS EQUAL TO THE REAL DIRECTION?
-*/
-
 /*
   This function updates the repulsion between every pair of people in the 
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper
 
-  Assumptions: none
+  Assumptions: two different people can not be in the same spot at the same time
 
   Parameters:   People: array of people
         repulsion_term: matrix containing the force of repulsion between a and b
@@ -194,22 +191,23 @@ void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
       double ry_ab                = People[i * N_FEATURES + 1] - People[j * N_FEATURES + 1];
       double ex_a                 = People[i * N_FEATURES + 3];
       double ey_a                 = People[i * N_FEATURES + 4];
+      double ex_b                 = People[j * N_FEATURES + 3];
+      double ey_b                 = People[j * N_FEATURES + 4];
+      double vb                   = People[j * N_FEATURES + 2];
+      double delta_b              = vb * TIMESTEP;
 
       double r_ab_norm            = sqrt(rx_ab * rx_ab + ry_ab * ry_ab);                      //(1)
 
       //me stands for "minus e" 
-      double rx_ab_mex            = rx_ab 
-                                      - People[j * N_FEATURES + 2] * DELTA_T * People[j * N_FEATURES + 3];
-      double ry_ab_mey            = ry_ab 
-                                      - People[j * N_FEATURES + 2] * DELTA_T * People[j * N_FEATURES + 4];
+      double rx_ab_mex            = rx_ab - delta_b * ex_b;
+      double ry_ab_mey            = ry_ab - delta_b * ey_b;
 
       double r_ab_me_norm         = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey);      //(2)
 
       double repulsion_x          = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm;
       double repulsion_y          = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm;
 
-      double b                    = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) 
-                                      - ((People[j * N_FEATURES + 2] * DELTA_T) * (People[j * N_FEATURES + 2] * DELTA_T))) / 2;
+      double b                    = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2;
       
       repulsion_x                *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
       repulsion_x                *= V_ALPHA_BETA / 4.0 / SIGMA / b;
@@ -261,8 +259,8 @@ void update_border_repulsion_term(double *People, double* borders, double *borde
       double repulsion_y          =  exp(-r_aB_norm / R) * (ry_aB/r_aB_norm);
       repulsion_y                 *= U_ALPHA_B / (double) R;
 
-      border_repulsion_term[i * n + 2 * j]     = repulsion_x;
-      border_repulsion_term[i * n + 2 * j + 1] = repulsion_y;
+      border_repulsion_term[i * (2*n) + 2 * j]     = repulsion_x;
+      border_repulsion_term[i * (2*n) + 2 * j + 1] = repulsion_y;
     }
   }
 }
@@ -299,15 +297,15 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
       }
 
       // add repulsive term towards person beta
-      social_force[2 * p]     += people_repulsion_term[p * n + 2 * beta];
-      social_force[2 * p + 1] += people_repulsion_term[p * n + 2 * beta + 1];
+      social_force[2 * p]     += people_repulsion_term[p * (2*n) + 2 * beta];
+      social_force[2 * p + 1] += people_repulsion_term[p * (2*n) + 2 * beta + 1];
     }
 
     // add repulsive terms of borders
     for(int b = 0; b < n_borders; b++)
     {
-      social_force[2 * p]     += border_repulsion_term[p * n + 2 * b];
-      social_force[2 * p + 1] += border_repulsion_term[p * n + 2 * b + 1];
+      social_force[2 * p]     += border_repulsion_term[p * (2*n) + 2 * b];
+      social_force[2 * p + 1] += border_repulsion_term[p * (2*n) + 2 * b + 1];
     }
   }
 }
