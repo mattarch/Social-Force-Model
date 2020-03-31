@@ -15,12 +15,12 @@
 #define MAX_SPEED 1.742       // maximum speed allowed for every person
 #define RELAX_TIME 0.5        // in [seconds]; used for smooth acceleration
 #define WALK_WAY_LENGTH 50.0  // in [meters]; walkway dimension in x direction
-#define WALK_WAY_WIDTH 10.0   // in [meters]; walkway dimension in y direction; also distance between borders in basic scenario
-#define NUMBER_OF_PEOPLE 2    // number of people in the simulation
+#define WALK_WAY_WIDTH 5.0   // in [meters]; walkway dimension in y direction; also distance between borders in basic scenario
+#define NUMBER_OF_PEOPLE 30    // number of people in the simulation
 #define N_FEATURES 7          // number of featutres stored in the People matrix for every person
 #define N_BORDERS 2           // number of biarders used in the scenario
-#define TIMESTEP 2.0            // in [seconds]; timestep for simulation
-#define N_TIMESTEP 30         // number of timesteps being simulated
+#define TIMESTEP 0.2            // in [seconds]; timestep for simulation
+#define N_TIMESTEP 300         // number of timesteps being simulated
 
 // parameters model PAGE 8
 #define V_ALPHA_BETA 2.1   // in m^{2}s^{-2}
@@ -44,7 +44,7 @@ void compute_actual_velocity(double *People, double *actual_velocity, int n);
 void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
 void update_border_repulsion_term(double *People, double* borders, double *border_repulsion_term, int n, int n_borders);
 void compute_social_force(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
-void update_position(double *People, double *social_force, double *prefered_velocity, int n);
+void update_position(double *People, double *social_force, double *prefered_velocity,double *actual_velocity, int n);
 void run_simulation();
 
 /* function defined in the header file itself */

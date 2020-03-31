@@ -44,15 +44,15 @@ void initialize_people(double *People, int n)
 
     if(i%2) // initialize this person to walk from left to right
     {
-      People[i*N_FEATURES ] = 0.0; // starting position x coordinate
+      People[i*N_FEATURES ] = 0.0 - rand()*WALK_WAY_LENGTH/RAND_MAX; // starting position x coordinate
       People[i*N_FEATURES +3] = 1.0; // starting value for direct_x      
-      People[i*N_FEATURES +5] = WALK_WAY_LENGTH; // target x coordinate
+      People[i*N_FEATURES +5] = WALK_WAY_LENGTH + 10; // target x coordinate
     }
     else   // initialize this person to walk from right to left
     {
-      People[i*N_FEATURES ] = WALK_WAY_LENGTH; // starting position x coordinate
+      People[i*N_FEATURES ] = WALK_WAY_LENGTH + rand()*WALK_WAY_LENGTH/RAND_MAX; // starting position x coordinate
       People[i*N_FEATURES +3] = -1.0; // starting value for direct_x      
-      People[i*N_FEATURES +5] = 0.0; // target x coordinate  
+      People[i*N_FEATURES +5] = 0.0 - 10; // target x coordinate  
     }
   }
 }
@@ -320,15 +320,15 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
         prefered_velocity = just a 2*n array for storing the prefered velocity
         n = number of people
 */
-void update_position(double *People, double *social_force, double *prefered_velocity, int n)
+void update_position(double *People, double *social_force, double *prefered_velocity, double *actual_velocity, int n)
 {
   double control_value;
   double norm_value;
   for(int i = 0; i<n;i++){
     control_value             = 1.0;
     //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-    prefered_velocity[2*i]    = People[N_FEATURES*i +2]*People[N_FEATURES*i +3] + social_force[2*i]*TIMESTEP;
-    prefered_velocity[2*i+1]  = People[N_FEATURES*i +2]*People[N_FEATURES*i +4] + social_force[2*i+1]*TIMESTEP;
+    prefered_velocity[2*i]    = actual_velocity[2*i] + social_force[2*i]*TIMESTEP;
+    prefered_velocity[2*i+1]  = actual_velocity[2*i+1]*People[N_FEATURES*i +4] + social_force[2*i+1]*TIMESTEP;
 
     //compute the norm of the preferd velocity
     norm_value                = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
@@ -399,7 +399,7 @@ void run_simulation()
     update_people_repulsion_term(People, people_repulsion_term, NUMBER_OF_PEOPLE);
     update_border_repulsion_term(People, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, NUMBER_OF_PEOPLE, N_BORDERS);
-    update_position(People, social_force, prefered_velocity, NUMBER_OF_PEOPLE);
+    update_position(People, social_force, prefered_velocity, actual_velocity, NUMBER_OF_PEOPLE);
     CONSOLE_PRINT(("Finished iteration %d\n", (step+1)));
 
     #ifdef DEBUG
