@@ -1,5 +1,5 @@
-#ifndef FOO_H_   /* Include guard */
-#define FOO_H_
+#ifndef BASIC_H_   /* Include guard */
+#define BASIC_H_
 
 #ifdef DEBUG
 # define CONSOLE_PRINT(x) printf x
@@ -35,15 +35,15 @@
 
 static char filename_global[40];
 
-void initialize_people(double *people, int n);
+void initialize_people(double *position, double *desired_direction, double *final_destination, int n);
 void initialize_borders(double *borders, int n);
-void update_desired_direction(double *People, int n);
-void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n);
-void compute_actual_velocity(double *People, double *actual_velocity, int n);
-void update_people_repulsion_term(double *People, double *Repulsion_term, int n);
-void update_border_repulsion_term(double *People, double* borders, double *border_repulsion_term, int n, int n_borders);
+void update_desired_direction(double *position, double* final_destination, double* direction, int n);
+void update_acceleration_term(double *desired_direction, double *acceleration_terms, double *actual_velocity, int n);
+void compute_actual_velocity(double *speed, double* desired_direction, double *actual_velocity, int n);
+void update_people_repulsion_term(double *position, double* desired_direction, double* speed, double *Repulsion_term, int n);
+void update_border_repulsion_term(double *position, double* borders, double *border_repulsion_term, int n, int n_borders);
 void compute_social_force(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
-void update_position(double *People, double *social_force, double *prefered_velocity,double *actual_velocity, int n);
+void update_position(double *position, double* desired_direction, double* speed, double *social_force, double *prefered_velocity, double *actual_velocity, int n);
 void run_simulation();
 
 /* function defined in the header file itself */

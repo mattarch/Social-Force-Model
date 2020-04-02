@@ -108,7 +108,7 @@ samp = Slider(axamp, 'Timesteps', 0, N_TIMESTEP, valinit=0, valstep=1,)
 
 # Animation controls
 is_manual = True            # True if user has taken control of the animation
-interval = 500              # ms, time between animation frames
+interval = 16              # ms, time between animation frames
 loop_len = 0.5 * N_TIMESTEP # seconds per loop
 
 def read_data(iter):

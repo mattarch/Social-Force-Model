@@ -10,12 +10,13 @@
 #include <math.h>
 #include <assert.h>
 
-
 #include "social_force_model_basic.h"
+//#include "testing.h"
 
 // main function
 int main()
 {
+   //RUN_TESTS;
    CONSOLE_PRINT(("Test\n"));
    run_simulation();
    return 0;
@@ -32,27 +33,26 @@ int main()
  Parameters:   People: array of people
                      n: number of people
 */
-void initialize_people(double *People, int n)
+void initialize_people(double *position, double *desired_direction, double *final_destination, int n)
 {
   for(int i = 0;i<n;i++)
   {
     // initialize values independant of starting point and target point
-    People[i*N_FEATURES +1] = rand()*WALK_WAY_WIDTH/RAND_MAX; // starting position y coordinate
-    People[i*N_FEATURES +2] = 0.0; // starting velocity
-    People[i*N_FEATURES +4] = 0.0; // starting value for direct_y
-    People[i*N_FEATURES +6] = rand()*WALK_WAY_WIDTH/RAND_MAX; // target y coordinate
+    position[i*2+1] = rand()*WALK_WAY_WIDTH/RAND_MAX; // starting position y coordinate
+    desired_direction[i*2+1] = 0.0; // starting value for direct_y
+    final_destination[i*2+1] = rand()*WALK_WAY_WIDTH/RAND_MAX; // target y coordinate
 
     if(i%2) // initialize this person to walk from left to right
     {
-      People[i*N_FEATURES ] = 0.0 - rand()*WALK_WAY_LENGTH/RAND_MAX; // starting position x coordinate
-      People[i*N_FEATURES +3] = 1.0; // starting value for direct_x      
-      People[i*N_FEATURES +5] = WALK_WAY_LENGTH + 10; // target x coordinate
+      position[i*2] = 0.0 - rand()*WALK_WAY_LENGTH/RAND_MAX; // starting position x coordinate
+      desired_direction[i*2] = 1.0; // starting value for direct_x      
+      final_destination[i*2] = WALK_WAY_LENGTH + 10; // target x coordinate
     }
     else   // initialize this person to walk from right to left
     {
-      People[i*N_FEATURES ] = WALK_WAY_LENGTH + rand()*WALK_WAY_LENGTH/RAND_MAX; // starting position x coordinate
-      People[i*N_FEATURES +3] = -1.0; // starting value for direct_x      
-      People[i*N_FEATURES +5] = 0.0 - 10; // target x coordinate  
+      position[i*2] = WALK_WAY_LENGTH + rand()*WALK_WAY_LENGTH/RAND_MAX; // starting position x coordinate
+      desired_direction[i*2] = -1.0; // starting value for direct_x      
+      final_destination[i*2] = 0.0 - 10; // target x coordinate  
     }
   }
 }
@@ -93,16 +93,16 @@ void initialize_borders(double *borders, int n)
   Parameters:   People: array of people
                      n: number of people
 */
-void update_desired_direction(double *People, int n)
+void update_desired_direction(double *position, double* final_destination, double* direction, int n)
 {
   // iterate over all persons and update direction
   for(int i=0; i<n; i++)
   {
     // get current position and target
-    double current_x = People[N_FEATURES*i];
-    double current_y = People[N_FEATURES*i + 1];
-    double target_x = People[N_FEATURES*i + 5];
-    double target_y = People[N_FEATURES*i + 6];
+    double current_x = position[i*2];
+    double current_y = position[i*2+1];
+    double target_x = final_destination[i*2];
+    double target_y = final_destination[i*2+1];
     
     // compute differences
     double delta_x  = target_x - current_x;
@@ -113,8 +113,8 @@ void update_desired_direction(double *People, int n)
     double normalizer = sqrt(d);
 
     // update direction
-    People[N_FEATURES*i + 3] = delta_x / normalizer;
-    People[N_FEATURES*i + 4] = delta_y / normalizer;
+    direction[i*2] = delta_x / normalizer;
+    direction[i*2+1] = delta_y / normalizer;
   }
 }
 
@@ -128,14 +128,14 @@ void update_desired_direction(double *People, int n)
       actual_velocity: array of size n X 2 for every person
                      n: number of people
 */
-void compute_actual_velocity(double *People, double *actual_velocity, int n)
+void compute_actual_velocity(double *speed, double* desired_direction, double *actual_velocity, int n)
 {
   // compute actual velocity for every person  
   // iterate over all people
   for(int i=0; i<n; i++)
   {
-    actual_velocity[2*i] = People[N_FEATURES*i + 2]*People[N_FEATURES*i + 3];
-    actual_velocity[2*i + 1] = People[N_FEATURES*i + 2]*People[N_FEATURES*i + 4];
+    actual_velocity[2*i] = speed[i]*desired_direction[i*2];
+    actual_velocity[2*i + 1] = speed[i]*desired_direction[i*2+1];
   }
 }
 
@@ -151,7 +151,7 @@ void compute_actual_velocity(double *People, double *actual_velocity, int n)
       actual_velocity: array with the actual velocity of every person
                      n: number of people
 */
-void update_acceleration_term(double *People, double *acceleration_terms, double *actual_velocity, int n)
+void update_acceleration_term(double *desired_direction, double *acceleration_terms, double *actual_velocity, int n)
 {
   //!ATTENTION: function compute_actual_velocity and uupdate_desired_direction have to be called befor this function in this order
 
@@ -160,8 +160,8 @@ void update_acceleration_term(double *People, double *acceleration_terms, double
   for(int i=0; i<n; i++)
   {
     // compute velocity difference
-    acceleration_terms[2*i] = AVG_SPEED*People[N_FEATURES*i + 3] - actual_velocity[2*i];
-    acceleration_terms[2*i + 1] = AVG_SPEED*People[N_FEATURES*i + 4] - actual_velocity[2*i + 1];
+    acceleration_terms[2*i] = AVG_SPEED*desired_direction[i*2] - actual_velocity[2*i];
+    acceleration_terms[2*i + 1] = AVG_SPEED*desired_direction[i*2+1] - actual_velocity[2*i + 1];
 
     // apply realxation time
     acceleration_terms[2*i] = (1/RELAX_TIME)*acceleration_terms[2*i];
@@ -180,20 +180,20 @@ void update_acceleration_term(double *People, double *acceleration_terms, double
         repulsion_term: matrix containing the force of repulsion between a and b
                      n: number of people
 */
-void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
+void update_people_repulsion_term(double *position, double* desired_direction, double* speed, double *Repulsion_term, int n)
 {
   for(int i = 0; i < n; i++)
   {
     for(int j = 0; j < n; j++)
     {
       if(i==j)continue;
-      double rx_ab                = People[i * N_FEATURES] - People[j * N_FEATURES];
-      double ry_ab                = People[i * N_FEATURES + 1] - People[j * N_FEATURES + 1];
-      double ex_a                 = People[i * N_FEATURES + 3];
-      double ey_a                 = People[i * N_FEATURES + 4];
-      double ex_b                 = People[j * N_FEATURES + 3];
-      double ey_b                 = People[j * N_FEATURES + 4];
-      double vb                   = People[j * N_FEATURES + 2];
+      double rx_ab                = position[i*2] - position[j*2];
+      double ry_ab                = position[i*2+1] - position[j*2+1];
+      double ex_a                 = desired_direction[i*2];
+      double ey_a                 = desired_direction[i*2+1];
+      double ex_b                 = desired_direction[j*2];
+      double ey_b                 = desired_direction[j*2+1];
+      double vb                   = speed[j];
       double delta_b              = vb * TIMESTEP;
 
       double r_ab_norm            = sqrt(rx_ab * rx_ab + ry_ab * ry_ab);                      //(1)
@@ -239,14 +239,14 @@ void update_people_repulsion_term(double *People, double *Repulsion_term, int n)
                      n: number of people
              n_borders: number of borders
 */
-void update_border_repulsion_term(double *People, double* borders, double *border_repulsion_term, int n, int n_borders)
+void update_border_repulsion_term(double *position, double* borders, double *border_repulsion_term, int n, int n_borders)
 {
   for(int i = 0; i < n; i++)
   {
     for(int j = 0; j < n_borders; j++)
     {
-      double rx_a                 = People[i * N_FEATURES];
-      double ry_a                 = People[i * N_FEATURES + 1];
+      double rx_a                 = position[i*2];
+      double ry_a                 = position[i*2+1];
 
       double rx_aB                = 0.0;
       double ry_aB                = ry_a -  borders[j];
@@ -320,7 +320,7 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
         prefered_velocity = just a 2*n array for storing the prefered velocity
         n = number of people
 */
-void update_position(double *People, double *social_force, double *prefered_velocity, double *actual_velocity, int n)
+void update_position(double *position, double* desired_direction, double* speed, double *social_force, double *prefered_velocity, double *actual_velocity, int n)
 {
   double control_value;
   double norm_value;
@@ -328,7 +328,7 @@ void update_position(double *People, double *social_force, double *prefered_velo
     control_value             = 1.0;
     //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
     prefered_velocity[2*i]    = actual_velocity[2*i] + social_force[2*i]*TIMESTEP;
-    prefered_velocity[2*i+1]  = actual_velocity[2*i+1]*People[N_FEATURES*i +4] + social_force[2*i+1]*TIMESTEP;
+    prefered_velocity[2*i+1]  = actual_velocity[2*i+1] + social_force[2*i+1]*TIMESTEP;
 
     //compute the norm of the preferd velocity
     norm_value                = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
@@ -344,13 +344,13 @@ void update_position(double *People, double *social_force, double *prefered_velo
     prefered_velocity[2*i +1] *=control_value;
 
     //update speed term in People matrix --> this is the new speed
-    People[N_FEATURES*i + 2]  = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
-    People[N_FEATURES*i + 3]  = prefered_velocity[2*i]/People[N_FEATURES*i + 2];
-    People[N_FEATURES*i + 4]  = prefered_velocity[2*i+1]/People[N_FEATURES*i + 2];
+    speed[i]  = sqrt(pow(prefered_velocity[2*i],2) + pow(prefered_velocity[2*i + 1],2));
+    desired_direction[i*2]  = prefered_velocity[2*i]/speed[i];
+    desired_direction[i*2+1]  = prefered_velocity[2*i+1]/speed[i];
     //update position QUESTION: should I use the computed velocity or should I use the updated speed times the desired direction? 
     // they might not be equal because the social force term is not included in the desired direction of movement
-    People[N_FEATURES*i]      += prefered_velocity[2*i]*TIMESTEP;
-    People[N_FEATURES*i + 1]  += prefered_velocity[2*i+1]*TIMESTEP;
+    position[i*2]    += prefered_velocity[2*i]*TIMESTEP;
+    position[i*2+1]  += prefered_velocity[2*i+1]*TIMESTEP;
   }
 
 }
@@ -360,7 +360,11 @@ void update_position(double *People, double *social_force, double *prefered_velo
 void run_simulation()
 {
   // allocate memory
-  double *People                  = (double *) calloc(NUMBER_OF_PEOPLE * N_FEATURES, sizeof(double));
+  //double *People                  = (double *) calloc(NUMBER_OF_PEOPLE * N_FEATURES, sizeof(double));
+  double *position                = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *speed                   = (double *) calloc(NUMBER_OF_PEOPLE, sizeof(double));
+  double *desired_direction       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *final_destination       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
   double *borders                 = (double *) calloc(N_BORDERS, sizeof(double));
   double *actual_velocity         = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
   double *acceleration_term       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
@@ -370,7 +374,8 @@ void run_simulation()
   double *prefered_velocity       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
 
   // check if calloc worked correctly
-  if (People == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL 
+  if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL 
+  || borders == NULL || actual_velocity == NULL || acceleration_term == NULL 
   || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL)
   {
     printf("Error: calloc failed\n");
@@ -378,12 +383,12 @@ void run_simulation()
   }
 
   // initialize arrays
-  initialize_people(People, NUMBER_OF_PEOPLE);
+  initialize_people(position, desired_direction, final_destination, NUMBER_OF_PEOPLE);
   initialize_borders(borders, N_BORDERS);
 
   #ifdef DEBUG
   get_filename();
-  output_to_file_initial_state(filename_global,People,prefered_velocity,NUMBER_OF_PEOPLE,N_FEATURES,N_TIMESTEP);
+  output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
   #endif
 
   // start simulation
@@ -393,17 +398,17 @@ void run_simulation()
   for(int step = 0; step < N_TIMESTEP; step++)
   {
     // update variables
-    compute_actual_velocity(People, actual_velocity, NUMBER_OF_PEOPLE);
-    update_desired_direction(People, NUMBER_OF_PEOPLE);
-    update_acceleration_term(People, acceleration_term, actual_velocity, NUMBER_OF_PEOPLE);
-    update_people_repulsion_term(People, people_repulsion_term, NUMBER_OF_PEOPLE);
-    update_border_repulsion_term(People, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
+    compute_actual_velocity(speed, desired_direction, actual_velocity, NUMBER_OF_PEOPLE);
+    update_desired_direction(position, final_destination, desired_direction, NUMBER_OF_PEOPLE);
+    update_acceleration_term(desired_direction, acceleration_term, actual_velocity, NUMBER_OF_PEOPLE);
+    update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, NUMBER_OF_PEOPLE);
+    update_border_repulsion_term(position, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, NUMBER_OF_PEOPLE, N_BORDERS);
-    update_position(People, social_force, prefered_velocity, actual_velocity, NUMBER_OF_PEOPLE);
+    update_position(position, desired_direction, speed, social_force, prefered_velocity, actual_velocity, NUMBER_OF_PEOPLE);
     CONSOLE_PRINT(("Finished iteration %d\n", (step+1)));
 
     #ifdef DEBUG
-      output_to_file_persons(filename_global,People,prefered_velocity,NUMBER_OF_PEOPLE,N_FEATURES,N_TIMESTEP);
+      output_to_file_persons(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
     #endif
   }
 
