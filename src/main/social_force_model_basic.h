@@ -15,9 +15,8 @@
 #define MAX_SPEED 1.742       // maximum speed allowed for every person
 #define RELAX_TIME 0.5        // in [seconds]; used for smooth acceleration
 #define WALK_WAY_LENGTH 50.0  // in [meters]; walkway dimension in x direction
-#define WALK_WAY_WIDTH 5.0   // in [meters]; walkway dimension in y direction; also distance between borders in basic scenario
+#define WALK_WAY_WIDTH 4.0   // in [meters]; walkway dimension in y direction; also distance between borders in basic scenario
 #define NUMBER_OF_PEOPLE 300    // number of people in the simulation
-#define N_FEATURES 7          // number of featutres stored in the People matrix for every person
 #define N_BORDERS 2           // number of biarders used in the scenario
 #define TIMESTEP 0.2            // in [seconds]; timestep for simulation
 #define N_TIMESTEP 300         // number of timesteps being simulated
@@ -48,8 +47,8 @@ void update_position(double *People, double *social_force, double *prefered_velo
 void run_simulation();
 
 /* function defined in the header file itself */
-void output_to_file_initial_state(char*,double*,double*,int,int,int);
-void output_to_file_persons(char*,double*,double*,int,int,int);
+void output_to_file_initial_state(char* filename, double* position, double* speed, double* desired_direction, double* final_destination, double *prefered_velocity, int n, int n_features, int n_timestep);
+void output_to_file_persons(char* filename, double* position, double* speed, double* desired_direction, double* final_destination,double *prefered_velocity, int n, int n_features, int n_timestep);
 void output_to_file_constants(char*);
 void get_filename();
 
@@ -60,7 +59,7 @@ void get_filename();
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_initial_state(char* filename, double* people, double *prefered_velocity, int n, int n_features, int n_timestep)
+void output_to_file_initial_state(char* filename,double* position,double* speed,double* desired_direction,double* final_destination,double *prefered_velocity,int n,int n_features, int n_timestep)
 {
     FILE *fptr;
 
@@ -73,7 +72,7 @@ void output_to_file_initial_state(char* filename, double* people, double *prefer
 
     output_to_file_constants(filename);
 
-    output_to_file_persons(filename, people, prefered_velocity, n,n_features, n_timestep);
+    output_to_file_persons(filename, position, speed, desired_direction, final_destination, prefered_velocity, n,n_features, n_timestep);
  
 }
 
@@ -93,14 +92,13 @@ void output_to_file_constants(char* filename)
         return;
     }
 
-    fprintf(fptr,"17\n"); // output number of Variables
+    fprintf(fptr,"16\n"); // output number of Variables
     fprintf(fptr,"AVG_SPEED %f\n",AVG_SPEED);
     fprintf(fptr,"MAX_SPEED %f\n",MAX_SPEED);
     fprintf(fptr,"RELAX_TIME %f\n",RELAX_TIME);
     fprintf(fptr,"WALK_WAY_LENGTH %f\n",WALK_WAY_LENGTH);
     fprintf(fptr,"WALK_WAY_WIDTH %f\n",WALK_WAY_WIDTH);
     fprintf(fptr,"NUMBER_OF_PEOPLE %d\n",(int)NUMBER_OF_PEOPLE);
-    fprintf(fptr,"N_FEATURES %d\n",(int)N_FEATURES);
     fprintf(fptr,"N_BORDERS %d\n",(int)N_BORDERS);
     fprintf(fptr,"TIMESTEP %f\n",TIMESTEP);
     fprintf(fptr,"N_TIMESTEP %d\n",(int)N_TIMESTEP);
@@ -124,7 +122,7 @@ void output_to_file_constants(char* filename)
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_persons(char* filename, double* people,double *prefered_velocity, int n, int n_features, int n_timestep)
+void output_to_file_persons(char* filename, double* position, double* speed, double* desired_direction, double* final_destination,double *prefered_velocity, int n, int n_features, int n_timestep)
 {
     FILE *fptr;
 
@@ -137,18 +135,27 @@ void output_to_file_persons(char* filename, double* people,double *prefered_velo
 
     for(int i = 0; i < n; i++)
     {
-        for(int j = 0; j < n_features; j++)
-        {
-            double x = people[i * n_features + j];
-            fprintf(fptr,"%f ",x);
-        }
+        
 
+        double position_x = position[2*i];
+        double position_y = position[2*i + 1];
+        double speed_c = speed[i];
+        double desired_direction_x = desired_direction[2*i];
+        double desired_direction_y = desired_direction[2*i + 1];
+        double final_destination_x = final_destination[2*i];
+        double final_destination_y = final_destination[2*i + 1];
         double vel_x = prefered_velocity[i * 2];
         double vel_y = prefered_velocity[i * 2 + 1];
 
+        fprintf(fptr,"%f ",position_x);
+        fprintf(fptr,"%f ",position_y);
+        fprintf(fptr,"%f ",speed_c);
+        fprintf(fptr,"%f ",desired_direction_x);
+        fprintf(fptr,"%f ",desired_direction_y);
+        fprintf(fptr,"%f ",final_destination_x);
+        fprintf(fptr,"%f ",final_destination_y);
         fprintf(fptr,"%f ",vel_x);
         fprintf(fptr,"%f ",vel_y);
-
         fprintf(fptr,"\n");
     }
 

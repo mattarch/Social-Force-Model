@@ -9,7 +9,7 @@ f = open(filename, 'rb')
 fileAsList = f.readlines()
 
 num_constants = int(fileAsList[0].split()[0])
-offset = num_constants + 1
+offset_c = num_constants + 1
 
 AVG_SPEED           = float(fileAsList[1].split()[1])
 MAX_SPEED           = float(fileAsList[2].split()[1])
@@ -17,17 +17,16 @@ RELAX_TIME          = float(fileAsList[3].split()[1])
 WALK_WAY_LENGTH     = float(fileAsList[4].split()[1])
 WALK_WAY_WIDTH      = float(fileAsList[5].split()[1])
 NUMBER_OF_PEOPLE    = int(fileAsList[6].split()[1])
-N_FEATURES          = int(fileAsList[7].split()[1])
-N_BORDERS           = int(fileAsList[8].split()[1])
-TIMESTEP            = float(fileAsList[9].split()[1])
-N_TIMESTEP          = int(fileAsList[10].split()[1])
-V_ALPHA_BETA        = float(fileAsList[11].split()[1])
-SIGMA               = float(fileAsList[12].split()[1])
-U_ALPHA_B           = float(fileAsList[13].split()[1])
-R                   = float(fileAsList[14].split()[1])
-DELTA_T             = float(fileAsList[15].split()[1])
-PSI                 = float(fileAsList[16].split()[1])
-INFLUENCE           = float(fileAsList[17].split()[1])
+N_BORDERS           = int(fileAsList[7].split()[1])
+TIMESTEP            = float(fileAsList[8].split()[1])
+N_TIMESTEP          = int(fileAsList[9].split()[1])
+V_ALPHA_BETA        = float(fileAsList[10].split()[1])
+SIGMA               = float(fileAsList[11].split()[1])
+U_ALPHA_B           = float(fileAsList[12].split()[1])
+R                   = float(fileAsList[13].split()[1])
+DELTA_T             = float(fileAsList[14].split()[1])
+PSI                 = float(fileAsList[15].split()[1])
+INFLUENCE           = float(fileAsList[16].split()[1])
 
 fig, axs = plt.subplots(1, 2)
 
@@ -40,7 +39,6 @@ textstr = '\n'.join((
     "WALK_WAY_LENGTH %.2f" % (WALK_WAY_LENGTH, ),
     "WALK_WAY_WIDTH %.2f" % (WALK_WAY_WIDTH, ),
     "NUMBER_OF_PEOPLE %.2f" % (NUMBER_OF_PEOPLE, ),
-    "N_FEATURES %.2f" % (N_FEATURES, ),
     "N_BORDERS %.2f" % (N_BORDERS, ),
     "TIMESTEP %.2f" % (TIMESTEP, ),
     "N_TIMESTEP %.2f" % (N_TIMESTEP, ),
@@ -114,7 +112,7 @@ interval = 500              # ms, time between animation frames
 loop_len = 0.5 * N_TIMESTEP # seconds per loop
 
 def read_data(iter):
-    offset = int(NUMBER_OF_PEOPLE * iter) + 18
+    offset = int(NUMBER_OF_PEOPLE * iter) + offset_c
     x = []
     y = []
     u = []
