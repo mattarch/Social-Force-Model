@@ -80,7 +80,7 @@ for i in range(NUMBER_OF_PEOPLE):
     else:
         categories.append(1)
 
-    line = fileAsList[i+offset].split()
+    line = fileAsList[i+offset_c].split()
     speed = 1 #float(line[2])
     x_initial.append(float(line[0])) #x position
     y_initial.append(float(line[1])) #y position
