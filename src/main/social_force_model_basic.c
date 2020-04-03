@@ -11,12 +11,12 @@
 #include <assert.h>
 
 #include "social_force_model_basic.h"
-//#include "testing.h"
+#include "testing.h"
 
 // main function
 int main()
 {
-   //RUN_TESTS;
+   RUN_TESTS;
    CONSOLE_PRINT(("Test\n"));
    run_simulation();
    return 0;
@@ -360,7 +360,6 @@ void update_position(double *position, double* desired_direction, double* speed,
 void run_simulation()
 {
   // allocate memory
-  //double *People                  = (double *) calloc(NUMBER_OF_PEOPLE * N_FEATURES, sizeof(double));
   double *position                = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
   double *speed                   = (double *) calloc(NUMBER_OF_PEOPLE, sizeof(double));
   double *desired_direction       = (double *) calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));

@@ -7,6 +7,12 @@
 # define CONSOLE_PRINT(x) do {} while (0)
 #endif
 
+#ifdef TEST
+# define RUN_TESTS run_tests()
+#else
+# define RUN_TESTS do {} while (0)
+#endif
+
 #include <time.h>
 #include <stdio.h>
 
