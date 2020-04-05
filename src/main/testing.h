@@ -82,7 +82,7 @@ void add_tests()
 	add_border_repulsion_testcase("segfault test", border_pos0, border_borders0, border_expected0, border_n0, border_nb0);
 
 	//social force
-	add_compute_social_force_testcase("segfault test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
+	add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
 
 	//position
 	add_position_testcase("segfault test", position_pos0, position_dir0, position_speed0, position_force0, position_vel0, position_expected0, position_n0);

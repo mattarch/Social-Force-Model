@@ -90,8 +90,10 @@ void initialize_borders(double *borders, int n)
 
   Assumptions: only one edge in the direction polygon (use target People array)
 
-  Parameters:   People: array of people
-                     n: number of people
+  Parameters:          position: array with postition of people
+              final_destination: array with final destinations 
+                      direction: array to store desired direction
+                              n: number of people
 */
 void update_desired_direction(double *position, double* final_destination, double* direction, int n)
 {

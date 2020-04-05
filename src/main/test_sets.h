@@ -26,10 +26,10 @@ double border_expected0[] = {1, 0, 1, 1, 0, 0, 1, 0};
 int border_n0 = 2;
 int border_nb0 = 2;
 
-double social_acc0[] = {1, 0, 0, 0};
-double social_prep0[] = {1, 1, 0, 0, 1, 1, 0, 0};
-double social_brep0[] = {1, 1, 0, 0, 1, 1, 0, 0};
-double social_expected0[] = {0, 1, 8, 3};
+double social_acc0[] = {3, 2, -5, 4};
+double social_prep0[] = {0, 0, 1.5, -0.5, -1.5, 0.5, 0, 0};
+double social_brep0[] = {1, 2, -3, 4, 5, 2, -2, -2};
+double social_expected0[] = {2.5, 7.5, -3.5, 4.5};
 int social_n0 = 2;
 int social_nb0 = 2;
 
