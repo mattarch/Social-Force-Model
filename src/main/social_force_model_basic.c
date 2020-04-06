@@ -10,6 +10,7 @@
 #include <math.h>
 #include <assert.h>
 
+#include "tsc_x86.h"
 #include "social_force_model_basic.h"
 #include "testing.h"
 
@@ -391,10 +392,11 @@ void run_simulation()
   get_filename();
   output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
   #endif
-
+  
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", NUMBER_OF_PEOPLE));
 
+  myInt64 start = start_tsc();
   // simulate steps
   for(int step = 0; step < N_TIMESTEP; step++)
   {
@@ -412,6 +414,11 @@ void run_simulation()
       output_to_file_persons(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
     #endif
   }
-
+  myInt64 end = stop_tsc(start);
+  printf("%d",end);
+  #ifdef BENCHMARK
+    get_filename();
+    output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
+  #endif
   CONSOLE_PRINT(("Simulation terminated\n"));
 }

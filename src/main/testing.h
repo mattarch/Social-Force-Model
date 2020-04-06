@@ -69,17 +69,23 @@ void 		 (**pos_ptr_v) (double*, double*, double*, double*, double*, double*, int
 void add_tests() 
 {
 	//direction testcases
-	add_direction_testcase("test testing", direction_position0, direction_fdest0, direction_expected0, direction_n0);
-	add_direction_testcase("error testing", direction_position0, direction_fdest0, direction_expected1, direction_n0);
+	//add_direction_testcase("test testing", direction_position0, direction_fdest0, direction_expected0, direction_n0);
+	//add_direction_testcase("error testing", direction_position0, direction_fdest0, direction_expected1, direction_n0);
 
 	//acceleration testcases
-	add_acceleration_testcase("segfault test", acceleration_direction0, acceleration_vel0, acceleration_expected0, acceleration_n0);
+	add_acceleration_testcase("acceleration_test_from_start_straight", acceleration_direction0, acceleration_vel0, acceleration_expected0, acceleration_n0);
+	add_acceleration_testcase("acceleration_test_from_start_45", acceleration_direction1, acceleration_vel1, acceleration_expected1, acceleration_n1);
+	add_acceleration_testcase("acceleration_test_with_velocity_straight", acceleration_direction2, acceleration_vel2, acceleration_expected2, acceleration_n2);
+	add_acceleration_testcase("acceleration_test_with_velocity_45", acceleration_direction3, acceleration_vel3, acceleration_expected3, acceleration_n3);
+	add_acceleration_testcase("acceleration_test_to_0", acceleration_direction4, acceleration_vel4, acceleration_expected4, acceleration_n4);
+	add_acceleration_testcase("deacceleration_test_straight", acceleration_direction5, acceleration_vel5, acceleration_expected5, acceleration_n5);
+	add_acceleration_testcase("deacceleration_test_45", acceleration_direction6, acceleration_vel6, acceleration_expected6, acceleration_n6);
 
 	//people repulsion testcases
-	add_people_repulsion_testcase("test1", repulsion_position0, repulsion_speed0, repulsion_direction0, repulsion_expected_result0, repulsion_n0);
+	//add_people_repulsion_testcase("test1", repulsion_position0, repulsion_speed0, repulsion_direction0, repulsion_expected_result0, repulsion_n0);
 
 	//border repulsion
-	add_border_repulsion_testcase("segfault test", border_pos0, border_borders0, border_expected0, border_n0, border_nb0);
+	//add_border_repulsion_testcase("segfault test", border_pos0, border_borders0, border_expected0, border_n0, border_nb0);
 
 	//social force
 	add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
@@ -92,19 +98,19 @@ void add_tests()
 void add_implementations()
 {
 	//update direction implementations
-	add_direction_implementation(update_desired_direction);
+	//add_direction_implementation(update_desired_direction);
 
 	//update acceleration implementations
 	add_acceleration_implementation(update_acceleration_term);
 
 	//update people repulsion implementations
-	add_people_repulsion_implementation(update_people_repulsion_term);
+	//add_people_repulsion_implementation(update_people_repulsion_term);
 
 	//update border repulsion implementations
-	add_border_repulsion_implementation(update_border_repulsion_term);
+	//add_border_repulsion_implementation(update_border_repulsion_term);
 
 	//compute social force implementations
-	add_social_implementation(compute_social_force);
+	//add_social_implementation(compute_social_force);
 
 	//update position implementations
 	add_pos_implementation(update_position);
@@ -139,7 +145,7 @@ void run()
 			id = "direction";
 			break;
 		case TACC:
-			id = "position";
+			id = "acceleration";
 			break;
 		case TPREP:
 			id = "people repulsion";
