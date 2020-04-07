@@ -36,7 +36,7 @@ double acceleration_direction6[] = {1, 1, -1, 1};
 double acceleration_expected6[]  = {-0.8, 2.68, 0.8, 2.68};
 double acceleration_vel6[]       = {1.74, 0, -1.74, 0};
 int acceleration_n6              = 2;
-/*
+
 double repulsion_position0[] = {5, 3, 8, 2, 9, 3};
 double repulsion_speed0[]    = {0.7, 0.5, 1.3};
 double repulsion_direction0[]= {0, 1, 1, 0, 4, 3};
@@ -57,7 +57,7 @@ double social_brep0[] = {1, 2, -3, 4, 5, 2, -2, -2};
 double social_expected0[] = {2.5, 7.5, -3.5, 4.5};
 int social_n0 = 2;
 int social_nb0 = 2;
-*/
+
 double position_pos0[] = {0, 0, 10, 10};
 double position_dir0[] = {1, 1, 0, 0};
 double position_speed0[] = {1, 2};

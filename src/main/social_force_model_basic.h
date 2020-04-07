@@ -53,8 +53,8 @@ void update_position(double *position, double* desired_direction, double* speed,
 void run_simulation();
 
 /* function defined in the header file itself */
-void output_to_file_initial_state(char* filename, double* position, double* speed, double* desired_direction, double* final_destination, double *prefered_velocity, int n, int n_features, int n_timestep);
-void output_to_file_persons(char* filename, double* position, double* speed, double* desired_direction, double* final_destination,double *prefered_velocity, int n, int n_features, int n_timestep);
+void output_to_file_initial_state(char* filename, double* position, double* speed, double* desired_direction, double* final_destination, int n, int n_features, int n_timestep);
+void output_to_file_persons(char* filename, double* position, double* speed, double* desired_direction, double* final_destination, int n, int n_features, int n_timestep);
 void output_to_file_constants(char*);
 void get_filename();
 
@@ -65,7 +65,7 @@ void get_filename();
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_initial_state(char* filename,double* position,double* speed,double* desired_direction,double* final_destination,double *prefered_velocity,int n,int n_features, int n_timestep)
+void output_to_file_initial_state(char* filename,double* position,double* speed,double* desired_direction,double* final_destination,int n,int n_features, int n_timestep)
 {
     FILE *fptr;
 
@@ -78,7 +78,7 @@ void output_to_file_initial_state(char* filename,double* position,double* speed,
 
     output_to_file_constants(filename);
 
-    output_to_file_persons(filename, position, speed, desired_direction, final_destination, prefered_velocity, n,n_features, n_timestep);
+    output_to_file_persons(filename, position, speed, desired_direction, final_destination,n,n_features, n_timestep);
  
 }
 
@@ -128,7 +128,7 @@ void output_to_file_constants(char* filename)
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_persons(char* filename, double* position, double* speed, double* desired_direction, double* final_destination,double *prefered_velocity, int n, int n_features, int n_timestep)
+void output_to_file_persons(char* filename, double* position, double* speed, double* desired_direction, double* final_destination, int n, int n_features, int n_timestep)
 {
     FILE *fptr;
 
@@ -141,8 +141,6 @@ void output_to_file_persons(char* filename, double* position, double* speed, dou
 
     for(int i = 0; i < n; i++)
     {
-        
-
         double position_x = position[2*i];
         double position_y = position[2*i + 1];
         double speed_c = speed[i];
@@ -150,8 +148,8 @@ void output_to_file_persons(char* filename, double* position, double* speed, dou
         double desired_direction_y = desired_direction[2*i + 1];
         double final_destination_x = final_destination[2*i];
         double final_destination_y = final_destination[2*i + 1];
-        double vel_x = prefered_velocity[i * 2];
-        double vel_y = prefered_velocity[i * 2 + 1];
+        double vel_x = desired_direction_x * speed_c;
+        double vel_y = desired_direction_y * speed_c;
 
         fprintf(fptr,"%f ",position_x);
         fprintf(fptr,"%f ",position_y);

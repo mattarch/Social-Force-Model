@@ -390,7 +390,7 @@ void run_simulation()
 
   #ifdef DEBUG
   get_filename();
-  output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
+  output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
   #endif
   
   // start simulation
@@ -411,14 +411,14 @@ void run_simulation()
     CONSOLE_PRINT(("Finished iteration %d\n", (step+1)));
 
     #ifdef DEBUG
-      output_to_file_persons(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
+      output_to_file_persons(filename_global,position,speed,desired_direction,final_destination,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
     #endif
   }
   myInt64 end = stop_tsc(start);
   printf("%d",end);
   #ifdef BENCHMARK
     get_filename();
-    output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,prefered_velocity,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
+    output_to_file_initial_state(filename_global,position,speed,desired_direction,final_destination,NUMBER_OF_PEOPLE,42,N_TIMESTEP);
   #endif
   CONSOLE_PRINT(("Simulation terminated\n"));
 }
