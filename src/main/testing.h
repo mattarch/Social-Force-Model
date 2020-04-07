@@ -36,7 +36,7 @@ void add_acceleration_implementation(void (*f)(double*, double*, double*, int));
 void add_people_repulsion_implementation(void (*f)(double*, double*, double*, double*, int));
 void add_border_repulsion_implementation(void (*f)(double*, double*, double*, int, int));
 void add_social_implementation(void (*f)(double*, double*, double*, double*, int, int));
-void add_pos_implementation(void (*f)(double*, double*, double*, double*, double*, double*, int));
+void add_pos_implementation(void (*f)(double*, double*, double*, double*, double*, int));
 
 typedef struct T { 
     char* name;
@@ -220,9 +220,8 @@ void run()
 					break;
 				case TPOS:
 					result_size = np * 2;
-					void (*f5)(double*, double*, double*, double*, double*, double*, int) = pos_ptr_v[i];
-					result = (double *) calloc(result_size, sizeof(double));
-					f5(cur->pos, cur->dir, cur->spe, cur->frc, result, cur->vel, np);
+					void (*f5)(double*, double*, double*, double*, double*, int) = pos_ptr_v[i];
+					f5(cur->pos, cur->dir, cur->spe, cur->frc, cur->vel, np);
 					control = cur->des;
 					result = cur->pos; //TODO: right now it only check the final position, not the direction				
 					break;
@@ -367,10 +366,10 @@ void add_social_implementation(void (*f)(double*, double*, double*, double*, int
 	social_ptr_v[counter[2*TFRC+1]-1] = f;
 }
 
-void add_pos_implementation(void (*f)(double*, double*, double*, double*, double*, double*, int))
+void add_pos_implementation(void (*f)(double*, double*, double*, double*, double*, int))
 {
 	counter[2*TPOS+1]++;
-	pos_ptr_v	= realloc(pos_ptr_v, counter[2*TPOS+1] * sizeof(void(*)(double*, double*, double*, double*, double*, double*, int)));
+	pos_ptr_v	= realloc(pos_ptr_v, counter[2*TPOS+1] * sizeof(void(*)(double*, double*, double*, double*, double*, int)));
 	pos_ptr_v[counter[2*TPOS+1]-1] = f;
 }
 
