@@ -10,15 +10,6 @@
     } while (0)
 #endif
 
-#ifdef TEST
-#define RUN_TESTS run_tests()
-#else
-#define RUN_TESTS \
-    do            \
-    {             \
-    } while (0)
-#endif
-
 #include <time.h>
 #include <stdio.h>
 
@@ -28,7 +19,7 @@
 #define RELAX_TIME 0.5       // in [seconds]; used for smooth acceleration
 #define WALK_WAY_LENGTH 50.0 // in [meters]; walkway dimension in x direction
 #define WALK_WAY_WIDTH 4.0   // in [meters]; walkway dimension in y direction; also distance between borders in basic scenario
-#define NUMBER_OF_PEOPLE 300 // number of people in the simulation
+//#define NUMBER_OF_PEOPLE 300 // number of people in the simulation
 #define N_BORDERS 2          // number of biarders used in the scenario
 #define TIMESTEP 0.2         // in [seconds]; timestep for simulation
 #define N_TIMESTEP 300       // number of timesteps being simulated
@@ -54,12 +45,12 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
 void update_border_repulsion_term(double *position, double *borders, double *border_repulsion_term, int n, int n_borders);
 void compute_social_force(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
 void update_position(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, int n);
-void run_simulation();
+void run_simulation(struct arguments* arguments);
 
 /* function defined in the header file itself */
-void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep);
+void output_to_file_initial_state(char *filename, struct arguments* arguments, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep);
 void output_to_file_persons(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep);
-void output_to_file_constants(char *);
+void output_to_file_constants(char *, struct arguments* arguments);
 void get_filename();
 
 /*
@@ -69,7 +60,7 @@ void get_filename();
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep)
+void output_to_file_initial_state(char *filename, struct arguments* arguments, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep)
 {
     FILE *fptr;
 
@@ -80,7 +71,7 @@ void output_to_file_initial_state(char *filename, double *position, double *actu
         perror("Error reading file in output_to_file_initial_state");
     }
 
-    output_to_file_constants(filename);
+    output_to_file_constants(filename, arguments);
 
     output_to_file_persons(filename, position, actual_speed, desired_direction, final_destination, n, n_features, n_timestep);
 }
@@ -89,7 +80,7 @@ void output_to_file_initial_state(char *filename, double *position, double *actu
   This function outputs the defined constants to the given filename
   Parameters: filename: name of the .txt file
 */
-void output_to_file_constants(char *filename)
+void output_to_file_constants(char *filename, struct arguments* arguments)
 {
     FILE *fptr;
 
@@ -107,10 +98,10 @@ void output_to_file_constants(char *filename)
     fprintf(fptr, "RELAX_TIME %f\n", RELAX_TIME);
     fprintf(fptr, "WALK_WAY_LENGTH %f\n", WALK_WAY_LENGTH);
     fprintf(fptr, "WALK_WAY_WIDTH %f\n", WALK_WAY_WIDTH);
-    fprintf(fptr, "NUMBER_OF_PEOPLE %d\n", (int)NUMBER_OF_PEOPLE);
+    fprintf(fptr, "NUMBER_OF_PEOPLE %d\n", arguments->n_people);
     fprintf(fptr, "N_BORDERS %d\n", (int)N_BORDERS);
     fprintf(fptr, "TIMESTEP %f\n", TIMESTEP);
-    fprintf(fptr, "N_TIMESTEP %d\n", (int)N_TIMESTEP);
+    fprintf(fptr, "N_TIMESTEP %d\n", arguments->n_timesteps);
 
     fprintf(fptr, "V_ALPHA_BETA %f\n", V_ALPHA_BETA);
     fprintf(fptr, "SIGMA %f\n", SIGMA);

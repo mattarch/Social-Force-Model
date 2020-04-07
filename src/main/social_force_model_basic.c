@@ -10,16 +10,32 @@
 #include <math.h>
 #include <assert.h>
 
+#include "parse_args.h"
+
 #include "tsc_x86.h"
 #include "social_force_model_basic.h"
 #include "testing.h"
 
 // main function
-int main()
+int main(int argc, char *argv[])
 {
-  RUN_TESTS;
+  struct arguments arguments = { 0 };
+
+  // default values for arguments
+  arguments.n_people = 300;
+  arguments.n_timesteps = 300;
+  arguments.test = false;
+
+  // parse arguments
+  argp_parse( &argp, argc, argv, 0, 0, &arguments );
+
+  if(arguments.test)
+  {
+    run_tests();
+  }
   CONSOLE_PRINT(("Test\n"));
-  run_simulation();
+  run_simulation(&arguments);
+
   return 0;
 }
 
@@ -381,19 +397,21 @@ void update_position(double *position, double *desired_direction, double *actual
 /*
   This function runs the simulation 
 */
-void run_simulation()
+void run_simulation(struct arguments* arguments)
 {
+  int number_of_people = arguments->n_people;
+  int n_timesteps = arguments->n_timesteps;
   // allocate memory
-  double *position = (double *)calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
-  double *speed = (double *)calloc(NUMBER_OF_PEOPLE, sizeof(double));
-  double *desired_direction = (double *)calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
-  double *final_destination = (double *)calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *position = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *speed = (double *)calloc(number_of_people, sizeof(double));
+  double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
   double *borders = (double *)calloc(N_BORDERS, sizeof(double));
-  double *actual_velocity = (double *)calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
-  double *acceleration_term = (double *)calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
-  double *people_repulsion_term = (double *)calloc(NUMBER_OF_PEOPLE * NUMBER_OF_PEOPLE * 2, sizeof(double));
-  double *border_repulsion_term = (double *)calloc(NUMBER_OF_PEOPLE * N_BORDERS * 2, sizeof(double));
-  double *social_force = (double *)calloc(NUMBER_OF_PEOPLE * 2, sizeof(double));
+  double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
+  double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
+  double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
 
   // check if calloc worked correctly
   if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL)
@@ -403,40 +421,40 @@ void run_simulation()
   }
 
   // initialize arrays
-  initialize_people(position, desired_direction, final_destination, NUMBER_OF_PEOPLE);
+  initialize_people(position, desired_direction, final_destination, number_of_people);
   initialize_borders(borders, N_BORDERS);
 
 #ifdef DEBUG
   get_filename();
-  output_to_file_initial_state(filename_global, position, speed, desired_direction, final_destination, NUMBER_OF_PEOPLE, 42, N_TIMESTEP);
+  output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, N_TIMESTEP);
 #endif
 
   // start simulation
-  CONSOLE_PRINT(("Start simulation with %d persons\n", NUMBER_OF_PEOPLE));
+  CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
 
   myInt64 start = start_tsc();
   // simulate steps
-  for (int step = 0; step < N_TIMESTEP; step++)
+  for (int step = 0; step < n_timesteps; step++)
   {
     // update variables
-    compute_actual_velocity(speed, desired_direction, actual_velocity, NUMBER_OF_PEOPLE);
-    update_desired_direction(position, final_destination, desired_direction, NUMBER_OF_PEOPLE);
-    update_acceleration_term(desired_direction, acceleration_term, actual_velocity, NUMBER_OF_PEOPLE);
-    update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, NUMBER_OF_PEOPLE);
-    update_border_repulsion_term(position, borders, border_repulsion_term, NUMBER_OF_PEOPLE, N_BORDERS);
-    compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, NUMBER_OF_PEOPLE, N_BORDERS);
-    update_position(position, desired_direction, speed, social_force, actual_velocity, NUMBER_OF_PEOPLE);
+    compute_actual_velocity(speed, desired_direction, actual_velocity, number_of_people);
+    update_desired_direction(position, final_destination, desired_direction, number_of_people);
+    update_acceleration_term(desired_direction, acceleration_term, actual_velocity, number_of_people);
+    update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
+    update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
+    compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
+    update_position(position, desired_direction, speed, social_force, actual_velocity, number_of_people);
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
 
 #ifdef DEBUG
-    output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, NUMBER_OF_PEOPLE, 42, N_TIMESTEP);
+    output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, number_of_people, 42, n_timesteps);
 #endif
   }
   myInt64 end = stop_tsc(start);
   printf("%d Cycles\n", end);
 #ifdef BENCHMARK
   get_filename();
-  output_to_file_initial_state(filename_global, position, speed, desired_direction, final_destination, NUMBER_OF_PEOPLE, 42, N_TIMESTEP);
+  output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, n_timesteps);
 #endif
   CONSOLE_PRINT(("Simulation terminated\n"));
 }
