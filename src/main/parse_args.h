@@ -56,11 +56,42 @@ static struct arg_options options[] = {
     {0}}; // do not delete the last entry, severs as flag for the end of the array
 
 /* function declarations */
-
+char *custom_strsep(char **stringp, const char *delimiter);
 static void display_help();
 static void process_option(int key, char *arg, struct arguments *arguments);
 static size_t find_matching_option(char *parsed_string);
 void parse_args(int argc, char *argv[], struct arguments *arguments);
+/*
+  Same functionality as strsep in "string.h".
+  Assumptions: none
+  Parameters : none
+*/
+char *custom_strsep(char **stringp, const char *delimiter)
+{
+    char *start = *stringp;
+    char *p;
+
+    if(start != NULL)
+    {
+        p = strpbrk(start, delimiter);
+    }
+    else
+    {
+        p = NULL;
+    }
+
+    if (p == NULL)
+    {
+        *stringp = NULL;
+    }
+    else
+    {
+        *p = '\0';
+        *stringp = p + 1;
+    }
+
+    return start;
+}
 
 /*
   This function prints the available command line options to the console upon the option --help.
@@ -176,7 +207,7 @@ void parse_args(int argc, char *argv[], struct arguments *arguments)
     {
         char *option = argv[i];
         pointer_to_args[i] = argv[i];
-        option = strsep(&pointer_to_args[i], "=");
+        option = custom_strsep(&pointer_to_args[i], "=");
 
         int option_index = find_matching_option(option);
 
