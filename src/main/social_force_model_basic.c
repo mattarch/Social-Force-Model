@@ -448,11 +448,13 @@ void run_simulation(struct arguments *arguments)
     update_desired_direction(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term(desired_direction, acceleration_term, actual_velocity, number_of_people);
     update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
-    if (arguments->test)
+   
+    update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
+    if (arguments->test) // FIXME: Question: how to do this s.t. it does not influence benachmarking?
     {
       test_people_repulsion_with_FD(people_repulsion_term, number_of_people, position, desired_direction, speed);
+      test_border_repulsion_with_FD(border_repulsion_term,position,borders,N_BORDERS,number_of_people);
     }
-    update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position(position, desired_direction, speed, social_force, actual_velocity, number_of_people);
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));

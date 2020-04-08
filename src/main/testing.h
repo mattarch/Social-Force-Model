@@ -378,6 +378,8 @@ void add_pos_implementation(void (*f)(double *, double *, double *, double *, do
 	pos_ptr_v[counter[2 * TPOS + 1] - 1] = f;
 }
 
+/* finite-differences functions */
+
 double compute_people_repulsion_fd(double *position, double *parameters, double *desired_direction, double *actual_speed, int i, int j)
 {
 	double rx_ab = parameters[0];
@@ -387,22 +389,20 @@ double compute_people_repulsion_fd(double *position, double *parameters, double 
 	double ex_b = desired_direction[j * 2];
 	double ey_b = desired_direction[j * 2 + 1];
 	double vb = actual_speed[j];
-	double delta_b = vb * TIMESTEP; // 1 mul => 1 flops
+	double delta_b = vb * TIMESTEP; 
 
-	double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //(1) 1 sqrt, 1 add, 2 mul => 4 flops
+	double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); 
 
-	//me stands for "minus e"
-	double rx_ab_mex = rx_ab - delta_b * ex_b; //1 add, 1 mul => 2 flops
-	double ry_ab_mey = ry_ab - delta_b * ey_b; //1 add, 1 mul => 2 flops
+	double rx_ab_mex = rx_ab - delta_b * ex_b; 
+	double ry_ab_mey = ry_ab - delta_b * ey_b; 
 
-	double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //(2)  1 sqrt, 2 mul, 1 add => 4 flops
+	double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey);
 
-	double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; //1 sqrt, 3 add, 2 mul, 1 div => 7 flops
+	double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; 
 
 	return V_ALPHA_BETA * exp(-b / SIGMA);
 }
 
-// only for 2 people
 void add_estimated_gradient_people_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *desired_direction, double *actual_speed, int i, int j)
 {
 
@@ -422,11 +422,11 @@ void add_estimated_gradient_people_repulsion(double *gradient, double *parameter
 	}
 	double ex_a = desired_direction[i * 2];
 	double ey_a = desired_direction[i * 2 + 1];
-	double check = ex_a * (gradient[0]) + ey_a * (gradient[1]);							   //2 mult, 1 add => 3 flops
-	double threshold = sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
+	double check = ex_a * (gradient[0]) + ey_a * (gradient[1]);								   
+	double threshold = sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) * cos(PSI); 
 	double w = check >= threshold ? 1 : INFLUENCE;
-	gradient[0] =  w * -gradient[0];
-	gradient[1] =  w * -gradient[1];
+	gradient[0] = w * -gradient[0];
+	gradient[1] = w * -gradient[1];
 }
 
 void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double *position, double *desired_direction, double *actual_speed)
@@ -434,7 +434,7 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
 	double tol = 1e-4;
 	double eps = 1e-10;
 
-	double fd_gradient[2]; //compute it on the fly
+	double fd_gradient[2];
 	double parameters[2];
 	double *analytic_gradient = people_repulsion_term;
 
@@ -453,11 +453,81 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
 			{
 				double absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n) + 2 * j + p]);
 				double relError = 2 * absErr / (eps + analytic_gradient[i * (2 * n) + 2 * j + p] + fd_gradient[p]);
-				//printf("%f, %f \n",fd_gradient[p],analytic_gradient[i * (2 * n) + 2 * j + p]);
+
 				if (relError > tol && absErr > 1e-6)
 				{
-					printf("Mismatch element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
-					printf("Mismatch element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
+					printf("Mismatch in people_repulsion element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
+					printf("Mismatch in people_repulsion element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
+				}
+			}
+		}
+	}
+}
+
+double compute_border_repulsion_fd(double *position, double *parameters, double *borders, int i, int j)
+{
+	double rx_a = parameters[0];
+	double ry_a = parameters[1];
+
+	double rx_aB = 0.0;
+	double ry_aB = ry_a - borders[j];
+
+	double r_aB_norm = fabs(ry_aB);
+
+	return U_ALPHA_B * exp(-r_aB_norm/R);
+}
+
+void add_estimated_gradient_border_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *borders, int i, int j)
+{
+
+	double dp = 1.0e-7;
+	double f_P, f_M;
+
+	for (int p = 0; p < n_parameters; p++)
+	{
+		double tmpVal = parameters[p];
+		parameters[p] = tmpVal + dp;
+		f_P = compute_border_repulsion_fd(position, parameters, borders, i, j);
+
+		parameters[p] = tmpVal - dp;
+		f_M = compute_border_repulsion_fd(position, parameters, borders, i, j);
+
+		gradient[p] = (f_P - f_M) / (2 * dp);
+	}
+	gradient[0] *= -1;
+	gradient[1] *= -1;
+}
+
+void test_border_repulsion_with_FD(double *border_repulsion_term, double *position, double *borders, int n_borders, int n)
+{
+	double tol = 1e-4;
+	double eps = 1e-10;
+
+	double fd_gradient[2];
+	double parameters[2];
+	double *analytic_gradient = border_repulsion_term;
+
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < n_borders; j++)
+		{
+			double rx_a = position[i * 2];
+			double ry_a = position[i * 2 + 1];
+			double rx_aB = 0.0;
+			double ry_aB = ry_a - borders[j];
+
+			parameters[0] = rx_aB;
+			parameters[1] = ry_aB;
+			add_estimated_gradient_border_repulsion(fd_gradient, parameters, 2, position, borders, i, j);
+			for (int p = 0; p < 2; p++)
+			{
+				double absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n_borders) + 2 * j + p]);
+				double relError = 2 * absErr / (eps + analytic_gradient[i * (2 * n_borders) + 2 * j + p] + fd_gradient[p]);
+
+				if (relError > tol && absErr > 1e-6)
+				{
+					printf("Mismatch in border_repulsion: element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n_borders) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
+					printf("Mismatch in border_repulsion: element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n_borders) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
 				}
 			}
 		}
