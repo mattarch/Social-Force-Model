@@ -403,10 +403,10 @@ double compute_people_repulsion_fd(double *position, double *parameters, double 
 }
 
 // only for 2 people
-void add_estimated_gradient(double *gradient, double *parameters, int n_parameters, double *position, double *desired_direction, double *actual_speed, int i, int j)
+void add_estimated_gradient_people_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *desired_direction, double *actual_speed, int i, int j)
 {
 
-	double dp = 1.0e-6;
+	double dp = 1.0e-7;
 	double f_P, f_M;
 
 	for (int p = 0; p < n_parameters; p++)
@@ -422,17 +422,15 @@ void add_estimated_gradient(double *gradient, double *parameters, int n_paramete
 	}
 	double ex_a = desired_direction[i * 2];
 	double ey_a = desired_direction[i * 2 + 1];
-	double check = ex_a * (-gradient[0]) + ey_a * (-gradient[1]);							   //2 mult, 1 add => 3 flops
+	double check = ex_a * (gradient[0]) + ey_a * (gradient[1]);							   //2 mult, 1 add => 3 flops
 	double threshold = sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
 	double w = check >= threshold ? 1 : INFLUENCE;
 	gradient[0] =  w * -gradient[0];
 	gradient[1] =  w * -gradient[1];
 }
 
-
 void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double *position, double *desired_direction, double *actual_speed)
 {
-
 	double tol = 1e-4;
 	double eps = 1e-10;
 
@@ -450,7 +448,7 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
 			double ry_ab = position[i * 2 + 1] - position[j * 2 + 1];
 			parameters[0] = rx_ab;
 			parameters[1] = ry_ab;
-			add_estimated_gradient(fd_gradient, parameters, 2, position, desired_direction, actual_speed, i, j);
+			add_estimated_gradient_people_repulsion(fd_gradient, parameters, 2, position, desired_direction, actual_speed, i, j);
 			for (int p = 0; p < 2; p++)
 			{
 				double absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n) + 2 * j + p]);
@@ -465,6 +463,4 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
 		}
 	}
 }
-
-
 #endif
