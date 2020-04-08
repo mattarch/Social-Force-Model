@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
   arguments.test = false;
 
   // parse arguments
-  argp_parse( &argp, argc, argv, 0, 0, &arguments );
+  parse_args(argc, argv, &arguments);
 
   if(arguments.test)
   {
