@@ -19,7 +19,7 @@
 // main function
 int main(int argc, char *argv[])
 {
-  struct arguments arguments = { 0 };
+  struct arguments arguments = {0};
 
   // default values for arguments
   arguments.n_people = 300;
@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
   // parse arguments
   parse_args(argc, argv, &arguments);
 
-  if(arguments.test)
+  if (arguments.test)
   {
     int error = run_tests();
-    if(error)
+    if (error)
     {
       printf("One ore more testcases failed, quitting program.\n");
       return 1;
@@ -218,7 +218,7 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
             desired_direction: (n,2) : array of 2d unit vectors pointing from a person's current position 
                                        towards the corresponging final_destination
                  actual_speed: (n,1) : array of the actual speed for every person
-        people_repulsion_term: (n,n) : matrix containing the force of repulsion between person i and j
+        people_repulsion_term: (2n,2n) : matrix containing the force of repulsion between person i and j
                             n: number of people
 */
 void update_people_repulsion_term(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
@@ -229,7 +229,7 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
     {
       if (i == j)
         continue;
-      double rx_ab = position[i * 2] - position[j * 2]; //1 add, 1 flop
+      double rx_ab = position[i * 2] - position[j * 2];         //1 add, 1 flop
       double ry_ab = position[i * 2 + 1] - position[j * 2 + 1]; //1 add, 1 flop
       double ex_a = desired_direction[i * 2];
       double ey_a = desired_direction[i * 2 + 1];
@@ -241,23 +241,23 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
       double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //(1) 1 sqrt, 1 add, 2 mul => 4 flops
 
       //me stands for "minus e"
-      double rx_ab_mex = rx_ab - delta_b * ex_b;  //1 add, 1 mul => 2 flops
-      double ry_ab_mey = ry_ab - delta_b * ey_b;  //1 add, 1 mul => 2 flops
+      double rx_ab_mex = rx_ab - delta_b * ex_b; //1 add, 1 mul => 2 flops
+      double ry_ab_mey = ry_ab - delta_b * ey_b; //1 add, 1 mul => 2 flops
 
       double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //(2)  1 sqrt, 2 mul, 1 add => 4 flops
 
-      double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm;  //2 divs, 1 add => 3 flops
-      double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm;  //2 divs, 1 add => 3 flops
+      double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm; //2 divs, 1 add => 3 flops
+      double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm; //2 divs, 1 add => 3 flops
 
       double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; //1 sqrt, 3 add, 2 mul, 1 div => 7 flops
 
-      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);  //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
-      repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;  //3 divs => 3 flops
+      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
+      repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //3 divs => 3 flops
 
-      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);  //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
-      repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;  //3 divs => 3 flops
+      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
+      repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //3 divs => 3 flops
 
-      double check = ex_a * (-repulsion_x) + ey_a * (-repulsion_y); //2 mult, 1 add => 3 flops 
+      double check = ex_a * (-repulsion_x) + ey_a * (-repulsion_y);                              //2 mult, 1 add => 3 flops
       double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
       double w = check >= threshold ? 1 : INFLUENCE;
 
@@ -266,7 +266,6 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
     }
   }
 }
-
 
 /*
   This function updates the repulsion between every person and every boarder.
@@ -405,7 +404,7 @@ void update_position(double *position, double *desired_direction, double *actual
 /*
   This function runs the simulation 
 */
-void run_simulation(struct arguments* arguments)
+void run_simulation(struct arguments *arguments)
 {
   int number_of_people = arguments->n_people;
   int n_timesteps = arguments->n_timesteps;
@@ -449,6 +448,10 @@ void run_simulation(struct arguments* arguments)
     update_desired_direction(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term(desired_direction, acceleration_term, actual_velocity, number_of_people);
     update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
+    if (arguments->test)
+    {
+      test_people_repulsion_with_FD(people_repulsion_term, number_of_people, position, desired_direction, speed);
+    }
     update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position(position, desired_direction, speed, social_force, actual_velocity, number_of_people);
