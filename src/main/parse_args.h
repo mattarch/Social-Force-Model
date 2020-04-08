@@ -1,7 +1,10 @@
 #ifndef PARSE_ARGS_H_ /* Include guard */
 #define PARSE_ARGS_H_
 
-// inspired by: https://makework.blog/blog/2018/10/5/argument-parsing-in-c
+/*
+    This header file provides the functionality to process command line input for a C application.
+    code inspired by: https://makework.blog/blog/2018/10/5/argument-parsing-in-c
+*/
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -31,23 +34,43 @@ enum option_keys
     OPTION_HELP = 0x42,
 };
 
-static void display_help();
-static void parse_option(int key, char *arg, struct arguments *arguments);
-size_t find_matching_option(char *parsed_string);
-void parse_args(int argc, char *argv[], struct arguments *arguments);
-
+/* string displayed when the help option is called.*/
 char doc[] = "HELP: Social Force Model Basic Version";
 
+/*
+   Supported options
+   - to add a new option do the following:
+    (1) add a new option_key to the option_keys ENUM that is distinct from the other options
+    (2) add option in this option array
+    (3) add state to the arguments struct if necessary 
+    (4) add a case for the switch statement using the defined option_key (from the ENUM), 
+        in the function process_option that processes the option
+*/
 static struct arg_options options[] = {
+    /* add options here */
     {"--n_people", OPTION_N_PEOPLE, 1, "300", "Number of people used in simulation."},
     {"--n_timesteps", OPTION_N_TIMESTEPS, 1, "300", "Number of timesteps."},
     {"--test", OPTION_TEST, 0, "false", "Run tests."},
+    /* don't change last two entries*/
     {"--help", OPTION_HELP, 0, "-", "Displays this help."},
-    {0}};
+    {0}}; // do not delete the last entry, severs as flag for the end of the array
 
+/* function declarations */
+
+static void display_help();
+static void process_option(int key, char *arg, struct arguments *arguments);
+static size_t find_matching_option(char *parsed_string);
+void parse_args(int argc, char *argv[], struct arguments *arguments);
+
+/*
+  This function prints the available command line options to the console upon the option --help.
+
+  Assumptions: none
+  Parameters : none
+*/
 static void display_help()
 {
-    printf("%s\n\n",doc);
+    printf("%s\n\n", doc);
     printf("%-20s%-20s%-100s\n", "option string", "default arg", "description");
 
     size_t i = 0;
@@ -66,11 +89,21 @@ static void display_help()
     exit(1);
 }
 
-static void parse_option(int key, char *arg, struct arguments *arguments)
+/*
+  This function parses the arguments input via command line and updates the state of the arguments.
+  This function is called only from parse_args.
+
+  Assumptions: option_key and struct arguments match
+  Parameters :
+            option_key : option_key defined in the ENUM option_keys
+                   arg : contains the arguments if the option has any, otherwise the pointer is NULL
+              arguments: struct of arguments
+*/
+static void process_option(int option_key, char *arg, struct arguments *arguments)
 {
     char *p;
 
-    switch (key)
+    switch (option_key)
     {
     case OPTION_N_PEOPLE:
         arguments->n_people = strtol(arg, &p, 10); // TODO: error handling
@@ -85,12 +118,22 @@ static void parse_option(int key, char *arg, struct arguments *arguments)
         display_help();
         break;
     default:
-        return ;
+        return;
     }
     return;
 }
 
-size_t find_matching_option(char *parsed_string)
+/*
+  This function checks whether the parsed_string matches any option.
+  If the parsed_string matches any option it returns the index of the option in the options[] array.
+  Otherwise the return value is negative, indicating that the parsed_string does not match any option.
+  This function is called only from parse_args.
+
+  Assumptions: The last entry of struct arg_options options[] array is {0}.
+  Parameters :
+         parsed_string : parsed option string
+*/
+static size_t find_matching_option(char *parsed_string)
 {
     size_t i = 0;
     while (strcmp(parsed_string, options[i].option_string) && strcmp("", options[i].option_string))
@@ -99,6 +142,7 @@ size_t find_matching_option(char *parsed_string)
     }
     if (!strcmp("", options[i].option_string))
     {
+        //
         return -1;
     }
     else
@@ -107,6 +151,18 @@ size_t find_matching_option(char *parsed_string)
     }
 }
 
+/*
+  This function parses the command line input, 
+  checks if the inputs match any option and if all arguments are specified.
+  Function succeeds if command line input is valid.
+
+  Assumptions: - options which require an argument use exactly one '=' as a delimiter for the option string and the argument
+               - options without delimiters do not use '=' in their string
+  Parameters :
+         argc : argument count passed from the main function
+         argv : argument value[] array passed from the main function, argv[0] contains the program name
+    arguments : struct of arguments
+*/
 void parse_args(int argc, char *argv[], struct arguments *arguments)
 {
     int *option_key = (int *)calloc(argc, sizeof(int *));
@@ -115,6 +171,7 @@ void parse_args(int argc, char *argv[], struct arguments *arguments)
     bool parse_error = false;
     bool missing_arguments = false;
 
+    /* parse command line input, check if inputs match options and if all arguments are specified */
     for (int i = 1; i < argc; i++)
     {
         char *option = argv[i];
@@ -149,6 +206,7 @@ void parse_args(int argc, char *argv[], struct arguments *arguments)
 
     if (parse_error)
     {
+        /* command line input is not valid, some input does not match any option*/
         char *msg = argv[0];
         strcat(msg, " --help: no command line option found");
         puts(msg);
@@ -156,15 +214,17 @@ void parse_args(int argc, char *argv[], struct arguments *arguments)
     }
     else if (missing_arguments)
     {
+        /* command line input is valid, but some arguments are missing for a specified option*/
         char *msg = argv[0];
-        strcat(msg, " --help: missing some arguments");
+        strcat(msg, " --help: missing some arguments for a specified option");
         puts(msg);
         exit(1);
     }
 
+    /* command line input is valid, parse the arguments*/
     for (int i = 1; i < argc; i++)
     {
-        parse_option(option_key[i], pointer_to_args[i], arguments);
+        process_option(option_key[i], pointer_to_args[i], arguments);
     }
 
     free(option_key);
