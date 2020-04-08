@@ -31,6 +31,7 @@ enum option_keys
     OPTION_HELP = 0x42,
 };
 
+static void display_help();
 static void parse_option(int key, char *arg, struct arguments *arguments);
 size_t find_matching_option(char *parsed_string);
 void parse_args(int argc, char *argv[], struct arguments *arguments);
