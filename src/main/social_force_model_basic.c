@@ -31,7 +31,12 @@ int main(int argc, char *argv[])
 
   if(arguments.test)
   {
-    run_tests();
+    int error = run_tests();
+    if(error)
+    {
+      printf("One ore more testcases failed, quitting program.\n");
+      return 1;
+    }
   }
   CONSOLE_PRINT(("Test\n"));
   run_simulation(&arguments);
@@ -205,6 +210,8 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper.
 
+  FLOPS = 42 * n * (n-1) = 42 * (n*2 - n)
+
   Assumptions: two different people can not be in the same spot at the same time
   Parameters: 
                      position: (n,2) : array of 2d position of people
@@ -222,36 +229,36 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
     {
       if (i == j)
         continue;
-      double rx_ab = position[i * 2] - position[j * 2];
-      double ry_ab = position[i * 2 + 1] - position[j * 2 + 1];
+      double rx_ab = position[i * 2] - position[j * 2]; //1 add, 1 flop
+      double ry_ab = position[i * 2 + 1] - position[j * 2 + 1]; //1 add, 1 flop
       double ex_a = desired_direction[i * 2];
       double ey_a = desired_direction[i * 2 + 1];
       double ex_b = desired_direction[j * 2];
       double ey_b = desired_direction[j * 2 + 1];
       double vb = actual_speed[j];
-      double delta_b = vb * TIMESTEP;
+      double delta_b = vb * TIMESTEP; // 1 mul => 1 flops
 
-      double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //(1)
+      double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //(1) 1 sqrt, 1 add, 2 mul => 4 flops
 
       //me stands for "minus e"
-      double rx_ab_mex = rx_ab - delta_b * ex_b;
-      double ry_ab_mey = ry_ab - delta_b * ey_b;
+      double rx_ab_mex = rx_ab - delta_b * ex_b;  //1 add, 1 mul => 2 flops
+      double ry_ab_mey = ry_ab - delta_b * ey_b;  //1 add, 1 mul => 2 flops
 
-      double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //(2)
+      double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //(2)  1 sqrt, 2 mul, 1 add => 4 flops
 
-      double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm;
-      double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm;
+      double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm;  //2 divs, 1 add => 3 flops
+      double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm;  //2 divs, 1 add => 3 flops
 
-      double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2;
+      double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; //1 sqrt, 3 add, 2 mul, 1 div => 7 flops
 
-      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
-      repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;
+      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);  //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
+      repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;  //3 divs => 3 flops
 
-      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);
-      repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;
+      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm);  //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
+      repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;  //3 divs => 3 flops
 
-      double check = ex_a * (-1.0 * repulsion_x) + ey_a * (-1.0 * repulsion_y);
-      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI);
+      double check = ex_a * (-repulsion_x) + ey_a * (-repulsion_y); //2 mult, 1 add => 3 flops 
+      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
       double w = check >= threshold ? 1 : INFLUENCE;
 
       people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;
@@ -259,6 +266,7 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
     }
   }
 }
+
 
 /*
   This function updates the repulsion between every person and every boarder.
@@ -451,7 +459,7 @@ void run_simulation(struct arguments* arguments)
 #endif
   }
   myInt64 end = stop_tsc(start);
-  printf("%d Cycles\n", end);
+  printf("%llu Cycles\n", end);
 #ifdef BENCHMARK
   get_filename();
   output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, n_timesteps);

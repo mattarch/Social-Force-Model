@@ -22,8 +22,8 @@
 
 void add_implementations();
 void add_tests();
-void run_tests();
-void run();
+int run_tests();
+int run();
 int check_square_distance(double *expected, double *res, int n);
 void add_direction_testcase(char* name, double* pos, double* speed, double* output, int n);
 void add_acceleration_testcase(char* name, double* dir, double* vel, double* output, int n);
@@ -63,7 +63,7 @@ void 		 (**acceleration_ptr_v) (double*, double*, double*, int);
 void 		 (**repulsion_ptr_v) (double*, double*, double*, double*, int);
 void 		 (**border_repulsion_ptr_v) (double*, double*, double*, int, int);
 void 		 (**social_ptr_v) (double*, double*, double*, double*, int, int);
-void 		 (**pos_ptr_v) (double*, double*, double*, double*, double*, double*, int);
+void 		 (**pos_ptr_v) (double*, double*, double*, double*, double*, int);
 
 
 void add_tests() 
@@ -82,7 +82,7 @@ void add_tests()
 	add_acceleration_testcase("deacceleration_test_45", acceleration_direction6, acceleration_vel6, acceleration_expected6, acceleration_n6);
 
 	//people repulsion testcases
-	//add_people_repulsion_testcase("test1", repulsion_position0, repulsion_speed0, repulsion_direction0, repulsion_expected_result0, repulsion_n0);
+	add_people_repulsion_testcase("test1", repulsion_position0, repulsion_speed0, repulsion_direction0, repulsion_expected_result0, repulsion_n0);
 
 	//border repulsion
 	//add_border_repulsion_testcase("segfault test", border_pos0, border_borders0, border_expected0, border_n0, border_nb0);
@@ -91,7 +91,7 @@ void add_tests()
 	add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
 
 	//position
-	add_position_testcase("segfault test", position_pos0, position_dir0, position_speed0, position_force0, position_vel0, position_expected0, position_n0);
+	//add_position_testcase("segfault test", position_pos0, position_dir0, position_speed0, position_force0, position_vel0, position_expected0, position_n0);
 	
 }
 
@@ -104,7 +104,7 @@ void add_implementations()
 	add_acceleration_implementation(update_acceleration_term);
 
 	//update people repulsion implementations
-	//add_people_repulsion_implementation(update_people_repulsion_term);
+	add_people_repulsion_implementation(update_people_repulsion_term);
 
 	//update border repulsion implementations
 	//add_border_repulsion_implementation(update_border_repulsion_term);
@@ -116,7 +116,7 @@ void add_implementations()
 	add_pos_implementation(update_position);
 }
 
-void run_tests()
+int run_tests()
 {
 	//init auxilliary parameters
 	for(int i = 0; i < N_TESTS * 2; i++)
@@ -129,12 +129,13 @@ void run_tests()
 	add_implementations();
 
 	//run tests
-	run();
-
+	int error = run();
+	return error;
 }
 
-void run()
+int run()
 {
+	int error_check = 0;
 	for(int k = 0; k < N_TESTS; k++)
 	{
 		if(testcases[k]==NULL)continue;
@@ -231,6 +232,7 @@ void run()
 				if(check_square_distance(control, result, np))
 				{
 					printf("\tTest %s '%s': ERROR!\n", id, testname);
+					error_check = 1;
 				} else
 				{
 					printf("\tTest %s '%s': CORRECT!\n", id, testname);
@@ -238,6 +240,7 @@ void run()
 			}
 		}
 	}
+	return error_check;
 }
 
 //returns 1 if error, returns 0 if OK
