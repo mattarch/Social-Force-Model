@@ -12,7 +12,7 @@ Visualize the output in test with:
 `python3 visualization_basic.py <filename>`
 
 ## Testing mode
-To run tests compile using the flag `-DTEST`.
+To run tests add the flag `--test` to the executable.
 To add tests first add parameters in the `test_set.h` file and add a new call inside the `add_tests()` function inside `testing.h`.
 To add implementations to check add a new call inside the `add_implementation()` function inside `testing.h`.
 
