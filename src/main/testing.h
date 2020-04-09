@@ -12,13 +12,11 @@
 #define PRINT_DEF printf("\033[0m");
 
 #define EPS 1e-06
-#define N_TESTS 6
+#define N_TESTS 4
 #define TDIR 0
 #define TACC 1
-#define TPREP 2
-#define TBREP 3
-#define TFRC 4
-#define TPOS 5
+#define TFRC 2
+#define TPOS 3
 
 void add_implementations();
 void add_tests();
@@ -27,14 +25,10 @@ int run();
 int check_square_distance(double *expected, double *res, int n);
 void add_direction_testcase(char *name, double *pos, double *speed, double *output, int n);
 void add_acceleration_testcase(char *name, double *dir, double *vel, double *spe, double *output, int n);
-void add_people_repulsion_testcase(char *name, double *pos, double *speed, double *directions, double *output, int n);
-void add_border_repulsion_testcase(char *name, double *pos, double *borders, double *output, int n, int n_borders);
 void add_compute_social_force_testcase(char *name, double *acc, double *people_rep, double *border_rep, double *output, int n, int n_borders);
 void add_position_testcase(char *name, double *pos, double *dir, double *speed, double *force, double *actual_vel, double* desired_speed, double *output_pos, int n);
 void add_direction_implementation(void (*f)(double *, double *, double *, int));
 void add_acceleration_implementation(void (*f)(double *, double *, double *, double *, int));
-void add_people_repulsion_implementation(void (*f)(double *, double *, double *, double *, int));
-void add_border_repulsion_implementation(void (*f)(double *, double *, double *, int, int));
 void add_social_implementation(void (*f)(double *, double *, double *, double *, int, int));
 void add_pos_implementation(void (*f)(double *, double *, double *, double *, double *, double *, int));
 
@@ -62,8 +56,6 @@ int counter[2 * N_TESTS];
 
 void (**direction_ptr_v)(double *, double *, double *, int);
 void (**acceleration_ptr_v)(double *, double *, double *, double *, int);
-void (**repulsion_ptr_v)(double *, double *, double *, double *, int);
-void (**border_repulsion_ptr_v)(double *, double *, double *, int, int);
 void (**social_ptr_v)(double *, double *, double *, double *, int, int);
 void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, int);
 
@@ -82,11 +74,6 @@ void add_tests()
 	//add_acceleration_testcase("deacceleration_test_straight", acceleration_direction5, acceleration_vel5, acceleration_expected5, acceleration_n5);
 	//add_acceleration_testcase("deacceleration_test_45", acceleration_direction6, acceleration_vel6, acceleration_expected6, acceleration_n6);
 
-	//people repulsion testcases
-	add_people_repulsion_testcase("test1", repulsion_position0, repulsion_speed0, repulsion_direction0, repulsion_expected_result0, repulsion_n0);
-
-	//border repulsion
-	//add_border_repulsion_testcase("segfault test", border_pos0, border_borders0, border_expected0, border_n0, border_nb0);
 
 	//social force
 	add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
@@ -102,12 +89,6 @@ void add_implementations()
 
 	//update acceleration implementations
 	add_acceleration_implementation(update_acceleration_term);
-
-	//update people repulsion implementations
-	add_people_repulsion_implementation(update_people_repulsion_term);
-
-	//update border repulsion implementations
-	//add_border_repulsion_implementation(update_border_repulsion_term);
 
 	//compute social force implementations
 	//add_social_implementation(compute_social_force);
@@ -148,12 +129,6 @@ int run()
 			break;
 		case TACC:
 			id = "acceleration";
-			break;
-		case TPREP:
-			id = "people repulsion";
-			break;
-		case TBREP:
-			id = "border repulsion";
 			break;
 		case TFRC:
 			id = "social force";
@@ -198,20 +173,6 @@ int run()
 					result = (double *)calloc(result_size, sizeof(double));
 					f1(cur->dir, result, cur->vel, cur->spe, np);
 					control = cur->acc;
-					break;
-				case TPREP:
-					result_size = np * np * 2;
-					void (*f2)(double *, double *, double *, double *, int) = repulsion_ptr_v[i];
-					result = (double *)calloc(result_size, sizeof(double));
-					f2(cur->pos, cur->dir, cur->spe, result, np);
-					control = cur->pre;
-					break;
-				case TBREP:
-					result_size = np * cur->n_borders * 2;
-					void (*f3)(double *, double *, double *, int, int) = border_repulsion_ptr_v[i];
-					result = (double *)calloc(result_size, sizeof(double));
-					f3(cur->pos, cur->bor, result, np, cur->n_borders);
-					control = cur->bre;
 					break;
 				case TFRC:
 					result_size = np * 2;
@@ -283,32 +244,6 @@ void add_acceleration_testcase(char *name, double *dir, double *vel, double *spe
 	testcases[TACC][counter[2 * TACC] - 1]->n = n;
 }
 
-void add_people_repulsion_testcase(char *name, double *pos, double *speed, double *directions, double *output, int n)
-{
-	counter[2 * TPREP]++;
-	testcases[TPREP] = realloc(testcases[TPREP], sizeof(testcase_t *) * counter[2 * TPREP]);
-	testcases[TPREP][counter[2 * TPREP] - 1] = malloc(sizeof(testcase_t));
-	testcases[TPREP][counter[2 * TPREP] - 1]->name = name;
-	testcases[TPREP][counter[2 * TPREP] - 1]->pos = pos;
-	testcases[TPREP][counter[2 * TPREP] - 1]->spe = speed;
-	testcases[TPREP][counter[2 * TPREP] - 1]->dir = directions;
-	testcases[TPREP][counter[2 * TPREP] - 1]->pre = output;
-	testcases[TPREP][counter[2 * TPREP] - 1]->n = n;
-}
-
-void add_border_repulsion_testcase(char *name, double *pos, double *borders, double *output, int n, int n_borders)
-{
-	counter[2 * TBREP]++;
-	testcases[TBREP] = realloc(testcases[TBREP], counter[2 * TBREP] * sizeof(testcase_t *));
-	testcases[TBREP][counter[2 * TBREP] - 1] = malloc(sizeof(testcase_t));
-	testcases[TBREP][counter[2 * TBREP] - 1]->name = name;
-	testcases[TBREP][counter[2 * TBREP] - 1]->pos = pos;
-	testcases[TBREP][counter[2 * TBREP] - 1]->bor = borders;
-	testcases[TBREP][counter[2 * TBREP] - 1]->bre = output;
-	testcases[TBREP][counter[2 * TBREP] - 1]->n = n;
-	testcases[TBREP][counter[2 * TBREP] - 1]->n_borders = n_borders;
-}
-
 void add_compute_social_force_testcase(char *name, double *acc, double *people_rep, double *border_rep, double *output, int n, int n_borders)
 {
 	counter[2 * TFRC]++;
@@ -351,20 +286,6 @@ void add_acceleration_implementation(void (*f)(double *, double *, double *, dou
 	counter[2 * TACC + 1]++;
 	acceleration_ptr_v = realloc(acceleration_ptr_v, counter[2 * TACC + 1] * sizeof(void (*)(double *, double *, double *, double *, int)));
 	acceleration_ptr_v[counter[2 * TACC + 1] - 1] = f;
-}
-
-void add_people_repulsion_implementation(void (*f)(double *, double *, double *, double *, int))
-{
-	counter[2 * TPREP + 1]++;
-	repulsion_ptr_v = realloc(repulsion_ptr_v, counter[2 * TPREP + 1] * sizeof(void (*)(double *, double *, double *, double *, int)));
-	repulsion_ptr_v[counter[2 * TPREP + 1] - 1] = f;
-}
-
-void add_border_repulsion_implementation(void (*f)(double *, double *, double *, int, int))
-{
-	counter[2 * TBREP + 1]++;
-	border_repulsion_ptr_v = realloc(border_repulsion_ptr_v, counter[2 * TBREP + 1] * sizeof(void (*)(double *, double *, double *, double *, int, int)));
-	border_repulsion_ptr_v[counter[2 * TBREP + 1] - 1] = f;
 }
 
 void add_social_implementation(void (*f)(double *, double *, double *, double *, int, int))
