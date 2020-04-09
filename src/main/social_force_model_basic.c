@@ -286,8 +286,8 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
       double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
       double w = check >= threshold ? 1 : INFLUENCE;
 
-      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;  //1 mult => 1 flop
-      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y;  //1 mult => 1 flop
+      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;     //1 mult => 1 flop
+      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y; //1 mult => 1 flop
     }
   }
 }
@@ -316,20 +316,20 @@ void update_border_repulsion_term(double *position, double *borders, double *bor
       double ry_a = position[i * 2 + 1];
 
       double rx_aB = 0.0;
-      double ry_aB = ry_a - borders[j];
+      double ry_aB = ry_a - borders[j]; //1 add => 1 flop
 
-      double r_aB_norm = fabs(ry_aB);
+      double r_aB_norm = fabs(ry_aB); // 1 fabs => 1 flop
 
-      double repulsion_x = exp(-r_aB_norm / R) * (rx_aB / r_aB_norm);
-      repulsion_x *= U_ALPHA_B / (double)R;
+      double repulsion_x = exp((-r_aB_norm) / R) * (rx_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
+      repulsion_x *= U_ALPHA_B / R;                                     // 1 mult, 1 div => 2 flops
 
-      double repulsion_y = exp(-r_aB_norm / R) * (ry_aB / r_aB_norm);
-      repulsion_y *= U_ALPHA_B / (double)R;
+      double repulsion_y = exp((-r_aB_norm) / R) * (ry_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
+      repulsion_y *= U_ALPHA_B / R;                                     // 1 mult, 1 div => 2 flops
 
       border_repulsion_term[i * (2 * n_borders) + 2 * j] = repulsion_x;
       border_repulsion_term[i * (2 * n_borders) + 2 * j + 1] = repulsion_y;
-    }
-  }
+    } // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders
+  } // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders * n 
 }
 
 /*
@@ -428,7 +428,7 @@ void update_position(double *position, double *desired_direction, double *actual
 }
 
 void simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+                double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
 {
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
