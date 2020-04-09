@@ -46,7 +46,22 @@ int main(int argc, char *argv[])
 
 // implementation of functions
 //------------------------------------------------------------------------------------------
+/*
+    This function returns a sample point from a normal distribution with mean "mu" and std.deviation sqrt of "sigma"
 
+    Assumptions: The parameters are positive
+  Parameters: 
+              sigma: (double) : squared value of the std.deviation of the distribution
+                 mu: (double) : mean of the distribution            
+*/
+double sampleNormal(double sigma, double mu) {
+    double u = ((double) rand() / (RAND_MAX)) * 2 - 1;
+    double v = ((double) rand() / (RAND_MAX)) * 2 - 1;
+    double r = u * u + v * v;
+    if (r == 0 || r > 1) return sampleNormal(sigma, mu);
+    double c = sqrt(-2 * log(r) / r);
+    return ((u * c * sigma) + mu);
+}
 /*
   This function initializes the arrays associated with people with reasonable starting values.
 
@@ -59,7 +74,7 @@ int main(int argc, char *argv[])
      final_destination: (n,2) : array with 2d coordinate of the final destinations of people
                      n: number of people
 */
-void initialize_people(double *position, double *desired_direction, double *final_destination, int n)
+void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n)
 {
   for (int i = 0; i < n; i++)
   {
@@ -67,6 +82,7 @@ void initialize_people(double *position, double *desired_direction, double *fina
     position[i * 2 + 1] = rand() * WALK_WAY_WIDTH / RAND_MAX;          // starting position y coordinate
     desired_direction[i * 2 + 1] = 0.0;                                // starting value for direct_y
     final_destination[i * 2 + 1] = rand() * WALK_WAY_WIDTH / RAND_MAX; // target y coordinate
+    desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
     if (i % 2) // initialize this person to walk from left to right
     {
@@ -187,7 +203,7 @@ void compute_actual_velocity(double *actual_speed, double *desired_direction, do
                                 actual_velocity = actual_speed * desired_direction
                      n: number of people
 */
-void update_acceleration_term(double *desired_direction, double *acceleration_term, double *actual_velocity, int n)
+void update_acceleration_term(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n)
 {
   //!ATTENTION: function compute_actual_velocity and uupdate_desired_direction have to be called befor this function in this order
 
@@ -196,8 +212,8 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   for (int i = 0; i < n; i++)
   {
     // compute velocity difference
-    acceleration_term[2 * i] = AVG_SPEED * desired_direction[i * 2] - actual_velocity[2 * i];
-    acceleration_term[2 * i + 1] = AVG_SPEED * desired_direction[i * 2 + 1] - actual_velocity[2 * i + 1];
+    acceleration_term[2 * i] = desired_speed[i] * desired_direction[i * 2] - actual_velocity[2 * i];
+    acceleration_term[2 * i + 1] = desired_speed[i] * desired_direction[i * 2 + 1] - actual_velocity[2 * i + 1];
 
     // apply realxation time
     acceleration_term[2 * i] = (1 / RELAX_TIME) * acceleration_term[2 * i];
@@ -367,7 +383,7 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
                                      actual_velocity = actual_speed * desired_direction
                           n: number of people
 */
-void update_position(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, int n)
+void update_position(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_speed, int n)
 {
   double control_value;
   double norm_value;
@@ -382,9 +398,9 @@ void update_position(double *position, double *desired_direction, double *actual
     norm_value = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2));
 
     //fromula 12 in the paper --> compute control_value according to norm
-    if (norm_value > MAX_SPEED)
+    if (norm_value > desired_speed[i]*1.3)
     {
-      control_value = MAX_SPEED / norm_value;
+      control_value = desired_speed[i]*1.3 / norm_value;
     }
 
     //apply control value
@@ -419,16 +435,16 @@ void run_simulation(struct arguments *arguments)
   double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
   double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
   double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
-
+  double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
   // check if calloc worked correctly
-  if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL)
+  if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
   {
     printf("Error: calloc failed\n");
     return;
   }
 
   // initialize arrays
-  initialize_people(position, desired_direction, final_destination, number_of_people);
+  initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
   initialize_borders(borders, N_BORDERS);
 
 #ifdef DEBUG
@@ -446,7 +462,7 @@ void run_simulation(struct arguments *arguments)
     // update variables
     compute_actual_velocity(speed, desired_direction, actual_velocity, number_of_people);
     update_desired_direction(position, final_destination, desired_direction, number_of_people);
-    update_acceleration_term(desired_direction, acceleration_term, actual_velocity, number_of_people);
+    update_acceleration_term(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
     update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
    
     update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
@@ -456,7 +472,7 @@ void run_simulation(struct arguments *arguments)
       test_border_repulsion_with_FD(border_repulsion_term,position,borders,N_BORDERS,number_of_people);
     }
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
-    update_position(position, desired_direction, speed, social_force, actual_velocity, number_of_people);
+    update_position(position, desired_direction, speed, social_force, actual_velocity, desired_speed, number_of_people);
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
 
 #ifdef DEBUG
