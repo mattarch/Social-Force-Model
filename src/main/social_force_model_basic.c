@@ -138,6 +138,12 @@ void initialize_borders(double *borders, int n_borders)
   This function updates the desired direction for all people.
   This function corresponds to formula (1) from the paper.
 
+	Cost:  adds: n * 3
+				mults: n * 2
+				 divs: n * 2
+				sqrts: n
+				Flops: n * 7
+
   Assumptions: There is only one final destination per person.
   Parameters:
               position: (n,2) : array of 2d position of people
@@ -158,16 +164,16 @@ void update_desired_direction(double *position, double *final_destination, doubl
     double target_y = final_destination[i * 2 + 1];
 
     // compute differences
-    double delta_x = target_x - current_x;
-    double delta_y = target_y - current_y;
+    double delta_x = target_x - current_x; // 1 add => 1 flop
+    double delta_y = target_y - current_y; // 1 add => 1 flop
 
     // normalization constant
-    double d = delta_x * delta_x + delta_y * delta_y;
-    double normalizer = sqrt(d);
+    double d = delta_x * delta_x + delta_y * delta_y; // 1 add, 2 mult => 3 flops
+    double normalizer = sqrt(d); // 1 sqrt
 
     // update desired_direction
-    desired_direction[i * 2] = delta_x / normalizer;
-    desired_direction[i * 2 + 1] = delta_y / normalizer;
+    desired_direction[i * 2] = delta_x / normalizer; // 1 div => 1 flop
+    desired_direction[i * 2 + 1] = delta_y / normalizer; // 1 div => 1 flop
   }
 }
 
@@ -336,6 +342,9 @@ void update_border_repulsion_term(double *position, double *borders, double *bor
   This function computes the social force for each person and stores the results in the array soacial_force
   This function corresponds to formula (9) of the paper.
 
+	Cost:  adds: 2 * n * (n + n_borders - 1)
+			  Flops: 2 * n * (n + n_borders - 1)
+
   Assumptions: The acceleration, people, and border terms are up to date.
   Parameters:       
              acceleration_term: (n,2) : array of x- and y-acceleration for every person
@@ -364,15 +373,15 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
       }
 
       // add repulsive term towards person beta
-      social_force[2 * p] += people_repulsion_term[p * (2 * n) + 2 * beta];
-      social_force[2 * p + 1] += people_repulsion_term[p * (2 * n) + 2 * beta + 1];
+      social_force[2 * p] += people_repulsion_term[p * (2 * n) + 2 * beta]; // 1 add => 1 flop
+      social_force[2 * p + 1] += people_repulsion_term[p * (2 * n) + 2 * beta + 1]; // 1 add => 1 flop
     }
 
     // add repulsive terms of borders
     for (int b = 0; b < n_borders; b++)
     {
-      social_force[2 * p] += border_repulsion_term[p * (2 * n_borders) + 2 * b];
-      social_force[2 * p + 1] += border_repulsion_term[p * (2 * n_borders) + 2 * b + 1];
+      social_force[2 * p] += border_repulsion_term[p * (2 * n_borders) + 2 * b]; // 1 add => 1 flop
+      social_force[2 * p + 1] += border_repulsion_term[p * (2 * n_borders) + 2 * b + 1]; // 1 add => 1 flop
     }
   }
 }
