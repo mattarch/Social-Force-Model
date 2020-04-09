@@ -14,10 +14,10 @@
 #include <stdio.h>
 
 // default values
-#define AVG_SPEED 1.34       // in basic scenario this is the desired speed of every person
-#define RELAX_TIME 0.5       // in [seconds]; used for smooth acceleration
-#define N_BORDERS 2          // number of biarders used in the scenario
-#define TIMESTEP 0.2         // in [seconds]; timestep for simulation
+#define AVG_SPEED 1.34 // in basic scenario this is the desired speed of every person
+#define RELAX_TIME 0.5 // in [seconds]; used for smooth acceleration
+#define N_BORDERS 2    // number of biarders used in the scenario
+#define TIMESTEP 0.2   // in [seconds]; timestep for simulation
 
 // parameters model PAGE 8
 #define V_ALPHA_BETA 2.1 // in m^{2}s^{-2}
@@ -29,6 +29,7 @@
 // add rest of functions
 
 static char filename_global[40];
+struct arguments arguments = {0};
 
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
 void initialize_borders(double *borders, int n_borders);
@@ -39,13 +40,36 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
 void update_border_repulsion_term(double *position, double *borders, double *border_repulsion_term, int n, int n_borders);
 void compute_social_force(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
 void update_position(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_speed, int n);
-void run_simulation(struct arguments* arguments);
+void simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed);
+void test_simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed);
 
 /* function defined in the header file itself */
-void output_to_file_initial_state(char *filename, struct arguments* arguments, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep);
-void output_to_file_persons(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep);
-void output_to_file_constants(char *, struct arguments* arguments);
+void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
+void output_to_file_persons(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
+void output_to_file_constants(char *);
 void get_filename();
+
+
+/*
+    This function returns a sample point from a normal distribution with mean "mu" and std.deviation sqrt of "sigma"
+
+    Assumptions: The parameters are positive
+  Parameters: 
+              sigma: (double) : squared value of the std.deviation of the distribution
+                 mu: (double) : mean of the distribution            
+*/
+double sampleNormal(double sigma, double mu)
+{
+  double u = ((double)rand() / (RAND_MAX)) * 2 - 1;
+  double v = ((double)rand() / (RAND_MAX)) * 2 - 1;
+  double r = u * u + v * v;
+  if (r == 0 || r > 1)
+    return sampleNormal(sigma, mu);
+  double c = sqrt(-2 * log(r) / r);
+  return ((u * c * sigma) + mu);
+}
 
 /*
   This function outputs the initial state of the Person matrix to the given filename
@@ -54,7 +78,7 @@ void get_filename();
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_initial_state(char *filename, struct arguments* arguments, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep)
+void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep)
 {
     FILE *fptr;
 
@@ -65,16 +89,16 @@ void output_to_file_initial_state(char *filename, struct arguments* arguments, d
         perror("Error reading file in output_to_file_initial_state");
     }
 
-    output_to_file_constants(filename, arguments);
+    output_to_file_constants(filename);
 
-    output_to_file_persons(filename, position, actual_speed, desired_direction, final_destination, n, n_features, n_timestep);
+    output_to_file_persons(filename, position, actual_speed, desired_direction, final_destination, n, n_timestep);
 }
 
 /*
   This function outputs the defined constants to the given filename
   Parameters: filename: name of the .txt file
 */
-void output_to_file_constants(char *filename, struct arguments* arguments)
+void output_to_file_constants(char *filename)
 {
     FILE *fptr;
 
@@ -89,12 +113,12 @@ void output_to_file_constants(char *filename, struct arguments* arguments)
     fprintf(fptr, "14\n"); // output number of Variables
     fprintf(fptr, "AVG_SPEED %f\n", AVG_SPEED);
     fprintf(fptr, "RELAX_TIME %f\n", RELAX_TIME);
-    fprintf(fptr, "WALK_WAY_LENGTH %f\n", arguments->walkway_length);
-    fprintf(fptr, "WALK_WAY_WIDTH %f\n", arguments->walkway_width);
-    fprintf(fptr, "NUMBER_OF_PEOPLE %d\n", arguments->n_people);
+    fprintf(fptr, "WALK_WAY_LENGTH %f\n", arguments.walkway_length);
+    fprintf(fptr, "WALK_WAY_WIDTH %f\n", arguments.walkway_width);
+    fprintf(fptr, "NUMBER_OF_PEOPLE %d\n", arguments.n_people);
     fprintf(fptr, "N_BORDERS %d\n", (int)N_BORDERS);
     fprintf(fptr, "TIMESTEP %f\n", TIMESTEP);
-    fprintf(fptr, "N_TIMESTEP %d\n", arguments->n_timesteps);
+    fprintf(fptr, "N_TIMESTEP %d\n", arguments.n_timesteps);
 
     fprintf(fptr, "V_ALPHA_BETA %f\n", V_ALPHA_BETA);
     fprintf(fptr, "SIGMA %f\n", SIGMA);
@@ -113,7 +137,7 @@ void output_to_file_constants(char *filename, struct arguments* arguments)
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_persons(char *filename, double *position, double *speed, double *desired_direction, double *final_destination, int n, int n_features, int n_timestep)
+void output_to_file_persons(char *filename, double *position, double *speed, double *desired_direction, double *final_destination, int n, int n_timestep)
 {
     FILE *fptr;
 

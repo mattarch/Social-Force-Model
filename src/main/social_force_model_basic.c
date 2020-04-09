@@ -15,11 +15,9 @@
 #include "tsc_x86.h"
 #include "social_force_model_basic.h"
 #include "testing.h"
-struct arguments arguments = {0};
 // main function
 int main(int argc, char *argv[])
 {
-  
 
   // default values for arguments
   arguments.n_people = 300;
@@ -31,39 +29,48 @@ int main(int argc, char *argv[])
   // parse arguments
   parse_args(argc, argv, &arguments);
 
+  /* start with simulation stuff */
+
+  int number_of_people = arguments.n_people;
+  int n_timesteps = arguments.n_timesteps;
+  // allocate memory
+  double *position = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *speed = (double *)calloc(number_of_people, sizeof(double));
+  double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *borders = (double *)calloc(N_BORDERS, sizeof(double));
+  double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
+  double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
+  double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
+  double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
+  // check if calloc worked correctly
+  if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
+  {
+    printf("Error: calloc failed\n");
+    return 1;
+  }
+
+  // initialize arrays
+  initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
+  initialize_borders(borders, N_BORDERS);
+
   if (arguments.test)
   {
-    int error = run_tests();
-    if (error)
-    {
-      printf("One ore more testcases failed, quitting program.\n");
-      return 1;
-    }
+    test_simulation(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
   }
-  CONSOLE_PRINT(("Test\n"));
-  run_simulation(&arguments);
+  else
+  {
+    simulation(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
+  }
 
   return 0;
 }
 
 // implementation of functions
 //------------------------------------------------------------------------------------------
-/*
-    This function returns a sample point from a normal distribution with mean "mu" and std.deviation sqrt of "sigma"
 
-    Assumptions: The parameters are positive
-  Parameters: 
-              sigma: (double) : squared value of the std.deviation of the distribution
-                 mu: (double) : mean of the distribution            
-*/
-double sampleNormal(double sigma, double mu) {
-    double u = ((double) rand() / (RAND_MAX)) * 2 - 1;
-    double v = ((double) rand() / (RAND_MAX)) * 2 - 1;
-    double r = u * u + v * v;
-    if (r == 0 || r > 1) return sampleNormal(sigma, mu);
-    double c = sqrt(-2 * log(r) / r);
-    return ((u * c * sigma) + mu);
-}
 /*
   This function initializes the arrays associated with people with reasonable starting values.
 
@@ -82,21 +89,21 @@ void initialize_people(double *position, double *desired_direction, double *fina
   {
     // initialize values independant of starting point and target point
     position[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-    desired_direction[i * 2 + 1] = 0.0;                                // starting value for direct_y
+    desired_direction[i * 2 + 1] = 0.0;                                         // starting value for direct_y
     final_destination[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
     desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
     if (i % 2) // initialize this person to walk from left to right
     {
       position[i * 2] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-      desired_direction[i * 2] = 1.0;                              // starting value for direct_x
+      desired_direction[i * 2] = 1.0;                                       // starting value for direct_x
       final_destination[i * 2] = arguments.walkway_length + 10;             // target x coordinate
     }
     else // initialize this person to walk from right to left
     {
       position[i * 2] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-      desired_direction[i * 2] = -1.0;                                         // starting value for direct_x
-      final_destination[i * 2] = 0.0 - 10;                                     // target x coordinate
+      desired_direction[i * 2] = -1.0;                                                           // starting value for direct_x
+      final_destination[i * 2] = 0.0 - 10;                                                       // target x coordinate
     }
   }
 }
@@ -400,9 +407,9 @@ void update_position(double *position, double *desired_direction, double *actual
     norm_value = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2));
 
     //fromula 12 in the paper --> compute control_value according to norm
-    if (norm_value > desired_speed[i]*1.3)
+    if (norm_value > desired_speed[i] * 1.3)
     {
-      control_value = desired_speed[i]*1.3 / norm_value;
+      control_value = desired_speed[i] * 1.3 / norm_value;
     }
 
     //apply control value
@@ -419,43 +426,39 @@ void update_position(double *position, double *desired_direction, double *actual
     position[i * 2 + 1] += prefered_velocity_y * TIMESTEP;
   }
 }
-/*
-  This function runs the simulation 
-*/
-void run_simulation(struct arguments *arguments)
+
+void simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
 {
-  int number_of_people = arguments->n_people;
-  int n_timesteps = arguments->n_timesteps;
-  // allocate memory
-  double *position = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *speed = (double *)calloc(number_of_people, sizeof(double));
-  double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *borders = (double *)calloc(N_BORDERS, sizeof(double));
-  double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
-  double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
-  double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
-  // check if calloc worked correctly
-  if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
-  {
-    printf("Error: calloc failed\n");
-    return;
-  }
-
-  // initialize arrays
-  initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
-  initialize_borders(borders, N_BORDERS);
-
-#ifdef DEBUG
-  get_filename();
-  output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, arguments->n_timesteps);
-#endif
-
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
+
+  // simulate steps
+  for (int step = 0; step < n_timesteps; step++)
+  {
+    // update variables
+    compute_actual_velocity(speed, desired_direction, actual_velocity, number_of_people);
+    update_desired_direction(position, final_destination, desired_direction, number_of_people);
+    update_acceleration_term(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
+    update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
+    update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
+    compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
+    update_position(position, desired_direction, speed, social_force, actual_velocity, desired_speed, number_of_people);
+    CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
+  }
+
+  CONSOLE_PRINT(("Simulation terminated\n"));
+}
+
+void test_simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+{
+
+  get_filename();
+  output_to_file_initial_state(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
+
+  // start simulation
+  printf("Start simulation with %d persons\n", number_of_people);
 
   myInt64 start = start_tsc();
   // simulate steps
@@ -466,26 +469,20 @@ void run_simulation(struct arguments *arguments)
     update_desired_direction(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
     update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
-   
     update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
-    if (arguments->test) // FIXME: Question: how to do this s.t. it does not influence benachmarking?
-    {
-      test_people_repulsion_with_FD(people_repulsion_term, number_of_people, position, desired_direction, speed);
-      test_border_repulsion_with_FD(border_repulsion_term,position,borders,N_BORDERS,number_of_people);
-    }
+
+    test_people_repulsion_with_FD(people_repulsion_term, number_of_people, position, desired_direction, speed);
+    test_border_repulsion_with_FD(border_repulsion_term, position, borders, N_BORDERS, number_of_people);
+
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position(position, desired_direction, speed, social_force, actual_velocity, desired_speed, number_of_people);
-    CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
 
-#ifdef DEBUG
-    output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, number_of_people, 42, n_timesteps);
-#endif
+    output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
+
+    printf("Finished iteration %d\n", (step + 1));
   }
   myInt64 end = stop_tsc(start);
   printf("%llu Cycles\n", end);
-#ifdef BENCHMARK
-  get_filename();
-  output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, n_timesteps);
-#endif
-  CONSOLE_PRINT(("Simulation terminated\n"));
+
+  printf("Simulation terminated\n");
 }
