@@ -15,16 +15,18 @@
 #include "tsc_x86.h"
 #include "social_force_model_basic.h"
 #include "testing.h"
-
+struct arguments arguments = {0};
 // main function
 int main(int argc, char *argv[])
 {
-  struct arguments arguments = {0};
+  
 
   // default values for arguments
   arguments.n_people = 300;
   arguments.n_timesteps = 300;
   arguments.test = false;
+  arguments.walkway_width = 4;
+  arguments.walkway_length = 50;
 
   // parse arguments
   parse_args(argc, argv, &arguments);
@@ -79,20 +81,20 @@ void initialize_people(double *position, double *desired_direction, double *fina
   for (int i = 0; i < n; i++)
   {
     // initialize values independant of starting point and target point
-    position[i * 2 + 1] = rand() * WALK_WAY_WIDTH / RAND_MAX;          // starting position y coordinate
+    position[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
     desired_direction[i * 2 + 1] = 0.0;                                // starting value for direct_y
-    final_destination[i * 2 + 1] = rand() * WALK_WAY_WIDTH / RAND_MAX; // target y coordinate
+    final_destination[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
     desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
     if (i % 2) // initialize this person to walk from left to right
     {
-      position[i * 2] = 0.0 - rand() * WALK_WAY_LENGTH / RAND_MAX; // starting position x coordinate
+      position[i * 2] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
       desired_direction[i * 2] = 1.0;                              // starting value for direct_x
-      final_destination[i * 2] = WALK_WAY_LENGTH + 10;             // target x coordinate
+      final_destination[i * 2] = arguments.walkway_length + 10;             // target x coordinate
     }
     else // initialize this person to walk from right to left
     {
-      position[i * 2] = WALK_WAY_LENGTH + rand() * WALK_WAY_LENGTH / RAND_MAX; // starting position x coordinate
+      position[i * 2] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
       desired_direction[i * 2] = -1.0;                                         // starting value for direct_x
       final_destination[i * 2] = 0.0 - 10;                                     // target x coordinate
     }
@@ -102,7 +104,7 @@ void initialize_people(double *position, double *desired_direction, double *fina
 /*
   This function initializes the borders array with reasonable starting values.
 
-  Assumptions: sidewalk scenario --> two horizontal borders, bottom one on height 0 top one on height WALK_WAY_WIDTH.
+  Assumptions: sidewalk scenario --> two horizontal borders, bottom one on height 0 top one on height arguments.walkway_width.
   Parameters:
                borders: (n_borders,2) : array of borders
              n_borders: number of borders
@@ -120,7 +122,7 @@ void initialize_borders(double *borders, int n_borders)
   }
   else
   {
-    borders[0] = WALK_WAY_WIDTH;
+    borders[0] = arguments.walkway_width;
     borders[1] = 0.0;
   }
 }
@@ -449,7 +451,7 @@ void run_simulation(struct arguments *arguments)
 
 #ifdef DEBUG
   get_filename();
-  output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, N_TIMESTEP);
+  output_to_file_initial_state(filename_global, arguments, position, speed, desired_direction, final_destination, number_of_people, 42, arguments->n_timesteps);
 #endif
 
   // start simulation

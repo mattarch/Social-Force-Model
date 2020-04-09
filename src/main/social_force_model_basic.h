@@ -15,21 +15,15 @@
 
 // default values
 #define AVG_SPEED 1.34       // in basic scenario this is the desired speed of every person
-#define MAX_SPEED 1.742      // maximum speed allowed for every person
 #define RELAX_TIME 0.5       // in [seconds]; used for smooth acceleration
-#define WALK_WAY_LENGTH 50.0 // in [meters]; walkway dimension in x direction
-#define WALK_WAY_WIDTH 4.0   // in [meters]; walkway dimension in y direction; also distance between borders in basic scenario
-//#define NUMBER_OF_PEOPLE 300 // number of people in the simulation
 #define N_BORDERS 2          // number of biarders used in the scenario
 #define TIMESTEP 0.2         // in [seconds]; timestep for simulation
-#define N_TIMESTEP 300       // number of timesteps being simulated
 
 // parameters model PAGE 8
 #define V_ALPHA_BETA 2.1 // in m^{2}s^{-2}
 #define SIGMA 0.3        // in m
 #define U_ALPHA_B 10.0   // in m^{2}s^{-2}
 #define R 0.2            // in m
-#define DELTA_T 2.0      // in s
 #define PSI 1.75         // in radians
 #define INFLUENCE 0.5    // pure (?)
 // add rest of functions
@@ -92,12 +86,11 @@ void output_to_file_constants(char *filename, struct arguments* arguments)
         return;
     }
 
-    fprintf(fptr, "16\n"); // output number of Variables
+    fprintf(fptr, "14\n"); // output number of Variables
     fprintf(fptr, "AVG_SPEED %f\n", AVG_SPEED);
-    fprintf(fptr, "MAX_SPEED %f\n", MAX_SPEED);
     fprintf(fptr, "RELAX_TIME %f\n", RELAX_TIME);
-    fprintf(fptr, "WALK_WAY_LENGTH %f\n", WALK_WAY_LENGTH);
-    fprintf(fptr, "WALK_WAY_WIDTH %f\n", WALK_WAY_WIDTH);
+    fprintf(fptr, "WALK_WAY_LENGTH %f\n", arguments->walkway_length);
+    fprintf(fptr, "WALK_WAY_WIDTH %f\n", arguments->walkway_width);
     fprintf(fptr, "NUMBER_OF_PEOPLE %d\n", arguments->n_people);
     fprintf(fptr, "N_BORDERS %d\n", (int)N_BORDERS);
     fprintf(fptr, "TIMESTEP %f\n", TIMESTEP);
@@ -107,7 +100,6 @@ void output_to_file_constants(char *filename, struct arguments* arguments)
     fprintf(fptr, "SIGMA %f\n", SIGMA);
     fprintf(fptr, "U_ALPHA_B %f\n", U_ALPHA_B);
     fprintf(fptr, "R %f\n", R);
-    fprintf(fptr, "DELTA_T %f\n", DELTA_T);
     fprintf(fptr, "PSI %f\n", PSI);
     fprintf(fptr, "INFLUENCE %f\n", INFLUENCE);
 

@@ -12,21 +12,19 @@ num_constants = int(fileAsList[0].split()[0])
 offset_c = num_constants + 1
 
 AVG_SPEED           = float(fileAsList[1].split()[1])
-MAX_SPEED           = float(fileAsList[2].split()[1])
-RELAX_TIME          = float(fileAsList[3].split()[1])
-WALK_WAY_LENGTH     = float(fileAsList[4].split()[1])
-WALK_WAY_WIDTH      = float(fileAsList[5].split()[1])
-NUMBER_OF_PEOPLE    = int(fileAsList[6].split()[1])
-N_BORDERS           = int(fileAsList[7].split()[1])
-TIMESTEP            = float(fileAsList[8].split()[1])
-N_TIMESTEP          = int(fileAsList[9].split()[1])
-V_ALPHA_BETA        = float(fileAsList[10].split()[1])
-SIGMA               = float(fileAsList[11].split()[1])
-U_ALPHA_B           = float(fileAsList[12].split()[1])
-R                   = float(fileAsList[13].split()[1])
-DELTA_T             = float(fileAsList[14].split()[1])
-PSI                 = float(fileAsList[15].split()[1])
-INFLUENCE           = float(fileAsList[16].split()[1])
+RELAX_TIME          = float(fileAsList[2].split()[1])
+WALK_WAY_LENGTH     = float(fileAsList[3].split()[1])
+WALK_WAY_WIDTH      = float(fileAsList[4].split()[1])
+NUMBER_OF_PEOPLE    = int(fileAsList[5].split()[1])
+N_BORDERS           = int(fileAsList[6].split()[1])
+TIMESTEP            = float(fileAsList[7].split()[1])
+N_TIMESTEP          = int(fileAsList[8].split()[1])
+V_ALPHA_BETA        = float(fileAsList[9].split()[1])
+SIGMA               = float(fileAsList[10].split()[1])
+U_ALPHA_B           = float(fileAsList[11].split()[1])
+R                   = float(fileAsList[12].split()[1])
+PSI                 = float(fileAsList[13].split()[1])
+INFLUENCE           = float(fileAsList[14].split()[1])
 
 fig, axs = plt.subplots(1, 2)
 
@@ -34,7 +32,6 @@ fig, axs = plt.subplots(1, 2)
 # add constants to the plot
 textstr = '\n'.join((
     "AVG_SPEED %.2f" % (AVG_SPEED, ),
-    "MAX_SPEED %.2f" % (MAX_SPEED, ),
     "RELAX_TIME %.2f" % (RELAX_TIME, ),
     "WALK_WAY_LENGTH %.2f" % (WALK_WAY_LENGTH, ),
     "WALK_WAY_WIDTH %.2f" % (WALK_WAY_WIDTH, ),
@@ -45,7 +42,6 @@ textstr = '\n'.join((
     "V_ALPHA_BETA %.2f" % (V_ALPHA_BETA, ),
     "SIGMA %.2f" % (SIGMA, ),
     "R %.2f" % (R, ),
-    "DELTA_T %.2f" % (DELTA_T, ),
     "PSI %.2f" % (PSI, ),
     "INFLUENCE %.2f" % (INFLUENCE, ),
 ))

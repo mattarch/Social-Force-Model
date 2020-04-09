@@ -14,6 +14,8 @@ struct arguments
 {
     int n_people;
     int n_timesteps;
+    double walkway_width;
+    double walkway_length;
     bool test;
 };
 
@@ -32,6 +34,8 @@ enum option_keys
     OPTION_N_TIMESTEPS = 0x101,
     OPTION_TEST = 0x102,
     OPTION_HELP = 0x42,
+    OPTION_WALKWAY_WIDTH = 0x147,
+    OPTION_WALKWAY_LENGTH = 0x117,
 };
 
 /* string displayed when the help option is called.*/
@@ -51,6 +55,9 @@ static struct arg_options options[] = {
     {"--n_people", OPTION_N_PEOPLE, 1, "300", "Number of people used in simulation."},
     {"--n_timesteps", OPTION_N_TIMESTEPS, 1, "300", "Number of timesteps."},
     {"--test", OPTION_TEST, 0, "false", "Run tests."},
+    {"--width", OPTION_WALKWAY_WIDTH, 1, "4", "Width of the walkway."},
+    {"--length", OPTION_WALKWAY_LENGTH, 1, "50", "Length of the walkway."},
+
     /* don't change last two entries*/
     {"--help", OPTION_HELP, 0, "-", "Displays this help."},
     {0}}; // do not delete the last entry, severs as flag for the end of the array
@@ -71,7 +78,7 @@ char *custom_strsep(char **stringp, const char *delimiter)
     char *start = *stringp;
     char *p;
 
-    if(start != NULL)
+    if (start != NULL)
     {
         p = strpbrk(start, delimiter);
     }
@@ -144,6 +151,12 @@ static void process_option(int option_key, char *arg, struct arguments *argument
         break;
     case OPTION_TEST:
         arguments->test = true;
+        break;
+    case OPTION_WALKWAY_WIDTH:
+        arguments->walkway_width = strtol(arg, &p, 10); // TODO: error handling
+        break;
+    case OPTION_WALKWAY_LENGTH:
+        arguments->walkway_length = strtol(arg, &p, 10); // TODO: error handling
         break;
     case OPTION_HELP:
         display_help();
