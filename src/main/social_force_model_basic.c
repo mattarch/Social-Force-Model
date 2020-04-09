@@ -235,7 +235,7 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper.
 
-  FLOPS = 42 * n * (n-1) = 42 * (n*2 - n)
+  FLOPS = 44 * n * (n-1) = 44444 * (n*2 - n)
 
   Assumptions: two different people can not be in the same spot at the same time
   Parameters: 
@@ -286,8 +286,8 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
       double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
       double w = check >= threshold ? 1 : INFLUENCE;
 
-      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;
-      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y;
+      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;  //1 mult => 1 flop
+      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y;  //1 mult => 1 flop
     }
   }
 }
