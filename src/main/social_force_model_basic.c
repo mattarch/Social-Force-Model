@@ -4,135 +4,16 @@
   Group: Simon Zurfluh, Matthias Matti, Tommaso Pegolotti, Lino Telschow
 */
 
-// import stuff
 #include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
-#include <assert.h>
 
-#include "parse_args.h"
-
-#include "tsc_x86.h"
 #include "social_force_model_basic.h"
+#include "social_force.h"
 #include "testing.h"
-// main function
-int main(int argc, char *argv[])
-{
+#include "utility.h"
 
-  // default values for arguments
-  arguments.n_people = 300;
-  arguments.n_timesteps = 300;
-  arguments.test = false;
-  arguments.walkway_width = 4;
-  arguments.walkway_length = 50;
-
-  // parse arguments
-  parse_args(argc, argv, &arguments);
-
-  /* start with simulation stuff */
-
-  int number_of_people = arguments.n_people;
-  int n_timesteps = arguments.n_timesteps;
-  // allocate memory
-  double *position = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *speed = (double *)calloc(number_of_people, sizeof(double));
-  double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *borders = (double *)calloc(N_BORDERS, sizeof(double));
-  double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
-  double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
-  double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
-  double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
-  // check if calloc worked correctly
-  if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
-  {
-    printf("Error: calloc failed\n");
-    return 1;
-  }
-
-  // initialize arrays
-  initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
-  initialize_borders(borders, N_BORDERS);
-
-  if (arguments.test)
-  {
-    test_simulation(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
-  }
-  else
-  {
-    simulation(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
-  }
-
-  return 0;
-}
-
-// implementation of functions
-//------------------------------------------------------------------------------------------
-
-/*
-  This function initializes the arrays associated with people with reasonable starting values.
-
-  Assumptions: There is at least one person.
-               In the sidewalk scenario half of the people start from left the other half from right.
-  Parameters: 
-              position: (n,2) : array of 2d position of people
-     desired_direction: (n,2) : array of 2d unit vectors pointing from a person's current position 
-                                towards the corresponging final_destination
-     final_destination: (n,2) : array with 2d coordinate of the final destinations of people
-                     n: number of people
-*/
-void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n)
-{
-  for (int i = 0; i < n; i++)
-  {
-    // initialize values independant of starting point and target point
-    position[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-    desired_direction[i * 2 + 1] = 0.0;                                         // starting value for direct_y
-    final_destination[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
-    desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
-
-    if (i % 2) // initialize this person to walk from left to right
-    {
-      position[i * 2] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-      desired_direction[i * 2] = 1.0;                                       // starting value for direct_x
-      final_destination[i * 2] = arguments.walkway_length + 10;             // target x coordinate
-    }
-    else // initialize this person to walk from right to left
-    {
-      position[i * 2] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-      desired_direction[i * 2] = -1.0;                                                           // starting value for direct_x
-      final_destination[i * 2] = 0.0 - 10;                                                       // target x coordinate
-    }
-  }
-}
-
-/*
-  This function initializes the borders array with reasonable starting values.
-
-  Assumptions: sidewalk scenario --> two horizontal borders, bottom one on height 0 top one on height arguments.walkway_width.
-  Parameters:
-               borders: (n_borders,2) : array of borders
-             n_borders: number of borders
-*/
-void initialize_borders(double *borders, int n_borders)
-{
-  // check for the basic scenario
-  if (n_borders != 2)
-  {
-    printf("There are more than 2 borders, borders get initialized to 0.");
-    for (int i = 0; i < n_borders; i++)
-    {
-      borders[i] = 0.0;
-    }
-  }
-  else
-  {
-    borders[0] = arguments.walkway_width;
-    borders[1] = 0.0;
-  }
-}
+extern char filename_global[40];
+extern struct arguments arguments;
 
 /*
   This function updates the desired direction for all people.
@@ -169,10 +50,10 @@ void update_desired_direction(double *position, double *final_destination, doubl
 
     // normalization constant
     double d = delta_x * delta_x + delta_y * delta_y; // 1 add, 2 mult => 3 flops
-    double normalizer = sqrt(d); // 1 sqrt
+    double normalizer = sqrt(d);                      // 1 sqrt
 
     // update desired_direction
-    desired_direction[i * 2] = delta_x / normalizer; // 1 div => 1 flop
+    desired_direction[i * 2] = delta_x / normalizer;     // 1 div => 1 flop
     desired_direction[i * 2 + 1] = delta_y / normalizer; // 1 div => 1 flop
   }
 }
@@ -198,7 +79,7 @@ void compute_actual_velocity(double *actual_speed, double *desired_direction, do
   // iterate over all people
   for (int i = 0; i < n; i++)
   {
-    actual_velocity[2 * i] = actual_speed[i] * desired_direction[i * 2]; // 1 mult, 1 flop
+    actual_velocity[2 * i] = actual_speed[i] * desired_direction[i * 2];         // 1 mult, 1 flop
     actual_velocity[2 * i + 1] = actual_speed[i] * desired_direction[i * 2 + 1]; // 1 mult, 1 flop
   }
 }
@@ -231,11 +112,11 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   for (int i = 0; i < n; i++)
   {
     // compute velocity difference
-    acceleration_term[2 * i] = desired_speed[i] * desired_direction[i * 2] - actual_velocity[2 * i]; // 1 mul, 1 add => 2 flops
+    acceleration_term[2 * i] = desired_speed[i] * desired_direction[i * 2] - actual_velocity[2 * i];             // 1 mul, 1 add => 2 flops
     acceleration_term[2 * i + 1] = desired_speed[i] * desired_direction[i * 2 + 1] - actual_velocity[2 * i + 1]; // 1 mul, 1 add => 2 flops
 
     // apply realxation time
-    acceleration_term[2 * i] = (1 / RELAX_TIME) * acceleration_term[2 * i]; //1 div, 1 mul => 2 flops
+    acceleration_term[2 * i] = (1 / RELAX_TIME) * acceleration_term[2 * i];         //1 div, 1 mul => 2 flops
     acceleration_term[2 * i + 1] = (1 / RELAX_TIME) * acceleration_term[2 * i + 1]; //1 div, 1 mul => 2 flops
   }
 }
@@ -302,7 +183,7 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
   }
 }
 
-/*
+/*social_force_model_basic
   This function updates the repulsion between every person and every boarder.
   Here the border B is assumed to be a sidewalk.
   This function corresponds to formula (5) from the paper.
@@ -346,16 +227,14 @@ void update_border_repulsion_term(double *position, double *borders, double *bor
       border_repulsion_term[i * (2 * n_borders) + 2 * j] = repulsion_x;
       border_repulsion_term[i * (2 * n_borders) + 2 * j + 1] = repulsion_y;
     } // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders
-  } // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders * n 
+  }   // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders * n
 }
 
 /*
   This function computes the social force for each person and stores the results in the array soacial_force
   This function corresponds to formula (9) of the paper.
 
-	Cost:  adds: 2 * n * (n + n_borders - 1)
-			  Flops: 2 * n * (n + n_borders - 1)
-
+	Cost:  adds: 2 * n * (n + n_borders social_force_model_basic
   Assumptions: The acceleration, people, and border terms are up to date.
   Parameters:       
              acceleration_term: (n,2) : array of x- and y-acceleration for every person
@@ -384,14 +263,14 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
       }
 
       // add repulsive term towards person beta
-      social_force[2 * p] += people_repulsion_term[p * (2 * n) + 2 * beta]; // 1 add => 1 flop
+      social_force[2 * p] += people_repulsion_term[p * (2 * n) + 2 * beta];         // 1 add => 1 flop
       social_force[2 * p + 1] += people_repulsion_term[p * (2 * n) + 2 * beta + 1]; // 1 add => 1 flop
     }
 
     // add repulsive terms of borders
     for (int b = 0; b < n_borders; b++)
     {
-      social_force[2 * p] += border_repulsion_term[p * (2 * n_borders) + 2 * b]; // 1 add => 1 flop
+      social_force[2 * p] += border_repulsion_term[p * (2 * n_borders) + 2 * b];         // 1 add => 1 flop
       social_force[2 * p + 1] += border_repulsion_term[p * (2 * n_borders) + 2 * b + 1]; // 1 add => 1 flop
     }
   }
@@ -423,7 +302,7 @@ void update_position(double *position, double *desired_direction, double *actual
   {
     control_value = 1.0;
     //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-    double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP; // 1 add, 1 mult => 2 flops
+    double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP;         // 1 add, 1 mult => 2 flops
     double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP; // 1 add, 1 mult => 2 flops
 
     //compute the norm of the preferd velocity
@@ -441,16 +320,16 @@ void update_position(double *position, double *desired_direction, double *actual
 
     //update speed term in People matrix --> this is the new speed
     actual_speed[i] = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2)); // 1 add, 2 mults, 1 sqrt => 4 flops
-    desired_direction[i * 2] = prefered_velocity_x / actual_speed[i]; // 1 div, 1 flop
-    desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i]; // 1 div, 1 flop
+    desired_direction[i * 2] = prefered_velocity_x / actual_speed[i];                  // 1 div, 1 flop
+    desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i];              // 1 div, 1 flop
     //update position
-    position[i * 2] += prefered_velocity_x * TIMESTEP; // 1 add, 1 mul => 2 flops
+    position[i * 2] += prefered_velocity_x * TIMESTEP;     // 1 add, 1 mul => 2 flops
     position[i * 2 + 1] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
   }
 }
 
-void simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+void simulation_basic(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
 {
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
@@ -472,8 +351,8 @@ void simulation(int number_of_people, int n_timesteps, double *position, double 
   CONSOLE_PRINT(("Simulation terminated\n"));
 }
 
-void test_simulation(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+void test_simulation_basic(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
 {
 
   get_filename();
@@ -482,7 +361,6 @@ void test_simulation(int number_of_people, int n_timesteps, double *position, do
   // start simulation
   printf("Start simulation with %d persons\n", number_of_people);
 
-  myInt64 start = start_tsc();
   // simulate steps
   for (int step = 0; step < n_timesteps; step++)
   {
@@ -503,8 +381,6 @@ void test_simulation(int number_of_people, int n_timesteps, double *position, do
 
     printf("Finished iteration %d\n", (step + 1));
   }
-  myInt64 end = stop_tsc(start);
-  printf("%llu Cycles\n", end);
 
   printf("Simulation terminated\n");
 }
