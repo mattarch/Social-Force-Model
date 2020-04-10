@@ -181,6 +181,8 @@ void update_desired_direction(double *position, double *final_destination, doubl
   This function computes the actual velocity for all people.
   This function is part of formula (2) from the paper.
 
+  FLOPS = n * (2 mults)
+
   Assumptions: none
   Parameters:
           actual_speed: (n,1) : array of the actual speed for every person
@@ -196,14 +198,16 @@ void compute_actual_velocity(double *actual_speed, double *desired_direction, do
   // iterate over all people
   for (int i = 0; i < n; i++)
   {
-    actual_velocity[2 * i] = actual_speed[i] * desired_direction[i * 2];
-    actual_velocity[2 * i + 1] = actual_speed[i] * desired_direction[i * 2 + 1];
+    actual_velocity[2 * i] = actual_speed[i] * desired_direction[i * 2]; // 1 mult, 1 flop
+    actual_velocity[2 * i + 1] = actual_speed[i] * desired_direction[i * 2 + 1]; // 1 mult, 1 flop
   }
 }
 
 /*
   This function updates the acceleration term for all people.
   This function is part of formula (2) from the paper.
+
+  FLOPS = n * (2 adds, 4 mults, 2 divs)
 
   Assumptions: - The RELAX_TIME macro is never 0.
                - actual_velocity needs to be up to date, 
@@ -227,12 +231,12 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   for (int i = 0; i < n; i++)
   {
     // compute velocity difference
-    acceleration_term[2 * i] = desired_speed[i] * desired_direction[i * 2] - actual_velocity[2 * i];
-    acceleration_term[2 * i + 1] = desired_speed[i] * desired_direction[i * 2 + 1] - actual_velocity[2 * i + 1];
+    acceleration_term[2 * i] = desired_speed[i] * desired_direction[i * 2] - actual_velocity[2 * i]; // 1 mul, 1 add => 2 flops
+    acceleration_term[2 * i + 1] = desired_speed[i] * desired_direction[i * 2 + 1] - actual_velocity[2 * i + 1]; // 1 mul, 1 add => 2 flops
 
     // apply realxation time
-    acceleration_term[2 * i] = (1 / RELAX_TIME) * acceleration_term[2 * i];
-    acceleration_term[2 * i + 1] = (1 / RELAX_TIME) * acceleration_term[2 * i + 1];
+    acceleration_term[2 * i] = (1 / RELAX_TIME) * acceleration_term[2 * i]; //1 div, 1 mul => 2 flops
+    acceleration_term[2 * i + 1] = (1 / RELAX_TIME) * acceleration_term[2 * i + 1]; //1 div, 1 mul => 2 flops
   }
 }
 
@@ -390,6 +394,9 @@ void compute_social_force(double *acceleration_term, double *people_repulsion_te
   This function computes the new velocity according to the social force and updates the position of every person.
   It implements formulas 10 to 12 in the paper.
 
+  FLOPS = n * (6 adds, 12 mults, 3 divs, 2 sqrts)
+        //This is the count if you always execute the if statement.
+        
   Assumptions: The social force needs to be computed before calling this function.
   Parameters:
                    position: (n,2) : array of 2d position of people
@@ -409,30 +416,29 @@ void update_position(double *position, double *desired_direction, double *actual
   {
     control_value = 1.0;
     //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-    double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP;
-    double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP;
+    double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP; // 1 add, 1 mult => 2 flops
+    double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP; // 1 add, 1 mult => 2 flops
 
     //compute the norm of the preferd velocity
-    norm_value = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2));
+    norm_value = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2)); // 1 add, 2 mults, 1 sqrt => 4 flops
 
     //fromula 12 in the paper --> compute control_value according to norm
     if (norm_value > desired_speed[i] * 1.3)
     {
-      control_value = desired_speed[i] * 1.3 / norm_value;
+      control_value = desired_speed[i] * 1.3 / norm_value; // 1 mul, 1 div => 2 flops
     }
 
     //apply control value
-    prefered_velocity_x *= control_value;
-    prefered_velocity_y *= control_value;
+    prefered_velocity_x *= control_value; // 1 mul, 1 flop
+    prefered_velocity_y *= control_value; // 1 mul, 1 flop
 
     //update speed term in People matrix --> this is the new speed
-    actual_speed[i] = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2));
-    desired_direction[i * 2] = prefered_velocity_x / actual_speed[i];
-    desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i];
-    //update position QUESTION: should I use the computed velocity or should I use the updated speed times the desired direction?
-    // they might not be equal because the social force term is not included in the desired direction of movement
-    position[i * 2] += prefered_velocity_x * TIMESTEP;
-    position[i * 2 + 1] += prefered_velocity_y * TIMESTEP;
+    actual_speed[i] = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2)); // 1 add, 2 mults, 1 sqrt => 4 flops
+    desired_direction[i * 2] = prefered_velocity_x / actual_speed[i]; // 1 div, 1 flop
+    desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i]; // 1 div, 1 flop
+    //update position
+    position[i * 2] += prefered_velocity_x * TIMESTEP; // 1 add, 1 mul => 2 flops
+    position[i * 2 + 1] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
   }
 }
 
