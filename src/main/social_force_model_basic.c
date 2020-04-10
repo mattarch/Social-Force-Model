@@ -307,6 +307,13 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
   Here the border B is assumed to be a sidewalk.
   This function corresponds to formula (5) from the paper.
 
+  Cost:  adds: n_borders * n * 1
+				mults: n_borders * n * 4
+				 divs: n_borders * n * 6
+          exp: n_borders * n * 2
+          fab: n_borders * n * 1
+        FLOPS: n_borders * n * 14
+
   Assumptions: The border B is a straight sidewalk (walking direction east-west), sidewalk described by two borders, a northern and southern border
   Parameters:
                  position: (n,2) : array of 2d position of people
