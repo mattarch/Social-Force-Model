@@ -21,6 +21,10 @@
 #define PSI 1.75         // in radians
 #define INFLUENCE 0.5    // pure (?)
 
+// benchmark parameters
+#define REP 15
+#define CYCLES_REQUIRED 1e8
+
 #ifdef DEBUG
 #define CONSOLE_PRINT(x) printf x
 #else
@@ -30,7 +34,24 @@
     } while (0)
 #endif
 
+// typedefs
+typedef void (*sim_func)(int, int, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*);  
+
+typedef struct {
+  sim_func f;
+  char* name;
+}sim_t;
+
+
+void add_implementations();
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
 void initialize_borders(double *borders, int n_borders);
+void run_bench(sim_t sim);
+int compare( const void* a, const void* b);
+void run_sim_test(sim_func f);
+long long unsigned int compute_flops(int number_of_people);
+void add_function(sim_func f, char* name);
+void add_test_function(sim_func f);
+
 
 #endif
