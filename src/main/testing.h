@@ -18,7 +18,7 @@
 #define TFRC 2
 #define TPOS 3
 
-void add_implementations();
+void add_function_implementations();
 void add_tests();
 int run_tests();
 int run();

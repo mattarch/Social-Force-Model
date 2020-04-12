@@ -22,6 +22,10 @@ void (**acceleration_ptr_v)(double *, double *, double *, double *, int);
 void (**social_ptr_v)(double *, double *, double *, double *, int, int);
 void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, int);
 
+
+/*
+*   Function that adds all the testcases to try to the list
+*/
 void add_tests()
 {
     //direction testcases
@@ -29,13 +33,13 @@ void add_tests()
     //add_direction_testcase("error testing", direction_position0, direction_fdest0, direction_expected1, direction_n0);
 
     //acceleration testcases
-    //add_acceleration_testcase("acceleration_test_from_start_straight", acceleration_direction0, acceleration_vel0, acceleration_expected0, acceleration_n0);
-    //add_acceleration_testcase("acceleration_test_from_start_45", acceleration_direction1, acceleration_vel1, acceleration_expected1, acceleration_n1);
-    //add_acceleration_testcase("acceleration_test_with_velocity_straight", acceleration_direction2, acceleration_vel2, acceleration_expected2, acceleration_n2);
-    //add_acceleration_testcase("acceleration_test_with_velocity_45", acceleration_direction3, acceleration_vel3, acceleration_expected3, acceleration_n3);
-    //add_acceleration_testcase("acceleration_test_to_0", acceleration_direction4, acceleration_vel4, acceleration_expected4, acceleration_n4);
-    //add_acceleration_testcase("deacceleration_test_straight", acceleration_direction5, acceleration_vel5, acceleration_expected5, acceleration_n5);
-    //add_acceleration_testcase("deacceleration_test_45", acceleration_direction6, acceleration_vel6, acceleration_expected6, acceleration_n6);
+    // add_acceleration_testcase("acceleration_test_from_start_straight", acceleration_direction0, acceleration_vel0, acceleration_expected0, acceleration_n0);
+    // add_acceleration_testcase("acceleration_test_from_start_45", acceleration_direction1, acceleration_vel1, acceleration_expected1, acceleration_n1);
+    // add_acceleration_testcase("acceleration_test_with_velocity_straight", acceleration_direction2, acceleration_vel2, acceleration_expected2, acceleration_n2);
+    // add_acceleration_testcase("acceleration_test_with_velocity_45", acceleration_direction3, acceleration_vel3, acceleration_expected3, acceleration_n3);
+    // add_acceleration_testcase("acceleration_test_to_0", acceleration_direction4, acceleration_vel4, acceleration_expected4, acceleration_n4);
+    // add_acceleration_testcase("deacceleration_test_straight", acceleration_direction5, acceleration_vel5, acceleration_expected5, acceleration_n5);
+    // add_acceleration_testcase("deacceleration_test_45", acceleration_direction6, acceleration_vel6, acceleration_expected6, acceleration_n6);
 
     //social force
     add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
@@ -44,7 +48,10 @@ void add_tests()
     //add_position_testcase("segfault test", position_pos0, position_dir0, position_speed0, position_force0, position_vel0, position_expected0, position_n0);
 }
 
-void add_implementations()
+/*
+*   function that adds differente implementations to test for correctness
+*/
+void add_function_implementations()
 {
     //update direction implementations
     //add_direction_implementation(update_desired_direction);
@@ -69,13 +76,18 @@ int run_tests()
 
     //add tests
     add_tests();
-    add_implementations();
+    add_function_implementations();
 
     //run tests
     int error = run();
     return error;
 }
 
+/*
+*   Function that runs all the testcases contained inside the list for each of the 
+*   implementations added. 
+*   Returns 1 if some test fails, 0 otherwise.
+*/
 int run()
 {
     int error_check = 0;
@@ -168,7 +180,11 @@ int run()
     return error_check;
 }
 
-//returns 1 if error, returns 0 if OK
+/*
+*   Function used to check the square distance between the expected result of a testcase
+*   and the result of the function testes.
+*   This function returns 1 if the distance is greater than the threshold, 0 otherwise.
+*/
 int check_square_distance(double *expected, double *res, int n)
 {
 
