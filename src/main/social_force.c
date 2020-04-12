@@ -194,7 +194,7 @@ void run_bench(sim_t sim)
     int n_timesteps = arguments.n_timesteps;
     // allocate memory
 
-    long long unsigned int flops = compute_flops(number_of_people);
+    long long unsigned int flops = arguments.n_timesteps * compute_flops(number_of_people);
 
     double *position = (double *)calloc(number_of_people * 2, sizeof(double));
     double *speed = (double *)calloc(number_of_people, sizeof(double));
