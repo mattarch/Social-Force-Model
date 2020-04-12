@@ -126,8 +126,8 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper.
 
-  FLOPS = 44 * n * (n-1) = 44444 * (n*2 - n)
-
+  FLOPS = 44 * n * (n-1) = 44 * (n^2 - n)
+        = (n^2 - n) * (14 add, 15 mult, 13 div, 3 sqrt, 2 exp)
   Assumptions: two different people can not be in the same spot at the same time
   Parameters: 
                      position: (n,2) : array of 2d position of people
