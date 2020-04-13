@@ -3,7 +3,7 @@
 # set variables
 options="Benchmark Test"
 timesteps=(300)
-persons=(8, 16, 32, 64, 128, 256)
+persons=(8)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
@@ -49,7 +49,7 @@ select opt in $options; do
           echo $line >> ../../benchmark/$filename
         done
       done
-      #python3 ../../benchmark/plot-benchmark.py $filename
+      python3 ../../benchmark/plot-benchmark.py ../../benchmark/$1$timelabel
     done
     exit
   elif [ $opt == "Test" ]; then
