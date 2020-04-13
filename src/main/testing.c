@@ -29,8 +29,7 @@ void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, i
 void add_tests()
 {
     //direction testcases
-    //add_direction_testcase("test testing", direction_position0, direction_fdest0, direction_expected0, direction_n0);
-    //add_direction_testcase("error testing", direction_position0, direction_fdest0, direction_expected1, direction_n0);
+    add_direction_testcase("basic direction test", direction_position0, direction_fdest0, direction_expected0, direction_n0);
 
     //acceleration testcases
     // add_acceleration_testcase("acceleration_test_from_start_straight", acceleration_direction0, acceleration_vel0, acceleration_expected0, acceleration_n0);
@@ -54,13 +53,13 @@ void add_tests()
 void add_function_implementations()
 {
     //update direction implementations
-    //add_direction_implementation(update_desired_direction);
+    add_direction_implementation(update_desired_direction);
 
     //update acceleration implementations
     add_acceleration_implementation(update_acceleration_term);
 
     //compute social force implementations
-    //add_social_implementation(compute_social_force);
+    add_social_implementation(compute_social_force);
 
     //update position implementations
     add_pos_implementation(update_position);
