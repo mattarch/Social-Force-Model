@@ -49,6 +49,7 @@ select opt in $options; do
           echo $line >> ../../benchmark/$filename
         done
       done
+      #python3 ../../benchmark/plot-benchmark.py $filename
     done
     exit
   elif [ $opt == "Test" ]; then
