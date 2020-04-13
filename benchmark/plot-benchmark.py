@@ -86,4 +86,5 @@ plt.tick_params(
     labelbottom=True) # labels along the bottom edge are off
 plt.legend()
 plt.savefig(filename + ".pdf")
+plt.show()
 
