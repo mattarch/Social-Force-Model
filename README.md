@@ -5,7 +5,7 @@ Google Docs Link:
 https://docs.google.com/document/d/1Pd_naY5nFvGuTWZ7cf6Ku0H6xgkG0ytWERB9O8ZGhYY/edit?usp=sharing
 
 ## compilation
-gcc social_force.c parse_args.c utility.c testing.c social_force_model_basic.c -lm -O3 -ffast-math -g
+`gcc social_force.c parse_args.c utility.c testing.c social_force_model_basic.c -lm -O3 -ffast-math -g`
 
 ## Debug mode
 To debug the application compile the file with the flag `-DDEBUG`.

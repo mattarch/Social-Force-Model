@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 // constants
 #include "social_force.h"
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
     arguments.test = false;
     arguments.walkway_width = 4;
     arguments.walkway_length = 50;
+    arguments.benchmark = "all";
 
     // parse arguments
     parse_args(argc, argv, &arguments);
@@ -79,10 +81,24 @@ int main(int argc, char *argv[])
     }
     else
     {
-        for (int i = 0; i < sim_counter; i++)
+        if (strstr(arguments.benchmark, "all") != 0)
         {
-            sim_t sim = sim_list[i];
-            run_bench(sim);
+            for (int i = 0; i < sim_counter; i++)
+            {
+                sim_t sim = sim_list[i];
+                run_bench(sim);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < sim_counter; i++)
+            {
+                sim_t sim = sim_list[i];
+                if (strstr(arguments.benchmark, sim.name) != 0)
+                {
+                    run_bench(sim);
+                }
+            }
         }
     }
     return 0;
@@ -167,7 +183,7 @@ int compare(const void *a, const void *b)
 */
 void run_bench(sim_t sim)
 {
-    char* name = sim.name;
+    char *name = sim.name;
     sim_func f = sim.f;
     double cycles = 0.;
     long num_runs = 5;
@@ -178,7 +194,7 @@ void run_bench(sim_t sim)
     int n_timesteps = arguments.n_timesteps;
     // allocate memory
 
-    long long unsigned int flops = compute_flops(number_of_people);
+    long long unsigned int flops = arguments.n_timesteps * compute_flops(number_of_people);
 
     double *position = (double *)calloc(number_of_people * 2, sizeof(double));
     double *speed = (double *)calloc(number_of_people, sizeof(double));
@@ -257,12 +273,12 @@ void run_bench(sim_t sim)
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
 
-    printf("%s\t%llu\t%f\t%.8f\n", name, flops, cycles, flops/cycles);
+    printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
 }
 
 /*
 * Runs all the function in the test list. These functions are used to check that the
-* gradient computed analytically are correct by comparing the result to a finite distances
+* gradient computed analytically are correct by comparing the result to a finite differences
 * implementation of the gradients.
 */
 void run_sim_test(sim_func f)
@@ -321,7 +337,7 @@ long long unsigned int compute_flops(int number_of_people)
 /*
 *   Appends a simulation function to the list
 */
-void add_function(sim_func f, char* name)
+void add_function(sim_func f, char *name)
 {
     sim_counter++;
     sim_list = realloc(sim_list, sizeof(sim_t) * sim_counter);

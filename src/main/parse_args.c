@@ -30,10 +30,10 @@ static struct arg_options options[] = {
     /* add options here */
     {"--n_people", OPTION_N_PEOPLE, 1, "300", "Number of people used in simulation."},
     {"--n_timesteps", OPTION_N_TIMESTEPS, 1, "300", "Number of timesteps."},
-    {"--test", OPTION_TEST, 0, "false", "Run tests."},
     {"--width", OPTION_WALKWAY_WIDTH, 1, "4", "Width of the walkway."},
     {"--length", OPTION_WALKWAY_LENGTH, 1, "50", "Length of the walkway."},
-
+    {"--benchmark", OPTION_BENCHMARK, 1, "all", "Runs the benchmark for the versions listed in args."},
+    {"--test", OPTION_TEST, 0, "false", "Run tests."},
     /* don't change last two entries*/
     {"--help", OPTION_HELP, 0, "-", "Displays this help."},
     {0}}; // do not delete the last entry, severs as flag for the end of the array
@@ -119,14 +119,17 @@ static void process_option(int option_key, char *arg, struct arguments *argument
     case OPTION_N_TIMESTEPS:
         arguments->n_timesteps = strtol(arg, &p, 10); // TODO: error handling
         break;
-    case OPTION_TEST:
-        arguments->test = true;
-        break;
     case OPTION_WALKWAY_WIDTH:
         arguments->walkway_width = strtol(arg, &p, 10); // TODO: error handling
         break;
     case OPTION_WALKWAY_LENGTH:
         arguments->walkway_length = strtol(arg, &p, 10); // TODO: error handling
+        break;
+    case OPTION_BENCHMARK:
+        arguments->benchmark = arg;
+        break;
+    case OPTION_TEST:
+        arguments->test = true;
         break;
     case OPTION_HELP:
         display_help();

@@ -18,6 +18,8 @@ struct arguments
     int n_timesteps;
     double walkway_width;
     double walkway_length;
+    char* benchmark;
+    int benchmark_max;
     bool test;
 };
 
@@ -34,10 +36,11 @@ enum option_keys
 {
     OPTION_N_PEOPLE = 0x100,
     OPTION_N_TIMESTEPS = 0x101,
-    OPTION_TEST = 0x102,
-    OPTION_HELP = 0x42,
-    OPTION_WALKWAY_WIDTH = 0x147,
-    OPTION_WALKWAY_LENGTH = 0x117,
+    OPTION_WALKWAY_WIDTH = 0x102,
+    OPTION_WALKWAY_LENGTH = 0x103,
+    OPTION_BENCHMARK = 0x104,
+    OPTION_TEST = 0x146,
+    OPTION_HELP = 0x147,
 };
 
 /* function declarations */
