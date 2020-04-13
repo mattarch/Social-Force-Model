@@ -139,6 +139,7 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
 */
 void update_people_repulsion_term(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
 {
+
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < n; j++)
@@ -180,6 +181,8 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
       people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;     //1 mult => 1 flop
       people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y; //1 mult => 1 flop
     }
+
+    
   }
 }
 
@@ -368,6 +371,7 @@ void test_simulation_basic(int number_of_people, int n_timesteps, double *positi
     compute_actual_velocity(speed, desired_direction, actual_velocity, number_of_people);
     update_desired_direction(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
+   
     update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
     update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
 
