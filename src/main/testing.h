@@ -18,23 +18,20 @@
 #define TFRC 2
 #define TPOS 3
 
-typedef void (*simul_t)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
-
 void add_function_implementations();
 void add_tests();
-int run_tests();
+int run_tests(sim_t **sim_list, int sim_counter);
 int run();
-int compare_simulations();
+int compare_simulations(sim_t **sim_list, int sim_counter);
 int check_square_distance(double *expected, double *res, int n);
 void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe,
-							 double **pos, double **dir, double **fdes, double **bor, double **spe, int n);
+			   double **pos, double **dir, double **fdes, double **bor, double **spe, int n);
 void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
-										 double **frc, int n); 
+					 double **frc, int n);
 void add_direction_testcase(char *name, double *pos, double *speed, double *output, int n);
 void add_acceleration_testcase(char *name, double *dir, double *vel, double *spe, double *output, int n);
 void add_compute_social_force_testcase(char *name, double *acc, double *people_rep, double *border_rep, double *output, int n, int n_borders);
 void add_position_testcase(char *name, double *pos, double *dir, double *speed, double *force, double *actual_vel, double *desired_speed, double *output_pos, int n);
-void add_simulation_implementation(simul_t f);
 void add_direction_implementation(void (*f)(double *, double *, double *, int));
 void add_acceleration_implementation(void (*f)(double *, double *, double *, double *, int));
 void add_social_implementation(void (*f)(double *, double *, double *, double *, int, int));

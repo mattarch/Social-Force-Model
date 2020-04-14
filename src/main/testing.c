@@ -9,9 +9,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "social_force.h"
 #include "testing.h"
 #include "test_sets.h"
-#include "social_force.h"
 #include "social_force_model_basic.h"
 #include "utility.h"
 
@@ -24,9 +24,6 @@ void (**acceleration_ptr_v)(double *, double *, double *, double *, int);
 void (**social_ptr_v)(double *, double *, double *, double *, int, int);
 void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, int);
 
-simul_t *sim_l;
-int sim_c;
-
 /*
 *   Function that adds all the testcases to try to the list
 */
@@ -36,10 +33,10 @@ void add_tests()
     add_direction_testcase("basic direction test", direction_position0, direction_fdest0, direction_expected0, direction_n0);
 
     //acceleration testcases
-    add_acceleration_testcase("acceleration_test_from_start_straight_and_with_angle", acceleration_direction0, acceleration_vel0, acceleration_desired_speed , acceleration_expected0, acceleration_n0);
-    add_acceleration_testcase("acceleration_test_with_velocity_straight_and_with_angle", acceleration_direction1, acceleration_vel1, acceleration_desired_speed , acceleration_expected1, acceleration_n1);
-    add_acceleration_testcase("acceleration_test_to_0_straight_and_with_angle", acceleration_direction2, acceleration_vel2, acceleration_desired_speed , acceleration_expected2, acceleration_n2);
-    add_acceleration_testcase("deacceleration_test_straight_and_with_angle", acceleration_direction3, acceleration_vel3, acceleration_desired_speed , acceleration_expected3, acceleration_n3);
+    add_acceleration_testcase("acceleration_test_from_start_straight_and_with_angle", acceleration_direction0, acceleration_vel0, acceleration_desired_speed, acceleration_expected0, acceleration_n0);
+    add_acceleration_testcase("acceleration_test_with_velocity_straight_and_with_angle", acceleration_direction1, acceleration_vel1, acceleration_desired_speed, acceleration_expected1, acceleration_n1);
+    add_acceleration_testcase("acceleration_test_to_0_straight_and_with_angle", acceleration_direction2, acceleration_vel2, acceleration_desired_speed, acceleration_expected2, acceleration_n2);
+    add_acceleration_testcase("deacceleration_test_straight_and_with_angle", acceleration_direction3, acceleration_vel3, acceleration_desired_speed, acceleration_expected3, acceleration_n3);
 
     //social force
     add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
@@ -54,8 +51,6 @@ void add_tests()
 */
 void add_function_implementations()
 {
-    add_simulation_implementation(simulation_basic);
-
     //update direction implementations
     add_direction_implementation(update_desired_direction);
 
@@ -69,7 +64,7 @@ void add_function_implementations()
     add_pos_implementation(update_position);
 }
 
-int run_tests()
+int run_tests(sim_t **sim_list, int sim_counter)
 {
     //init auxilliary parameters
     for (int i = 0; i < N_TESTS * 2; i++)
@@ -83,16 +78,15 @@ int run_tests()
 
     //run tests
     int error = run();
-    int errorsim = compare_simulations();
+    int errorsim = compare_simulations(sim_list, sim_counter);
     return error + errorsim;
 }
-
 
 /*
 * Runs all the simulation and compare the result to the basic version
 * Returns 0 if OK, returns 1 if there's an error.
 */
-int compare_simulations()
+int compare_simulations(sim_t **sim_list, int sim_counter)
 {
     int error_check = 0;
     int number_of_people = 10;
@@ -125,12 +119,12 @@ int compare_simulations()
     allocate_arrays(&oracle_speed, &oracle_actual_velocity, &oracle_acceleration_term, &oracle_people_repulsion_term,
                     &oracle_border_repulsion_term, &oracle_social_force, number_of_people);
 
-    simul_t f = sim_l[0];
+    sim_func f = sim_list[0]->f;
     f(number_of_people, n_timesteps, oracle_position, oracle_speed, oracle_desired_direction, oracle_final_destination,
       oracle_borders, oracle_actual_velocity, oracle_acceleration_term,
       oracle_people_repulsion_term, oracle_border_repulsion_term, oracle_social_force, oracle_desired_speed);
     //test all implementations
-    for (int i = 1; i < sim_c; i++)
+    for (int i = 1; i < sim_counter; i++)
     {
         int check = 0;
 
@@ -139,7 +133,7 @@ int compare_simulations()
         allocate_arrays(&current_speed, &current_actual_velocity, &current_acceleration_term, &current_people_repulsion_term,
                         &current_border_repulsion_term, &current_social_force, number_of_people);
 
-        f = sim_l[i];
+        f = sim_list[i]->f;
         f(number_of_people, n_timesteps, current_position, current_speed, current_desired_direction, current_final_destination,
           current_borders, current_actual_velocity, current_acceleration_term,
           current_people_repulsion_term, current_border_repulsion_term, current_social_force, current_desired_speed);
@@ -155,7 +149,7 @@ int compare_simulations()
         }
         else
         {
-            printf("CORRECT!\n");
+            printf("%s CORRECT!\n", sim_list[i]->name);
         }
 
         free_all(11, &current_position, &current_speed, &current_desired_direction, &current_final_destination, &current_borders, &current_actual_velocity,
@@ -337,13 +331,6 @@ void add_position_testcase(char *name, double *pos, double *dir, double *speed, 
     testcases[TPOS][counter[2 * TPOS] - 1]->n = n;
 }
 
-void add_simulation_implementation(simul_t f)
-{
-    sim_c++;
-    sim_l = realloc(sim_l, sim_c * sizeof(simul_t));
-    sim_l[sim_c - 1] = f;
-}
-
 void add_direction_implementation(void (*f)(double *, double *, double *, int))
 {
     counter[2 * TDIR + 1]++;
@@ -398,7 +385,6 @@ void allocate_arrays(double **spe, double **vel, double **acc, double **prep, do
     *brep = (double *)calloc(n * N_BORDERS * 2, sizeof(double));
     *frc = (double *)calloc(n * 2, sizeof(double));
 }
-
 
 /* finite-differences functions */
 

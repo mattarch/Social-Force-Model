@@ -11,6 +11,7 @@ underline="_"
 filesuffix=".txt"
 timelabel="$underline$currentdate$underline$currenttime$filesuffix"
 prog="social_force"
+firstarg = $1
 
 # compile program
 # if macOS -> use gcc-9, else -> gcc
@@ -33,9 +34,9 @@ select opt in $options; do
       ./$prog --n_timesteps=$t --n_people=4 | while read line
       do
         set -- $line
-        filename=$1$timelabel
+        filename=$firstarg$timelabel
         echo $line
-        echo $line > ../../benchmark/$filename
+        echo $line >> ../../benchmark/$filename
       done
 
       for p in "${persons[@]}"
@@ -44,12 +45,12 @@ select opt in $options; do
         ./$prog --n_timesteps=$t --n_people=$p | while read line
         do
           set -- $line
-          filename=$1$timelabel
+          filename=$firstarg$timelabel
           echo $line
           echo $line >> ../../benchmark/$filename
         done
       done
-      python3 ../../benchmark/plot-benchmark.py ../../benchmark/$1$timelabel
+      python3 ../../benchmark/plot-benchmark.py ../../benchmark/$firstarg$timelabel
     done
     exit
   elif [ $opt == "Test" ]; then

@@ -31,12 +31,6 @@
 struct arguments arguments = {0};
 char filename_global[40];
 
-//simulations and tests list
-sim_t *sim_list;
-sim_func *test_functions_list;
-int sim_counter = 0;
-int test_func_counter = 0;
-
 //cost of each operation
 const int add_cost = 1;
 const int mult_cost = 1;
@@ -45,18 +39,17 @@ const int exp_cost = 1;
 const int sqrt_cost = 1;
 const int fabs_cost = 1;
 
-/*
-*   Function used to add the different implementations of the simulation to benchmark.
-*/
-void add_implementations()
-{
-    add_function(simulation_basic, "basic");
-    add_test_function(test_simulation_basic);
-}
-
 // main function
 int main(int argc, char *argv[])
 {
+
+    sim_t *sim_list[50];
+    //simulations and tests list
+    sim_func test_functions_list[50];
+
+    int sim_counter = 0;
+
+    int test_func_counter = 0;
 
     // default values for arguments
     arguments.n_people = 300;
@@ -69,10 +62,10 @@ int main(int argc, char *argv[])
     // parse arguments
     parse_args(argc, argv, &arguments);
 
-    add_implementations();
+    add_implementations(sim_list, &sim_counter, test_functions_list, &test_func_counter);
     if (arguments.test)
     {
-        run_tests();
+        run_tests(sim_list, sim_counter);
         for (int i = 0; i < test_func_counter; i++)
         {
             sim_func current = test_functions_list[i];
@@ -85,7 +78,7 @@ int main(int argc, char *argv[])
         {
             for (int i = 0; i < sim_counter; i++)
             {
-                sim_t sim = sim_list[i];
+                sim_t sim = *sim_list[i];
                 run_bench(sim);
             }
         }
@@ -93,7 +86,7 @@ int main(int argc, char *argv[])
         {
             for (int i = 0; i < sim_counter; i++)
             {
-                sim_t sim = sim_list[i];
+                sim_t sim = *sim_list[i];
                 if (strstr(arguments.benchmark, sim.name) != 0)
                 {
                     run_bench(sim);
@@ -168,6 +161,19 @@ void initialize_borders(double *borders, int n_borders)
         borders[0] = arguments.walkway_width;
         borders[1] = 0.0;
     }
+}
+
+/*
+*   Function used to add the different implementations of the simulation to benchmark.
+*/
+void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter)
+{
+    add_function(sim_list, sim_counter, simulation_basic, "basic");
+    add_function(sim_list, sim_counter, simulation_basic, "basic0");
+    add_function(sim_list, sim_counter, simulation_basic, "basic1");
+    add_function(sim_list, sim_counter, simulation_basic, "basic2");
+    add_function(sim_list, sim_counter, simulation_basic, "basic3");
+    add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
 
 /*
@@ -337,20 +343,20 @@ long long unsigned int compute_flops(int number_of_people)
 /*
 *   Appends a simulation function to the list
 */
-void add_function(sim_func f, char *name)
+void add_function(sim_t **sim_list, int *sim_counter, sim_func f, char *name)
 {
-    sim_counter++;
-    sim_list = realloc(sim_list, sizeof(sim_t) * sim_counter);
-    sim_t sim = {f, name};
-    sim_list[sim_counter - 1] = sim;
+    (*sim_counter) = *sim_counter + 1;
+    sim_t *sim = (sim_t *)malloc(sizeof(sim_t));
+    sim->f = f;
+    sim->name = name;
+    sim_list[*sim_counter - 1] = sim;
 }
 
 /*
 *   Appends a test simulation function to the list
 */
-void add_test_function(sim_func f)
+void add_test_function(sim_func *test_functions_list, sim_func f, int *test_func_counter)
 {
-    test_func_counter++;
-    test_functions_list = realloc(test_functions_list, sizeof(sim_func) * test_func_counter);
-    test_functions_list[test_func_counter - 1] = f;
+    (*test_func_counter) = *test_func_counter + 1;
+    test_functions_list[*test_func_counter - 1] = f;
 }
