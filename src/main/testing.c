@@ -55,9 +55,6 @@ void add_tests()
 void add_function_implementations()
 {
     add_simulation_implementation(simulation_basic);
-    add_simulation_implementation(simulation_basic);
-    add_simulation_implementation(simulation_basic);
-    add_simulation_implementation(simulation_basic);
 
     //update direction implementations
     add_direction_implementation(update_desired_direction);
