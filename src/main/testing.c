@@ -7,11 +7,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "testing.h"
 #include "test_sets.h"
 #include "social_force.h"
 #include "social_force_model_basic.h"
+#include "utility.h"
 
 testcase_t **testcases[N_TESTS];
 
@@ -22,6 +24,8 @@ void (**acceleration_ptr_v)(double *, double *, double *, double *, int);
 void (**social_ptr_v)(double *, double *, double *, double *, int, int);
 void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, int);
 
+simul_t *sim_list;
+int sim_counter;
 
 /*
 *   Function that adds all the testcases to try to the list
@@ -48,10 +52,15 @@ void add_tests()
 }
 
 /*
-*   function that adds differente implementations to test for correctness
+*   function that adds different implementations to test for correctness
 */
 void add_function_implementations()
 {
+    add_simulation_implementation(simulation_basic);
+    add_simulation_implementation(simulation_basic);
+    add_simulation_implementation(simulation_basic);
+    add_simulation_implementation(simulation_basic);
+
     //update direction implementations
     add_direction_implementation(update_desired_direction);
 
@@ -79,7 +88,89 @@ int run_tests()
 
     //run tests
     int error = run();
-    return error;
+    int errorsim = compare_simulations();
+    return error + errorsim;
+}
+
+
+/*
+* Runs all the simulation and compare the result to the basic version
+* Returns 0 if OK, returns 1 if there's an error.
+*/
+int compare_simulations()
+{
+    int error_check = 0;
+    int number_of_people = 10;
+    int n_timesteps = 50;
+    double *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
+        *oracle_borders, *oracle_actual_velocity, *oracle_acceleration_term, *oracle_people_repulsion_term,
+        *oracle_border_repulsion_term, *oracle_social_force, *oracle_desired_speed;
+    double *current_position, *current_speed, *current_desired_direction, *current_final_destination,
+        *current_borders, *current_actual_velocity, *current_acceleration_term, *current_people_repulsion_term,
+        *current_border_repulsion_term, *current_social_force, *current_desired_speed;
+    // allocate memory
+    double *starting_position = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *starting_desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *starting_final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *starting_borders = (double *)calloc(N_BORDERS, sizeof(double));
+    double *starting_desired_speed = (double *)calloc(number_of_people, sizeof(double));
+    // // check if calloc worked correctly
+    if (starting_position == NULL || starting_desired_direction == NULL || starting_final_destination == NULL || starting_borders == NULL || starting_desired_speed == NULL)
+    {
+        printf("Error: calloc failed\n");
+        return 1;
+    }
+
+    // initialize starting position
+    initialize_people(starting_position, starting_desired_direction, starting_final_destination, starting_desired_speed, number_of_people);
+    initialize_borders(starting_borders, N_BORDERS);
+
+    copy_init(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed,
+              &oracle_position, &oracle_desired_direction, &oracle_final_destination, &oracle_borders, &oracle_desired_speed, number_of_people);
+    allocate_arrays(&oracle_speed, &oracle_actual_velocity, &oracle_acceleration_term, &oracle_people_repulsion_term,
+                    &oracle_border_repulsion_term, &oracle_social_force, number_of_people);
+
+    simul_t f = sim_list[0];
+    f(number_of_people, n_timesteps, oracle_position, oracle_speed, oracle_desired_direction, oracle_final_destination,
+      oracle_borders, oracle_actual_velocity, oracle_acceleration_term,
+      oracle_people_repulsion_term, oracle_border_repulsion_term, oracle_social_force, oracle_desired_speed);
+    //test all implementations
+    for (int i = 1; i < sim_counter; i++)
+    {
+        int check = 0;
+
+        copy_init(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed,
+                  &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, number_of_people);
+        allocate_arrays(&current_speed, &current_actual_velocity, &current_acceleration_term, &current_people_repulsion_term,
+                        &current_border_repulsion_term, &current_social_force, number_of_people);
+
+        f = sim_list[i];
+        f(number_of_people, n_timesteps, current_position, current_speed, current_desired_direction, current_final_destination,
+          current_borders, current_actual_velocity, current_acceleration_term,
+          current_people_repulsion_term, current_border_repulsion_term, current_social_force, current_desired_speed);
+
+        check += check_square_distance(oracle_position, current_position, number_of_people * 2);
+        check += check_square_distance(oracle_speed, current_speed, number_of_people);
+        check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people * 2);
+
+        if (check)
+        {
+            printf("ERROR: implementation %d differs from the base\n", i);
+            error_check = 1;
+        }
+        else
+        {
+            printf("CORRECT!\n");
+        }
+
+        free_all(11, &current_position, &current_speed, &current_desired_direction, &current_final_destination, &current_borders, &current_actual_velocity,
+                 &current_acceleration_term, &current_people_repulsion_term, &current_border_repulsion_term, &current_social_force, &current_desired_speed);
+    }
+
+    free_all(11, &oracle_position, &oracle_speed, &oracle_desired_direction, &oracle_final_destination, &oracle_borders, &oracle_actual_velocity,
+             &oracle_acceleration_term, &oracle_people_repulsion_term, &oracle_border_repulsion_term, &oracle_social_force, &oracle_desired_speed);
+
+    return error_check;
 }
 
 /*
@@ -251,6 +342,13 @@ void add_position_testcase(char *name, double *pos, double *dir, double *speed, 
     testcases[TPOS][counter[2 * TPOS] - 1]->n = n;
 }
 
+void add_simulation_implementation(simul_t f)
+{
+    sim_counter++;
+    sim_list = realloc(sim_list, sim_counter * sizeof(simul_t));
+    sim_list[sim_counter - 1] = f;
+}
+
 void add_direction_implementation(void (*f)(double *, double *, double *, int))
 {
     counter[2 * TDIR + 1]++;
@@ -278,6 +376,34 @@ void add_pos_implementation(void (*f)(double *, double *, double *, double *, do
     pos_ptr_v = realloc(pos_ptr_v, counter[2 * TPOS + 1] * sizeof(void (*)(double *, double *, double *, double *, double *, double *, int)));
     pos_ptr_v[counter[2 * TPOS + 1] - 1] = f;
 }
+
+void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe,
+               double **pos, double **dir, double **fdes, double **bor, double **spe, int n)
+{
+    *pos = malloc(n * 2 * sizeof(double));
+    *dir = malloc(n * 2 * sizeof(double));
+    *fdes = malloc(n * 2 * sizeof(double));
+    *bor = malloc(N_BORDERS * sizeof(double));
+    *spe = malloc(n * sizeof(double));
+
+    memcpy(*pos, s_pos, n * 2 * sizeof(double));   //
+    memcpy(*dir, s_dir, n * 2 * sizeof(double));   //
+    memcpy(*fdes, s_fdes, n * 2 * sizeof(double)); //
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
+    memcpy(*spe, s_spe, n * sizeof(double));
+}
+
+void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
+                     double **frc, int n)
+{
+    *spe = (double *)calloc(n, sizeof(double));
+    *vel = (double *)calloc(n * 2, sizeof(double));
+    *acc = (double *)calloc(n * 2, sizeof(double));
+    *prep = (double *)calloc(n * n * 2, sizeof(double));
+    *brep = (double *)calloc(n * N_BORDERS * 2, sizeof(double));
+    *frc = (double *)calloc(n * 2, sizeof(double));
+}
+
 
 /* finite-differences functions */
 
