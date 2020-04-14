@@ -36,19 +36,17 @@ void add_tests()
     add_direction_testcase("basic direction test", direction_position0, direction_fdest0, direction_expected0, direction_n0);
 
     //acceleration testcases
-    // add_acceleration_testcase("acceleration_test_from_start_straight", acceleration_direction0, acceleration_vel0, acceleration_expected0, acceleration_n0);
-    // add_acceleration_testcase("acceleration_test_from_start_45", acceleration_direction1, acceleration_vel1, acceleration_expected1, acceleration_n1);
-    // add_acceleration_testcase("acceleration_test_with_velocity_straight", acceleration_direction2, acceleration_vel2, acceleration_expected2, acceleration_n2);
-    // add_acceleration_testcase("acceleration_test_with_velocity_45", acceleration_direction3, acceleration_vel3, acceleration_expected3, acceleration_n3);
-    // add_acceleration_testcase("acceleration_test_to_0", acceleration_direction4, acceleration_vel4, acceleration_expected4, acceleration_n4);
-    // add_acceleration_testcase("deacceleration_test_straight", acceleration_direction5, acceleration_vel5, acceleration_expected5, acceleration_n5);
-    // add_acceleration_testcase("deacceleration_test_45", acceleration_direction6, acceleration_vel6, acceleration_expected6, acceleration_n6);
+    add_acceleration_testcase("acceleration_test_from_start_straight_and_with_angle", acceleration_direction0, acceleration_vel0, acceleration_desired_speed , acceleration_expected0, acceleration_n0);
+    add_acceleration_testcase("acceleration_test_with_velocity_straight_and_with_angle", acceleration_direction1, acceleration_vel1, acceleration_desired_speed , acceleration_expected1, acceleration_n1);
+    add_acceleration_testcase("acceleration_test_to_0_straight_and_with_angle", acceleration_direction2, acceleration_vel2, acceleration_desired_speed , acceleration_expected2, acceleration_n2);
+    add_acceleration_testcase("deacceleration_test_straight_and_with_angle", acceleration_direction3, acceleration_vel3, acceleration_desired_speed , acceleration_expected3, acceleration_n3);
 
     //social force
     add_compute_social_force_testcase("basic test", social_acc0, social_prep0, social_brep0, social_expected0, social_n0, social_nb0);
 
     //position
-    //add_position_testcase("segfault test", position_pos0, position_dir0, position_speed0, position_force0, position_vel0, position_expected0, position_n0);
+    add_position_testcase("position_test_from_origin_0_speed_unit_social_force", position_pos0, position_dir, position_speed, position_force0, position_vel0, position_desired_speed, position_expected0, position_n0);
+    add_position_testcase("position_test_from_origin_MAX_speed_unit_social_force", position_pos1, position_dir, position_speed, position_force1, position_vel1, position_desired_speed, position_expected1, position_n1);
 }
 
 /*
