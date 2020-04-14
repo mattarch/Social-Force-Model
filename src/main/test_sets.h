@@ -60,13 +60,14 @@ int social_nb0 = 2;
 double position_desired_speed[] = {1.34, 1.34, 1.34, 1.34};
 double position_dir[] = {0, 0, 0, 0, 0, 0, 0, 0}; // not needed for computation, only written to
 double position_speed[] = {0, 0, 0, 0}; // not needed for computation, only written to
-double position_pos[] = {0, 0, 0, 0, 0, 0, 0, 0}; // starting at origin
 // Test0, 4 unit directions, 0 starting speed, unit social force
+double position_pos0[] = {0, 0, 0, 0, 0, 0, 0, 0}; // starting at origin
 double position_force0[] = {1, 0, 0, 1, -1, 0, 0, -1}; // unit social force
 double position_vel0[] = {0, 0, 0, 0, 0, 0, 0, 0};
 double position_expected0[] = {0.04, 0, 0, 0.04, -0.04, 0, 0, -0.04};
 int position_n0 = 4;
 // Test1, 4 unit directions, 1.742 starting speed, unit social force
+double position_pos1[] = {0, 0, 0, 0, 0, 0, 0, 0}; // starting at origin
 double position_force1[] = {1, 0, 0, 1, -1, 0, 0, -1}; // unit social force
 double position_vel1[] = {1.742, 0, 0, 1.742, -1.742, 0, 0, -1.742};
 double position_expected1[] = {0.3484, 0, 0, 0.3484, -0.3484, 0, 0, -0.3484};
