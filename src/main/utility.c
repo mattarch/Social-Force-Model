@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <stdarg.h>
 
 #include "utility.h"
 #include "social_force.h"
@@ -149,24 +148,4 @@ void get_filename()
     timenow = gmtime(&now);
 
     strftime(filename_global, sizeof(filename_global), "../../test/basic_%Y-%m-%d_%H-%M-%S", timenow);
-}
-
-/*
-*   Function that frees all the pointers to double passed as an argument
-*/
-void free_all(int n, ...)
-{
-    int i;
-    double **cur;
-
-    va_list list;
-    va_start(list, n);
-
-    for (int i = 0; i < n; i++)
-    {
-        cur = va_arg(list, double **);
-        free(*cur);
-    }
-
-    va_end(list);
 }

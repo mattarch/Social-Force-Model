@@ -32,7 +32,9 @@ struct arguments arguments = {0};
 char filename_global[40];
 
 //simulations and tests list
+sim_t *sim_list;
 sim_func *test_functions_list;
+int sim_counter = 0;
 int test_func_counter = 0;
 
 //cost of each operation
@@ -46,9 +48,9 @@ const int fabs_cost = 1;
 /*
 *   Function used to add the different implementations of the simulation to benchmark.
 */
-void add_implementations(sim_t** list, int* counter)
+void add_implementations()
 {
-    add_function(list, counter, simulation_basic, "basic");
+    add_function(simulation_basic, "basic");
     add_test_function(test_simulation_basic);
 }
 
@@ -67,10 +69,7 @@ int main(int argc, char *argv[])
     // parse arguments
     parse_args(argc, argv, &arguments);
 
-    sim_t *sim_list;
-    int sim_counter = 0;
-    add_implementations(&sim_list, &sim_counter);
-    
+    add_implementations();
     if (arguments.test)
     {
         run_tests();
@@ -338,12 +337,12 @@ long long unsigned int compute_flops(int number_of_people)
 /*
 *   Appends a simulation function to the list
 */
-void add_function(sim_t** list, int* counter, sim_func f, char *name)
+void add_function(sim_func f, char *name)
 {
-    (*counter)++;
-    *list = realloc(*list, sizeof(sim_t) * *counter);
+    sim_counter++;
+    sim_list = realloc(sim_list, sizeof(sim_t) * sim_counter);
     sim_t sim = {f, name};
-    *list[*counter - 1] = sim;
+    sim_list[sim_counter - 1] = sim;
 }
 
 /*

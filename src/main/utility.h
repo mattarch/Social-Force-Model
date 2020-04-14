@@ -15,7 +15,6 @@ void get_filename();
 void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
 void output_to_file_persons(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
 void output_to_file_constants(char *);
-void free_all(int n, ...);
 
 double sampleNormal(double sigma, double mu);
 

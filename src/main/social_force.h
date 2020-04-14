@@ -43,14 +43,14 @@ typedef struct {
 }sim_t;
 
 
-void add_implementations(sim_t** list, int* counter);
+void add_implementations();
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
 void initialize_borders(double *borders, int n_borders);
 void run_bench(sim_t sim);
 int compare( const void* a, const void* b);
 void run_sim_test(sim_func f);
 long long unsigned int compute_flops(int number_of_people);
-void add_function(sim_t** list, int* counter, sim_func f, char *name);
+void add_function(sim_func f, char* name);
 void add_test_function(sim_func f);
 
 
