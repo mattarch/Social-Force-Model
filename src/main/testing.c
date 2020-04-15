@@ -28,7 +28,7 @@ void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, i
 /*
 *   Function that adds all the testcases to try to the list
 */
-void add_tests()
+void add_testcases()
 {
     //direction testcases
     add_direction_testcase("basic direction test", direction_position0, direction_fdest0, direction_expected0, direction_n0);
@@ -74,11 +74,11 @@ int run_tests(sim_t **sim_list, int sim_counter)
     }
 
     //add tests
-    add_tests();
+    add_testcases();
     add_function_implementations();
 
     //run tests
-    int error = run();
+    int error = run_testcases();
     int errorsim = compare_simulations(sim_list, sim_counter);
     return error + errorsim;
 }
@@ -88,7 +88,7 @@ int run_tests(sim_t **sim_list, int sim_counter)
 * gradient computed analytically are correct by comparing the result to a finite differences
 * implementation of the gradients.
 */
-void run_sim_test(sim_func f, struct arguments arguments)
+void run_finite_differences(sim_func f, struct arguments arguments)
 {
     int number_of_people = arguments.n_people;
     int n_timesteps = arguments.n_timesteps;
@@ -214,7 +214,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
 *   implementations added. 
 *   Returns 1 if some test fails, 0 otherwise.
 */
-int run()
+int run_testcases()
 {
     int error_check = 0;
     for (int k = 0; k < N_TESTS; k++)

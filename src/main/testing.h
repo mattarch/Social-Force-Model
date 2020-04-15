@@ -21,10 +21,10 @@
 #define TPOS 3
 
 void add_function_implementations();
-void add_tests();
+void add_testcases();
 int run_tests(sim_t **sim_list, int sim_counter);
-void run_sim_test(sim_func f, struct arguments arguments);
-int run();
+void run_finite_differences(sim_func f, struct arguments arguments);
+int run_testcases();
 int compare_simulations(sim_t **sim_list, int sim_counter);
 int check_square_distance(double *expected, double *res, int n);
 void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe,

@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < test_func_counter; i++)
         {
             sim_func current = test_functions_list[i];
-            run_sim_test(current,arguments);
+            run_finite_differences(current,arguments);
         }
     }
     else
