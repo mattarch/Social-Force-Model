@@ -29,7 +29,7 @@
 
 // globals
 struct arguments arguments = {0};
-char filename_global[40];
+char filename_global[80];
 
 //cost of each operation
 const int add_cost = 1;

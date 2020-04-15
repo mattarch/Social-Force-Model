@@ -7,7 +7,7 @@
 #ifndef BASIC_H_ /* Include guard */
 #define BASIC_H_
 
-extern char filename_global[40];
+extern char filename_global[80];
 
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
 void initialize_borders(double *borders, int n_borders);

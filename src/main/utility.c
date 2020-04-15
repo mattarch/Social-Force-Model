@@ -15,7 +15,7 @@
 #include "parse_args.h"
 
 extern struct arguments arguments;
-extern char filename_global[40];
+extern char filename_global[80];
 
 /*
     This function returns a sample point from a normal distribution with mean "mu" and std.deviation sqrt of "sigma"
@@ -149,15 +149,16 @@ void get_filename()
     {
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
-        sprintf(filename_global,"../../test/basic_%d-%02d-%02d_%02d-%02d-%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+        sprintf(filename_global, "../../test/basic_%d-%02d-%02d_%02d-%02d-%02d%s", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ".txt");
     }
     else if ('_' == arguments.filename[0])
     {
-        strcpy(filename_global, "basic");
+        strcpy(filename_global, "../../test/basic");
         strcat(filename_global, arguments.filename);
     }
     else
     {
+        strcpy(filename_global, "../../test/");
         strcpy(filename_global, arguments.filename);
     }
 }

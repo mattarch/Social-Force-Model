@@ -8,7 +8,7 @@
 #define UTILITY_H_
 
 extern struct arguments arguments;
-extern char filename_global[40];
+extern char filename_global[80];
 
 /* function defined in the header file itself */
 void get_filename();

@@ -50,7 +50,8 @@ select opt in $options; do
     exit
   elif [ $opt == "Visualization/Test" ]; then
     echo "Perform Visualization/Tests:"
-    ./$prog --visual  
+    ./$prog --visual  --filename=$timelabel
+    python3 ../../test/visualization_basic.py ../../test/$firstarg$timelabel
     exit
   else
     echo "Error: chose 1, 2 or 3"

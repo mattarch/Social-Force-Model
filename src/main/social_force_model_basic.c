@@ -12,7 +12,7 @@
 #include "testing.h"
 #include "utility.h"
 
-extern char filename_global[40];
+extern char filename_global[80];
 extern struct arguments arguments;
 
 /*

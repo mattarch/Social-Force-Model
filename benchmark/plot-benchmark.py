@@ -5,6 +5,26 @@ import matplotlib.pyplot as plt
 
 import sys 
 
+import platform, subprocess
+
+def get_processor_info():
+    if platform.system() == "Windows":
+        family = platform.processor()
+        name = subprocess.check_output(["wmic","cpu","get", "name"]).strip().split("\n")[1]
+        return ' '.join([name])
+    elif platform.system() == "Darwin":
+        return subprocess.check_output(['/usr/sbin/sysctl', "-n", "machdep.cpu.brand_string"]).strip()
+    elif platform.system() == "Linux":
+        with open('/proc/cpuinfo') as f:
+            for line in f:
+                # Ignore the blank line separating the information between
+                # details about two processing units
+                if line.strip():
+                    if line.rstrip('\n').startswith('model name'):
+                        model_name = line.rstrip('\n').split(':')[1]
+                        return model_name
+    return "" 
+
 def plot_setup():
     plt.rcParams.update({'font.size': 10})
     colors = cycler('color',
@@ -69,7 +89,8 @@ try:
         plt.plot(x0,y0,'.-', linewidth=2,label=version)
 
     plt.gcf().text(0.125, 0.9, "Performance [Flops/Cycle] vs. input size", fontsize=10)
-    plt.title('Performance-Plot',loc='left',y=1.06,fontsize=12)
+    title = "Performance Plot on" + get_processor_info()
+    plt.title(title,loc='left',y=1.06,fontsize=12)
 
     ax = plt.gca()
     ax.grid(which='major', axis='y')
