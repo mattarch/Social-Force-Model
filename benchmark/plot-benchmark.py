@@ -13,7 +13,7 @@ def get_processor_info():
         name = subprocess.check_output(["wmic","cpu","get", "name"]).strip().split("\n")[1]
         return ' '.join([name])
     elif platform.system() == "Darwin":
-        return subprocess.check_output(['/usr/sbin/sysctl', "-n", "machdep.cpu.brand_string"]).strip()
+        return " " + str(subprocess.check_output(['/usr/sbin/sysctl', "-n", "machdep.cpu.brand_string"]).strip().decode("utf-8"))
     elif platform.system() == "Linux":
         with open('/proc/cpuinfo') as f:
             for line in f:
