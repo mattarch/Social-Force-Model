@@ -31,6 +31,7 @@ select opt in $options; do
       echo "-Execute Benchmarks for $t time steps:"
 
       # perform 1 benchmark to create files
+			echo "--run benchmark for 4 persons"
       ./$prog --n_timesteps=$t --n_people=4 | while read line
       do
         set -- $line
