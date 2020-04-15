@@ -388,7 +388,7 @@ void test_simulation_basic(int number_of_people, int n_timesteps, double *positi
       output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
     }
 
-    printf("Finished iteration %d\n", (step + 1));
+    //printf("Finished iteration %d\n", (step + 1));
   }
 
   printf("Simulation terminated\n");
