@@ -3,7 +3,7 @@
 # set variables
 options="Benchmark Test"
 timesteps=(300)
-persons=(8)
+persons=(4 8)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
@@ -26,20 +26,12 @@ select opt in $options; do
   if [ $opt == "Benchmark" ]; then
     echo "Perform Benchmarks: "
     
+    # execute benchmark for all time steps
     for t in "${timesteps[@]}"
     do
       echo "-Execute Benchmarks for $t time steps:"
 
-      # perform 1 benchmark to create files
-			echo "--run benchmark for 4 persons"
-      ./$prog --n_timesteps=$t --n_people=4 | while read line
-      do
-        set -- $line
-        filename=$firstarg$timelabel
-        echo $line
-        echo $line >> ../../benchmark/$filename
-      done
-
+      # execute benchmark for all persons
       for p in "${persons[@]}"
       do
         echo "--run benchmark for $p persons"
