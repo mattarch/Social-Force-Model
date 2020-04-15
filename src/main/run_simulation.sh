@@ -26,6 +26,7 @@ select opt in $options; do
   if [ $opt == "Benchmark" ]; then
     echo "Perform Benchmarks: "
     
+    # execute benchmark for all time steps
     for t in "${timesteps[@]}"
     do
       echo "-Execute Benchmarks for $t time steps:"
