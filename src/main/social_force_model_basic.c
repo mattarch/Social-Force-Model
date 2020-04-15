@@ -181,8 +181,6 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
       people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;     //1 mult => 1 flop
       people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y; //1 mult => 1 flop
     }
-
-    
   }
 }
 
@@ -358,20 +356,24 @@ void test_simulation_basic(int number_of_people, int n_timesteps, double *positi
                            double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
 {
 
-  get_filename();
-  output_to_file_initial_state(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
+  if (arguments.visual)
+  {
+    get_filename();
+    output_to_file_initial_state(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
+  }
 
   // start simulation
   printf("Start simulation with %d persons\n", number_of_people);
 
+  int ntimesteps = arguments.visual ? n_timesteps : NTESTS_FINITE_DIFFERENCES;
   // simulate steps
-  for (int step = 0; step < n_timesteps; step++)
+  for (int step = 0; step < ntimesteps; step++)
   {
     // update variables
     compute_actual_velocity(speed, desired_direction, actual_velocity, number_of_people);
     update_desired_direction(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
-   
+
     update_people_repulsion_term(position, desired_direction, speed, people_repulsion_term, number_of_people);
     update_border_repulsion_term(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
 
@@ -381,7 +383,10 @@ void test_simulation_basic(int number_of_people, int n_timesteps, double *positi
     compute_social_force(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position(position, desired_direction, speed, social_force, actual_velocity, desired_speed, number_of_people);
 
-    output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
+    if (arguments.visual)
+    {
+      output_to_file_persons(filename_global, position, speed, desired_direction, final_destination, number_of_people, n_timesteps);
+    }
 
     printf("Finished iteration %d\n", (step + 1));
   }

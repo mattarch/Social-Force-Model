@@ -7,6 +7,8 @@
 #ifndef TESTING_H_ /* Include guard */
 #define TESTING_H_
 
+#include "parse_args.h"
+
 #define PRINT_RED printf("\033[0;31m")
 #define PRINT_GREEN printf("\033[0;32m");
 #define PRINT_DEF printf("\033[0m");
@@ -21,6 +23,7 @@
 void add_function_implementations();
 void add_tests();
 int run_tests(sim_t **sim_list, int sim_counter);
+void run_sim_test(sim_func f, struct arguments arguments);
 int run();
 int compare_simulations(sim_t **sim_list, int sim_counter);
 int check_square_distance(double *expected, double *res, int n);

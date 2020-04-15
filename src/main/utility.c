@@ -3,12 +3,12 @@
   Topic: social force model
   Group: Simon Zurfluh, Matthias Matti, Tommaso Pegolotti, Lino Telschow
 */
-
-#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <time.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "utility.h"
 #include "social_force.h"
@@ -144,11 +144,22 @@ void output_to_file_persons(char *filename, double *position, double *speed, dou
 */
 void get_filename()
 {
-    struct tm *timenow;
-    time_t now = time(NULL);
-    timenow = gmtime(&now);
 
-    strftime(filename_global, sizeof(filename_global), "../../test/basic_%Y-%m-%d_%H-%M-%S", timenow);
+    if (arguments.filename == "\n")
+    {
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+        sprintf(filename_global,"../../test/basic_%d-%02d-%02d_%02d-%02d-%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    }
+    else if ('_' == arguments.filename[0])
+    {
+        strcpy(filename_global, "basic");
+        strcat(filename_global, arguments.filename);
+    }
+    else
+    {
+        strcpy(filename_global, arguments.filename);
+    }
 }
 
 /*

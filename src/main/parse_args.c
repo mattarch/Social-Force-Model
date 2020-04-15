@@ -33,7 +33,10 @@ static struct arg_options options[] = {
     {"--width", OPTION_WALKWAY_WIDTH, 1, "4", "Width of the walkway."},
     {"--length", OPTION_WALKWAY_LENGTH, 1, "50", "Length of the walkway."},
     {"--benchmark", OPTION_BENCHMARK, 1, "all", "Runs the benchmark for the versions listed in args."},
-    {"--test", OPTION_TEST, 0, "false", "Run tests."},
+    {"--visual", OPTION_VISUAL, 0, "false", "Creates visualization output of the basic version. Runs for n_people of iterations."},
+    {"--filename", OPTION_FILENAME, 1, "", "Creates visualization output of the basic version. Runs for n_people of iterations."},
+
+    {"--test", OPTION_TEST, 0, "false", "Run tests. No visualization output created."},
     /* don't change last two entries*/
     {"--help", OPTION_HELP, 0, "-", "Displays this help."},
     {0}}; // do not delete the last entry, severs as flag for the end of the array
@@ -130,6 +133,12 @@ static void process_option(int option_key, char *arg, struct arguments *argument
         break;
     case OPTION_TEST:
         arguments->test = true;
+        break;
+    case OPTION_VISUAL:
+        arguments->visual = true;
+        break;
+    case OPTION_FILENAME:
+        arguments->filename = arg;
         break;
     case OPTION_HELP:
         display_help();

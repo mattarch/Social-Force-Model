@@ -11,15 +11,15 @@
 #include <time.h>
 #include <string.h>
 
+// parsing arguments
+#include "parse_args.h"
+
 // constants
 #include "social_force.h"
 #include "social_force_model_basic.h"
 
 // testing
 #include "testing.h"
-
-// parsing arguments
-#include "parse_args.h"
 
 // benachmarking
 #include "tsc_x86.h"
@@ -58,18 +58,20 @@ int main(int argc, char *argv[])
     arguments.walkway_width = 4;
     arguments.walkway_length = 50;
     arguments.benchmark = "all";
+    arguments.visual = false;
+    arguments.filename = "\n";
 
     // parse arguments
     parse_args(argc, argv, &arguments);
 
     add_implementations(sim_list, &sim_counter, test_functions_list, &test_func_counter);
-    if (arguments.test)
+    if (arguments.test || arguments.visual)
     {
         run_tests(sim_list, sim_counter);
         for (int i = 0; i < test_func_counter; i++)
         {
             sim_func current = test_functions_list[i];
-            run_sim_test(current);
+            run_sim_test(current,arguments);
         }
     }
     else
@@ -169,10 +171,6 @@ void initialize_borders(double *borders, int n_borders)
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter)
 {
     add_function(sim_list, sim_counter, simulation_basic, "basic");
-    add_function(sim_list, sim_counter, simulation_basic, "basic0");
-    add_function(sim_list, sim_counter, simulation_basic, "basic1");
-    add_function(sim_list, sim_counter, simulation_basic, "basic2");
-    add_function(sim_list, sim_counter, simulation_basic, "basic3");
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
 
@@ -282,51 +280,7 @@ void run_bench(sim_t sim)
     printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
 }
 
-/*
-* Runs all the function in the test list. These functions are used to check that the
-* gradient computed analytically are correct by comparing the result to a finite differences
-* implementation of the gradients.
-*/
-void run_sim_test(sim_func f)
-{
-    int number_of_people = arguments.n_people;
-    int n_timesteps = arguments.n_timesteps;
-    // allocate memory
 
-    double *position = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *speed = (double *)calloc(number_of_people, sizeof(double));
-    double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *borders = (double *)calloc(N_BORDERS, sizeof(double));
-    double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
-    double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
-    double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
-    // check if calloc worked correctly
-    if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
-    {
-        printf("Error: calloc failed\n");
-        return;
-    }
-
-    // initialize arrays
-    initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
-    initialize_borders(borders, N_BORDERS);
-    f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
-    free(position);
-    free(speed);
-    free(desired_direction);
-    free(final_destination);
-    free(borders);
-    free(actual_velocity);
-    free(acceleration_term);
-    free(people_repulsion_term);
-    free(border_repulsion_term);
-    free(social_force);
-    free(desired_speed);
-}
 
 /*
 *   Function that returns the number of flops. Computed used wxMaxima.

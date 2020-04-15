@@ -18,8 +18,9 @@ struct arguments
     int n_timesteps;
     double walkway_width;
     double walkway_length;
-    char* benchmark;
-    int benchmark_max;
+    char *benchmark;
+    char *filename;
+    bool visual;
     bool test;
 };
 
@@ -29,7 +30,7 @@ struct arg_options
     int option_key;
     bool takes_arguments;
     char default_arg[20];
-    char option_description[80];
+    char option_description[120];
 };
 
 enum option_keys
@@ -39,6 +40,8 @@ enum option_keys
     OPTION_WALKWAY_WIDTH = 0x102,
     OPTION_WALKWAY_LENGTH = 0x103,
     OPTION_BENCHMARK = 0x104,
+    OPTION_VISUAL = 0x105,
+    OPTION_FILENAME = 0x106,
     OPTION_TEST = 0x146,
     OPTION_HELP = 0x147,
 };

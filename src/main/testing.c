@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "parse_args.h"
 #include "social_force.h"
 #include "testing.h"
 #include "test_sets.h"
@@ -80,6 +81,52 @@ int run_tests(sim_t **sim_list, int sim_counter)
     int error = run();
     int errorsim = compare_simulations(sim_list, sim_counter);
     return error + errorsim;
+}
+
+/*
+* Runs all the function in the test list. These functions are used to check that the
+* gradient computed analytically are correct by comparing the result to a finite differences
+* implementation of the gradients.
+*/
+void run_sim_test(sim_func f, struct arguments arguments)
+{
+    int number_of_people = arguments.n_people;
+    int n_timesteps = arguments.n_timesteps;
+    // allocate memory
+
+    double *position = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *speed = (double *)calloc(number_of_people, sizeof(double));
+    double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *borders = (double *)calloc(N_BORDERS, sizeof(double));
+    double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
+    double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
+    double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
+    double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
+    // check if calloc worked correctly
+    if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
+    {
+        printf("Error: calloc failed\n");
+        return;
+    }
+
+    // initialize arrays
+    initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
+    initialize_borders(borders, N_BORDERS);
+    f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
+    free(position);
+    free(speed);
+    free(desired_direction);
+    free(final_destination);
+    free(borders);
+    free(actual_velocity);
+    free(acceleration_term);
+    free(people_repulsion_term);
+    free(border_repulsion_term);
+    free(social_force);
+    free(desired_speed);
 }
 
 /*

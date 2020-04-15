@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # set variables
-options="Benchmark Test"
-timesteps=(300)
-persons=(8)
+options="Benchmark Test Visualization/Test"
+timesteps=(25) # talk about number of iterations
+persons=(4 8 16 32 ) #64 128 256 512 1024 2048)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
@@ -11,7 +11,7 @@ underline="_"
 filesuffix=".txt"
 timelabel="$underline$currentdate$underline$currenttime$filesuffix"
 prog="social_force"
-firstarg = $1
+firstarg=$1
 
 # compile program
 # if macOS -> use gcc-9, else -> gcc
@@ -29,15 +29,6 @@ select opt in $options; do
     for t in "${timesteps[@]}"
     do
       echo "-Execute Benchmarks for $t time steps:"
-
-      # perform 1 benchmark to create files
-      ./$prog --n_timesteps=$t --n_people=4 | while read line
-      do
-        set -- $line
-        filename=$firstarg$timelabel
-        echo $line
-        echo $line >> ../../benchmark/$filename
-      done
 
       for p in "${persons[@]}"
       do
@@ -57,8 +48,12 @@ select opt in $options; do
     echo "Perform Tests:"
     ./$prog --test
     exit
+  elif [ $opt == "Visualization/Test" ]; then
+    echo "Perform Visualization/Tests:"
+    ./$prog --visual  
+    exit
   else
-    echo "Error: chose 1 or 2"
+    echo "Error: chose 1, 2 or 3"
     exit
   fi
 done
