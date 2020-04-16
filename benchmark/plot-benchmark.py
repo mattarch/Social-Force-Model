@@ -9,7 +9,7 @@ import platform, subprocess
 
 def get_processor_info():
     if platform.system() == "Windows":
-        return 'AMD Ryzen 7 3700U with Radeon Vega Mobile Gfx'
+        return ' AMD Ryzen 7 3700U with Radeon Vega Mobile Gfx'
     elif platform.system() == "Darwin":
         return " " + str(subprocess.check_output(['/usr/sbin/sysctl', "-n", "machdep.cpu.brand_string"]).strip().decode("utf-8"))
     elif platform.system() == "Linux":
