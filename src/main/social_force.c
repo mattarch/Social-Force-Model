@@ -17,6 +17,7 @@
 // constants
 #include "social_force.h"
 #include "social_force_model_basic.h"
+#include "social_force_model_basic_simplified.h"
 
 // testing
 #include "testing.h"
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < test_func_counter; i++)
         {
             sim_func current = test_functions_list[i];
-            run_finite_differences(current,arguments);
+            run_finite_differences(current, arguments);
         }
     }
     else
@@ -172,7 +173,10 @@ void initialize_borders(double *borders, int n_borders)
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter)
 {
     add_function(sim_list, sim_counter, simulation_basic, "basic");
+    add_function(sim_list, sim_counter, simulation_basic_simplified, "simplified");
+
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
+    add_test_function(test_functions_list, test_simulation_basic_simplified, test_func_counter);
 }
 
 /*
@@ -280,8 +284,6 @@ void run_bench(sim_t sim)
 
     printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
 }
-
-
 
 /*
 *   Function that returns the number of flops. Computed used wxMaxima.
