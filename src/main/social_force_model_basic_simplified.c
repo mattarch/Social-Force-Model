@@ -190,11 +190,10 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
   This function corresponds to formula (5) from the paper.
 
   Cost:  adds: n_borders * n * 1
-				mults: n_borders * n * 4
-				 divs: n_borders * n * 6
-          exp: n_borders * n * 2
-          fab: n_borders * n * 1
-        FLOPS: n_borders * n * 14
+				mults: n_borders * n * 3
+				 divs: n_borders * n * 3
+          exp: n_borders * n * 1
+        FLOPS: n_borders * n * 8
 
   Assumptions: The border B is a straight sidewalk (walking direction east-west), sidewalk described by two borders, a northern and southern border
   Parameters:
@@ -217,18 +216,18 @@ void update_border_repulsion_term_simplified(double *position, double *borders, 
       double rx_aB = 0.0;
       double ry_aB = ry_a - borders[j]; //1 add => 1 flop
 
-      double r_aB_norm = ry_aB > 0 ? ry_aB : -ry_aB; ; // 1 fabs => 1 flop
+      double r_aB_norm = ry_aB > 0 ? ry_aB : -ry_aB;
 
-      double repulsion_x = exp((-r_aB_norm) / R) * (rx_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
-      repulsion_x *= U_ALPHA_B / R;                                     // 1 mult, 1 div => 2 flops
+      double shared_expression = exp((-r_aB_norm) / R) * U_ALPHA_B / R / r_aB_norm; // 1 exp, 3 div, 1 mult => 4 flops + 1 exp
 
-      double repulsion_y = exp((-r_aB_norm) / R) * (ry_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
-      repulsion_y *= U_ALPHA_B / R;                                     // 1 mult, 1 div => 2 flops
+      double repulsion_x = shared_expression * rx_aB ; // 1 mult => 1 flop
+
+      double repulsion_y = shared_expression * ry_aB; // 1 mult => 1 flop
 
       border_repulsion_term[i * (2 * n_borders) + 2 * j] = repulsion_x;
       border_repulsion_term[i * (2 * n_borders) + 2 * j + 1] = repulsion_y;
-    } // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders
-  }   // (1 add, 4 mult, 6 div, 2 exp, 1 fab) * n_borders * n
+    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
+  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
 }
 
 /*
