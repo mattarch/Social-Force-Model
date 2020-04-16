@@ -94,7 +94,7 @@ try:
 
     ax = plt.gca()
     ax.grid(which='major', axis='y')
-    plt.ylim((0, 20))
+    plt.ylim((0, 4))
     plt.yticks(fontsize=10)
     plt.axes().xaxis.set_label_coords(0.5, -0.15)
     plt.axes().tick_params(left= False)
