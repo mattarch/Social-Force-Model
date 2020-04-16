@@ -11,7 +11,7 @@ underline="_"
 filesuffix=".txt"
 timelabel="$underline$currentdate$underline$currenttime$filesuffix"
 prog="social_force"
-firstarg=$1
+firstarg=basic
 
 # compile program
 # if macOS -> use gcc-9, else -> gcc
@@ -42,8 +42,15 @@ select opt in $options; do
           echo $line >> ../../benchmark/$filename
         done
       done
-      python3 ../../benchmark/plot-benchmark.py ../../benchmark/$firstarg$timelabel
-    done
+
+      # open benchmark results
+			if [ $os == "Darwin" ] || [ $os == "Linux" ]; then
+				python3 ../../benchmark/plot-benchmark.py ../../benchmark/$firstarg$timelabel
+   		else
+				python ../../benchmark/plot-benchmark.py ../../benchmark/$firstarg$timelabel
+			fi
+
+	 done
     exit
   elif [ $opt == "Test" ]; then
     echo "Perform Tests:"
@@ -52,7 +59,14 @@ select opt in $options; do
   elif [ $opt == "Visualization/Test" ]; then
     echo "Perform Visualization/Tests:"
     ./$prog --visual  --filename=$timelabel
-    python3 ../../test/visualization_basic.py ../../test/$firstarg$timelabel
+
+    # open visualization
+    if [ $os == "Darwin" ] || [ $os == "Linux" ]; then
+				python3 ../../test/visualization_basic.py ../../test/$firstarg$timelabel
+   		else
+				python ../../test/visualization_basic.py ../../test/$firstarg$timelabel
+			fi
+
     exit
   else
     echo "Error: chose 1, 2 or 3"
