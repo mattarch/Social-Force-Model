@@ -138,8 +138,6 @@ void update_acceleration_term_simplified(double *desired_direction, double *acce
 */
 void update_people_repulsion_term_simplified(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
 {
-  double projection_factor = cos(PSI);  // 1 cos
-  double division_factor = V_ALPHA_BETA / 4.0 / SIGMA;    //2 divs
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < n; j++)
@@ -169,13 +167,13 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
 
       double b = sqrt(norm_sum * norm_sum - delta_b * delta_b) / 2; //1 add, 2 mult, 1 div, 1 sqrt
 
-      double common_factor = exp(-b / SIGMA) * norm_sum * division_factor / b; //2 mult, 2 div, 1 exp
+      double common_factor = exp(-b / SIGMA) * norm_sum * DIV_FACTOR / b; //2 mult, 2 div, 1 exp
 
       repulsion_x *= common_factor; //1 mult
       repulsion_y *= common_factor; //1 mult        
 
       double check = ex_a * repulsion_x + ey_a * repulsion_y; //1 add, 2 mult                        
-      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * projection_factor; //1 add, 3 mult, 1 sqrt 
+      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * PROJECTION_FACTOR; //1 add, 3 mult, 1 sqrt 
       double w = -check >= threshold ? 1 : INFLUENCE;
 
       people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x; //1 mult
