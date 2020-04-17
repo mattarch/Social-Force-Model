@@ -182,3 +182,22 @@ void free_all(int n, ...)
 
     va_end(list);
 }
+
+double exp_fast(double x) {
+  x = 1.0 + x / 16384;
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x;
+  return x;
+}
+
+double exp_taylor(double x)  
+{  
+    double sum = 1.0f; // initialize sum of series  
+  
+    for (int i = 5; i > 0; --i )  
+        sum = 1 + x * sum / i;  
+  
+    return sum;  
+}  

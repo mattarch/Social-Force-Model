@@ -126,8 +126,7 @@ void update_acceleration_term_simplified(double *desired_direction, double *acce
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper.
 
-  FLOPS = 44 * n * (n-1) = 44 * (n^2 - n)
-        = (n^2 - n) * (14 add, 15 mult, 13 div, 3 sqrt, 2 exp)
+  FLOPS = (n^2 - n) * (11 add, 20 mult, 7 div, 4 sqrt, 1 exp)
   Assumptions: two different people can not be in the same spot at the same time
   Parameters: 
                      position: (n,2) : array of 2d position of people
@@ -139,47 +138,48 @@ void update_acceleration_term_simplified(double *desired_direction, double *acce
 */
 void update_people_repulsion_term_simplified(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
 {
-
+  double projection_factor = cos(PSI);  // 1 cos
+  double division_factor = V_ALPHA_BETA / 4.0 / SIGMA;    //2 divs
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < n; j++)
     {
       if (i == j)
         continue;
-      double rx_ab = position[i * 2] - position[j * 2];         //1 add, 1 flop
-      double ry_ab = position[i * 2 + 1] - position[j * 2 + 1]; //1 add, 1 flop
+      double rx_ab = position[i * 2] - position[j * 2];         //1 add
+      double ry_ab = position[i * 2 + 1] - position[j * 2 + 1];   //1 add
       double ex_a = desired_direction[i * 2];
       double ey_a = desired_direction[i * 2 + 1];
       double ex_b = desired_direction[j * 2];
       double ey_b = desired_direction[j * 2 + 1];
       double vb = actual_speed[j];
-      double delta_b = vb * TIMESTEP; // 1 mul => 1 flops
+      double delta_b = vb * TIMESTEP;  //1 mult
 
-      double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //(1) 1 sqrt, 1 add, 2 mul => 4 flops
+      double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //1 add, 2 mult, 1 sqrt
 
       //me stands for "minus e"
-      double rx_ab_mex = rx_ab - delta_b * ex_b; //1 add, 1 mul => 2 flops
-      double ry_ab_mey = ry_ab - delta_b * ey_b; //1 add, 1 mul => 2 flops
+      double rx_ab_mex = rx_ab - delta_b * ex_b; //1 add, 1 mult
+      double ry_ab_mey = ry_ab - delta_b * ey_b; //1 add, 1 mult
 
-      double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //(2)  1 sqrt, 2 mul, 1 add => 4 flops
+      double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //1 add, 2 mult, 1 sqrt
+      double norm_sum = r_ab_norm + r_ab_me_norm; //1 add
 
-      double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm; //2 divs, 1 add => 3 flops
-      double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm; //2 divs, 1 add => 3 flops
+      double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm; //1 add, 2 div
+      double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm; //1 add, 2 div
 
-      double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; //1 sqrt, 3 add, 2 mul, 1 div => 7 flops
+      double b = sqrt(norm_sum * norm_sum - delta_b * delta_b) / 2; //1 add, 2 mult, 1 div, 1 sqrt
 
-      double common_factor = exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm) * (V_ALPHA_BETA / 4.0 / SIGMA / b);
+      double common_factor = exp(-b / SIGMA) * norm_sum * division_factor / b; //2 mult, 2 div, 1 exp
 
-      repulsion_x *= common_factor;
+      repulsion_x *= common_factor; //1 mult
+      repulsion_y *= common_factor; //1 mult        
 
-      repulsion_y *= common_factor;          //3 divs => 3 flops
+      double check = ex_a * repulsion_x + ey_a * repulsion_y; //1 add, 2 mult                        
+      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * projection_factor; //1 add, 3 mult, 1 sqrt 
+      double w = -check >= threshold ? 1 : INFLUENCE;
 
-      double check = ex_a * (-repulsion_x) + ey_a * (-repulsion_y);                              //2 mult, 1 add => 3 flops
-      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
-      double w = check >= threshold ? 1 : INFLUENCE;
-
-      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x;     //1 mult => 1 flop
-      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y; //1 mult => 1 flop
+      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x; //1 mult
+      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y; //1 mult
     }
   }
 }
