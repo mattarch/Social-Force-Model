@@ -58,37 +58,12 @@ void update_desired_direction_simplified(double *position, double *final_destina
   }
 }
 
-/*
-  This function computes the actual velocity for all people.
-  This function is part of formula (2) from the paper.
-
-  FLOPS = n * (2 mults)
-
-  Assumptions: none
-  Parameters:
-          actual_speed: (n,1) : array of the actual speed for every person
-     desired_direction: (n,2) : array of 2d unit vectors pointing from a person's current position 
-                                towards the corresponging final_destination
-       actual_velocity: (n,2) : array of 2d velocity vectors for every person
-                                actual_velocity = actual_speed * desired_direction
-                     n: number of people
-*/
-void compute_actual_velocity_simplified(double *actual_speed, double *desired_direction, double *actual_velocity, int n)
-{
-  // compute actual velocity for every person
-  // iterate over all people
-  for (int i = 0; i < n; i++)
-  {
-    actual_velocity[2 * i] = actual_speed[i] * desired_direction[i * 2];         // 1 mult, 1 flop
-    actual_velocity[2 * i + 1] = actual_speed[i] * desired_direction[i * 2 + 1]; // 1 mult, 1 flop
-  }
-}
 
 /*
   This function updates the acceleration term for all people.
   This function is part of formula (2) from the paper.
 
-  FLOPS = n * (2 adds, 4 mults, 2 divs)
+  FLOPS = n * (2 adds, 4 mults)
 
   Assumptions: - The RELAX_TIME macro is never 0.
                - actual_velocity needs to be up to date, 
@@ -111,13 +86,22 @@ void update_acceleration_term_simplified(double *desired_direction, double *acce
   // iterate over every person
   for (int i = 0; i < n; i++)
   {
+    // get actual velocity, desired direction, desired speed
+    double actual_velocity_x      = actual_velocity[2 * i];
+    double actual_velocity_y      = actual_velocity[2 * i + 1];
+    double desired_direction_x    = desired_direction[2 * i];
+    double desired_direction_y    = desired_direction[2 * i + 1];
+    double desired_speed_value    = desired_speed[i];
+
     // compute velocity difference
-    acceleration_term[2 * i] = desired_speed[i] * desired_direction[i * 2] - actual_velocity[2 * i];             // 1 mul, 1 add => 2 flops
-    acceleration_term[2 * i + 1] = desired_speed[i] * desired_direction[i * 2 + 1] - actual_velocity[2 * i + 1]; // 1 mul, 1 add => 2 flops
+    double v_delta_x              = desired_speed_value * desired_direction_x; // 1 mul, 1 flop
+    double v_delta_y              = desired_speed_value * desired_direction_y; // 1 mul, 1 flop
+    v_delta_x                     -= actual_velocity_x; // 1 add, 1 flop
+    v_delta_y                     -= actual_velocity_y; // 1 add, 1 flop
 
     // apply realxation time
-    acceleration_term[2 * i] = (1 / RELAX_TIME) * acceleration_term[2 * i];         //1 div, 1 mul => 2 flops
-    acceleration_term[2 * i + 1] = (1 / RELAX_TIME) * acceleration_term[2 * i + 1]; //1 div, 1 mul => 2 flops
+    acceleration_term[2 * i] = INV_RELAX_TIME * v_delta_x;         // 1 mul => 1 flops
+    acceleration_term[2 * i + 1] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
 }
 
@@ -278,7 +262,7 @@ void compute_social_force_simplified(double *acceleration_term, double *people_r
   This function computes the new velocity according to the social force and updates the position of every person.
   It implements formulas 10 to 12 in the paper.
 
-  FLOPS = n * (6 adds, 12 mults, 3 divs, 2 sqrts)
+  FLOPS = n * (5 adds, 10 mults, 3 divs, 1 sqrts)
         //This is the count if you always execute the if statement.
         
   Assumptions: The social force needs to be computed before calling this function.
@@ -298,28 +282,29 @@ void update_position_simplified(double *position, double *desired_direction, dou
   double norm_value;
   for (int i = 0; i < n; i++)
   {
-    control_value = 1.0;
+    
     //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
     double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP;         // 1 add, 1 mult => 2 flops
     double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP; // 1 add, 1 mult => 2 flops
 
     //compute the norm of the preferd velocity
-    norm_value = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2)); // 1 add, 2 mults, 1 sqrt => 4 flops
+    double x_sq_plus_y_sq = (prefered_velocity_x*prefered_velocity_x) + (prefered_velocity_y*prefered_velocity_y); // 1 add, 2 mults => 3 flops
+    norm_value = sqrt(x_sq_plus_y_sq); // 1 sqrt => 1 flops
 
     //fromula 12 in the paper --> compute control_value according to norm
-    if (norm_value > desired_speed[i] * 1.3)
-    {
-      control_value = desired_speed[i] * 1.3 / norm_value; // 1 mul, 1 div => 2 flops
-    }
+    double max_speed = desired_speed[i] * 1.3; // 1 mul => 1 flops
+    control_value = norm_value > max_speed ? (max_speed/norm_value) : 1.0; // 1 div => 1 flops
 
     //apply control value
     prefered_velocity_x *= control_value; // 1 mul, 1 flop
     prefered_velocity_y *= control_value; // 1 mul, 1 flop
 
-    //update speed term in People matrix --> this is the new speed
-    actual_speed[i] = sqrt(pow(prefered_velocity_x, 2) + pow(prefered_velocity_y, 2)); // 1 add, 2 mults, 1 sqrt => 4 flops
+    //update speed value, desire direction, actual_velocity
+    actual_speed[i] = control_value*norm_value;   // 1 mul, 1 flop
     desired_direction[i * 2] = prefered_velocity_x / actual_speed[i];                  // 1 div, 1 flop
     desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i];              // 1 div, 1 flop
+    actual_velocity[2 * i] = prefered_velocity_x;
+    actual_velocity[2 * i + 1] = prefered_velocity_y;
     //update position
     position[i * 2] += prefered_velocity_x * TIMESTEP;     // 1 add, 1 mul => 2 flops
     position[i * 2 + 1] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
@@ -336,7 +321,6 @@ void simulation_basic_simplified(int number_of_people, int n_timesteps, double *
   for (int step = 0; step < n_timesteps; step++)
   {
     // update variables
-    compute_actual_velocity_simplified(speed, desired_direction, actual_velocity, number_of_people);
     update_desired_direction_simplified(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term_simplified(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
     update_people_repulsion_term_simplified(position, desired_direction, speed, people_repulsion_term, number_of_people);
@@ -361,7 +345,6 @@ void test_simulation_basic_simplified(int number_of_people, int n_timesteps, dou
   for (int step = 0; step < ntimesteps; step++)
   {
     // update variables
-    compute_actual_velocity_simplified(speed, desired_direction, actual_velocity, number_of_people);
     update_desired_direction_simplified(position, final_destination, desired_direction, number_of_people);
     update_acceleration_term_simplified(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
 

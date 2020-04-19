@@ -13,7 +13,7 @@ void initialize_people_simplified(double *position, double *desired_direction, d
 void initialize_borders_simplified(double *borders, int n_borders);
 void update_desired_direction_simplified(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term_simplified(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
-void compute_actual_velocity_simplified(double *actual_speed, double *desired_direction, double *actual_velocity, int n);
+//void compute_actual_velocity_simplified(double *actual_speed, double *desired_direction, double *actual_velocity, int n);
 void update_people_repulsion_term_simplified(double *position, double *desired_direction, double *actual_speed, double *Repulsion_term, int n);
 void update_border_repulsion_term_simplified(double *position, double *borders, double *border_repulsion_term, int n, int n_borders);
 void compute_social_force_simplified(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);

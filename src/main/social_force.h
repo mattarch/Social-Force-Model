@@ -9,7 +9,8 @@
 
 // default values
 #define AVG_SPEED 1.34 // in basic scenario this is the desired speed of every person
-#define RELAX_TIME 0.5 // in [seconds]; used for smooth acceleration
+#define RELAX_TIME 0.5
+#define INV_RELAX_TIME 2 // == 1 / REALX_TIME in [seconds]; used for smooth acceleration
 #define N_BORDERS 2    // number of biarders used in the scenario
 #define TIMESTEP 0.2   // in [seconds]; timestep for simulation
 
