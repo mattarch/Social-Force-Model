@@ -22,8 +22,8 @@ extern struct arguments arguments;
 	Cost:  adds: n * 3
 				mults: n * 2
 				 divs: n * 2
-				sqrts: n
-				Flops: n * 7
+		  	sqrts: n
+				Flops: n * 8
 
   Assumptions: There is only one final destination per person.
   Parameters:
@@ -50,7 +50,7 @@ void update_desired_direction_simplified(double *position, double *final_destina
 
     // normalization constant
     double d = delta_x * delta_x + delta_y * delta_y; // 1 add, 2 mult => 3 flops
-    double normalizer = sqrt(d);                      // 1 sqrt
+    double normalizer = sqrt(d);                      // 1 sqrt => 1 flop
 
     // update desired_direction
     desired_direction[i * 2] = delta_x / normalizer;     // 1 div => 1 flop
