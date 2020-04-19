@@ -19,7 +19,9 @@
 #define U_ALPHA_B 10.0   // in m^{2}s^{-2}
 #define R 0.2            // in m
 #define PSI 1.75         // in radians
-#define INFLUENCE 0.5    // pure (?)
+#define PROJECTION_FACTOR -0.17825 // == cos(PSI), pure
+#define INFLUENCE 0.5    // pure 
+#define DIV_FACTOR 1.75  // == V_ALPHA_BETA / 4 / SIGMA , pure
 
 // benchmark parameters
 #define REP 15

@@ -486,6 +486,7 @@ void add_estimated_gradient_people_repulsion(double *gradient, double *parameter
 
 void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double *position, double *desired_direction, double *actual_speed)
 {
+    int num_errors = 0;
     double tol = 1e-4;
     double eps = 1e-10;
 
@@ -513,6 +514,11 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
                 {
                     printf("Mismatch in people_repulsion element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
                     printf("Mismatch in people_repulsion element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
+                    num_errors++;
+                    if (num_errors > 51)
+                    {
+                        exit(1);
+                    }
                 }
             }
         }
@@ -556,6 +562,7 @@ void add_estimated_gradient_border_repulsion(double *gradient, double *parameter
 
 void test_border_repulsion_with_FD(double *border_repulsion_term, double *position, double *borders, int n_borders, int n)
 {
+    int num_errors = 0;
     double tol = 1e-4;
     double eps = 1e-10;
 
@@ -584,6 +591,11 @@ void test_border_repulsion_with_FD(double *border_repulsion_term, double *positi
                 {
                     printf("Mismatch in border_repulsion: element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n_borders) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
                     printf("Mismatch in border_repulsion: element %d,%d: Analytic val: %lf, FD val: %lf. Error: %lf(%lf%%)\n", i, j, analytic_gradient[i * (2 * n_borders) + 2 * j + p], fd_gradient[p], absErr, relError * 100);
+                    num_errors++;
+                    if (num_errors > 51)
+                    {
+                        exit(1);
+                    }
                 }
             }
         }
