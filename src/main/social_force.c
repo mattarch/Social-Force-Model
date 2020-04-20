@@ -125,6 +125,7 @@ void initialize_people(double *position, double *desired_direction, double *fina
         desired_direction[i * 2 + 1] = 0.0;                                         // starting value for direct_y
         final_destination[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
         desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
+        
 
         if (i % 2) // initialize this person to walk from left to right
         {
@@ -138,6 +139,22 @@ void initialize_people(double *position, double *desired_direction, double *fina
             desired_direction[i * 2] = -1.0;                                                           // starting value for direct_x
             final_destination[i * 2] = 0.0 - 10;                                                       // target x coordinate
         }
+    }
+}
+/*
+  This function computes the max speed value for every person.
+
+  Assumptions: There is at least one person.
+               
+  Parameters: desired_speed (n,1) = vector of desired speed values
+              desired_max_speed (n,1) = vector of max speed values
+                     n: number of people
+*/
+void compute_max_speed(double *desired_speed, double *desired_max_speed, int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        desired_max_speed[i] = desired_speed[i]*1.3;
     }
 }
 
@@ -216,8 +233,9 @@ void run_bench(sim_t sim)
     double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
     double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
     double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
+    double *desired_max_speed = (double *)calloc(number_of_people, sizeof(double));
     // check if calloc worked correctly
-    if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL)
+    if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL || desired_max_speed == NULL)
     {
         printf("Error: calloc failed\n");
         return;
@@ -225,6 +243,7 @@ void run_bench(sim_t sim)
 
     // initialize arrays
     initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
+    compute_max_speed(desired_speed, desired_max_speed, number_of_people);
     initialize_borders(borders, N_BORDERS);
 
     // Warm-up phase
@@ -234,7 +253,7 @@ void run_bench(sim_t sim)
         start = start_tsc();
         for (size_t i = 0; i < num_runs; i++)
         {
-            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
+            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         }
         end = stop_tsc(start);
 
@@ -246,6 +265,7 @@ void run_bench(sim_t sim)
     double *cycles_list = malloc(sizeof(double) * REP);
 
     initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
+    compute_max_speed(desired_speed, desired_max_speed, number_of_people);
     initialize_borders(borders, N_BORDERS);
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
@@ -256,7 +276,7 @@ void run_bench(sim_t sim)
         start = start_tsc();
         for (size_t i = 0; i < num_runs; ++i)
         {
-            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed);
+            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         }
         end = stop_tsc(start);
 
@@ -278,6 +298,7 @@ void run_bench(sim_t sim)
     free(border_repulsion_term);
     free(social_force);
     free(desired_speed);
+    free(desired_max_speed);
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);

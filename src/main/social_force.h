@@ -40,7 +40,7 @@
 #endif
 
 // typedefs
-typedef void (*sim_func)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
+typedef void (*sim_func)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
 typedef struct
 {
@@ -50,6 +50,7 @@ typedef struct
 
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter);
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
+void compute_max_speed(double *desired_speed, double *desired_max_speed, int n);
 void initialize_borders(double *borders, int n_borders);
 void run_bench(sim_t sim);
 int compare(const void *a, const void *b);

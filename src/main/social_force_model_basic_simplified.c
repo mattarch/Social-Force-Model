@@ -276,7 +276,7 @@ void compute_social_force_simplified(double *acceleration_term, double *people_r
                                      actual_velocity = actual_speed * desired_direction
                           n: number of people
 */
-void update_position_simplified(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_speed, int n)
+void update_position_simplified(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
 {
   double control_value;
   double norm_value;
@@ -292,7 +292,7 @@ void update_position_simplified(double *position, double *desired_direction, dou
     norm_value = sqrt(x_sq_plus_y_sq); // 1 sqrt => 1 flops
 
     //fromula 12 in the paper --> compute control_value according to norm
-    double max_speed = desired_speed[i] * 1.3; // 1 mul => 1 flops
+    double max_speed = desired_max_speed[i]; // 1 mul => 1 flops
     control_value = norm_value > max_speed ? (max_speed/norm_value) : 1.0; // 1 div => 1 flops
 
     //apply control value
@@ -312,7 +312,7 @@ void update_position_simplified(double *position, double *desired_direction, dou
 }
 
 void simulation_basic_simplified(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double*desired_max_speed)
 {
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
@@ -326,7 +326,7 @@ void simulation_basic_simplified(int number_of_people, int n_timesteps, double *
     update_people_repulsion_term_simplified(position, desired_direction, speed, people_repulsion_term, number_of_people);
     update_border_repulsion_term_simplified(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
     compute_social_force_simplified(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
-    update_position_simplified(position, desired_direction, speed, social_force, actual_velocity, desired_speed, number_of_people);
+    update_position_simplified(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
   }
 
@@ -334,7 +334,7 @@ void simulation_basic_simplified(int number_of_people, int n_timesteps, double *
 }
 
 void test_simulation_basic_simplified(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
 
   // start simulation
@@ -355,7 +355,7 @@ void test_simulation_basic_simplified(int number_of_people, int n_timesteps, dou
     test_border_repulsion_with_FD(border_repulsion_term, position, borders, N_BORDERS, number_of_people);
 
     compute_social_force_simplified(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
-    update_position_simplified(position, desired_direction, speed, social_force, actual_velocity, desired_speed, number_of_people);
+    update_position_simplified(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
     
     //printf("Finished iteration %d\n", (step + 1));
   }

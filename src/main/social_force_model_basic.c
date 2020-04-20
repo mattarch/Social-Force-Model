@@ -330,7 +330,7 @@ void update_position(double *position, double *desired_direction, double *actual
 }
 
 void simulation_basic(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
@@ -353,7 +353,7 @@ void simulation_basic(int number_of_people, int n_timesteps, double *position, d
 }
 
 void test_simulation_basic(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed)
+                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
 
   if (arguments.visual)

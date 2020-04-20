@@ -27,8 +27,8 @@ void run_finite_differences(sim_func f, struct arguments arguments);
 int run_testcases();
 int compare_simulations(sim_t **sim_list, int sim_counter);
 int check_square_distance(double *expected, double *res, int n);
-void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe,
-			   double **pos, double **dir, double **fdes, double **bor, double **spe, int n);
+void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
+			   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
 void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
 					 double **frc, int n);
 void add_direction_testcase(char *name, double *pos, double *speed, double *output, int n);
