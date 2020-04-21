@@ -41,10 +41,12 @@
 
 // typedefs
 typedef void (*sim_func)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
+typedef long long unsigned int (*flops_func)(int);
 
 typedef struct
 {
   sim_func f;
+  flops_func flops_f;
   char *name;
 } sim_t;
 
@@ -54,8 +56,9 @@ void compute_max_speed(double *desired_speed, double *desired_max_speed, int n);
 void initialize_borders(double *borders, int n_borders);
 void run_bench(sim_t sim);
 int compare(const void *a, const void *b);
-long long unsigned int compute_flops(int number_of_people);
-void add_function(sim_t **sim_list, int *sim_counter, sim_func f, char *name);
+long long unsigned int compute_basic_flops(int number_of_people);
+long long unsigned int compute_simplified_flops(int number_of_people);
+void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f,char *name);
 void add_test_function(sim_func *test_functions_list, sim_func f, int *test_func_counter);
 
 #endif

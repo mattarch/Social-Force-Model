@@ -110,7 +110,7 @@ void update_acceleration_term_simplified(double *desired_direction, double *acce
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper.
 
-  FLOPS = (n^2 - n) * (11 add, 20 mult, 7 div, 4 sqrt, 1 exp)
+  FLOPS = (n^2 - n) * (12 add, 20 mult, 7 div, 4 sqrt, 1 exp)
   Assumptions: two different people can not be in the same spot at the same time
   Parameters: 
                      position: (n,2) : array of 2d position of people
@@ -151,7 +151,7 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
 
       double b = sqrt(norm_sum * norm_sum - delta_b * delta_b) / 2; //1 add, 2 mult, 1 div, 1 sqrt
 
-      double common_factor = exp(-b / SIGMA) * norm_sum * DIV_FACTOR / b; //2 mult, 2 div, 1 exp
+      double common_factor = exp_fast(-b / SIGMA) * norm_sum * DIV_FACTOR / b; //2 mult, 2 div, 1 exp
 
       repulsion_x *= common_factor; //1 mult
       repulsion_y *= common_factor; //1 mult        
@@ -200,7 +200,7 @@ void update_border_repulsion_term_simplified(double *position, double *borders, 
 
       double r_aB_norm = ry_aB > 0 ? ry_aB : -ry_aB;
 
-      double shared_expression = exp((-r_aB_norm) / R) * U_ALPHA_B / R / r_aB_norm; // 1 exp, 3 div, 1 mult => 4 flops + 1 exp
+      double shared_expression = exp_fast((-r_aB_norm) / R) * U_ALPHA_B / R / r_aB_norm; // 1 exp, 3 div, 1 mult => 4 flops + 1 exp
 
       double repulsion_x = shared_expression * rx_aB ; // 1 mult => 1 flop
 
@@ -262,7 +262,7 @@ void compute_social_force_simplified(double *acceleration_term, double *people_r
   This function computes the new velocity according to the social force and updates the position of every person.
   It implements formulas 10 to 12 in the paper.
 
-  FLOPS = n * (5 adds, 10 mults, 3 divs, 1 sqrts)
+  FLOPS = n * (5 adds, 9 mults, 3 divs, 1 sqrts)
         //This is the count if you always execute the if statement.
         
   Assumptions: The social force needs to be computed before calling this function.
@@ -292,7 +292,7 @@ void update_position_simplified(double *position, double *desired_direction, dou
     norm_value = sqrt(x_sq_plus_y_sq); // 1 sqrt => 1 flops
 
     //fromula 12 in the paper --> compute control_value according to norm
-    double max_speed = desired_max_speed[i]; // 1 mul => 1 flops
+    double max_speed = desired_max_speed[i]; 
     control_value = norm_value > max_speed ? (max_speed/norm_value) : 1.0; // 1 div => 1 flops
 
     //apply control value

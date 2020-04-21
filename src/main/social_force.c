@@ -39,6 +39,7 @@ const int div_cost = 1;
 const int exp_cost = 1;
 const int sqrt_cost = 1;
 const int fabs_cost = 1;
+const int fast_exp_cost = 16;
 
 // main function
 int main(int argc, char *argv[])
@@ -125,7 +126,6 @@ void initialize_people(double *position, double *desired_direction, double *fina
         desired_direction[i * 2 + 1] = 0.0;                                         // starting value for direct_y
         final_destination[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
         desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
-        
 
         if (i % 2) // initialize this person to walk from left to right
         {
@@ -154,7 +154,7 @@ void compute_max_speed(double *desired_speed, double *desired_max_speed, int n)
 {
     for (int i = 0; i < n; i++)
     {
-        desired_max_speed[i] = desired_speed[i]*1.3;
+        desired_max_speed[i] = desired_speed[i] * 1.3;
     }
 }
 
@@ -189,8 +189,8 @@ void initialize_borders(double *borders, int n_borders)
 */
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter)
 {
-    add_function(sim_list, sim_counter, simulation_basic, "basic");
-    add_function(sim_list, sim_counter, simulation_basic_simplified, "simplified");
+    add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
+    add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
     add_test_function(test_functions_list, test_simulation_basic_simplified, test_func_counter);
@@ -211,6 +211,7 @@ void run_bench(sim_t sim)
 {
     char *name = sim.name;
     sim_func f = sim.f;
+    flops_func flops_f = sim.flops_f;
     double cycles = 0.;
     long num_runs = 5;
     double multiplier = 1;
@@ -220,7 +221,7 @@ void run_bench(sim_t sim)
     int n_timesteps = arguments.n_timesteps;
     // allocate memory
 
-    long long unsigned int flops = arguments.n_timesteps * compute_flops(number_of_people);
+    long long unsigned int flops = arguments.n_timesteps * flops_f(number_of_people);
 
     double *position = (double *)calloc(number_of_people * 2, sizeof(double));
     double *speed = (double *)calloc(number_of_people, sizeof(double));
@@ -307,26 +308,61 @@ void run_bench(sim_t sim)
 }
 
 /*
-*   Function that returns the number of flops. Computed used wxMaxima.
+*   Function that returns the number of flops. Computed useing wxMaxima.
 */
-long long unsigned int compute_flops(int number_of_people)
+long long unsigned int compute_basic_flops(int number_of_people)
 {
-    return number_of_people * (fabs_cost * N_BORDERS + 2 * sqrt_cost * N_BORDERS +
-                               6 * div_cost * N_BORDERS + 4 * mult_cost * N_BORDERS + 3 * add_cost * N_BORDERS +
-                               2 * exp_cost * number_of_people + 2 * sqrt_cost * number_of_people +
-                               13 * div_cost * number_of_people + 15 * mult_cost * number_of_people +
-                               16 * add_cost * number_of_people - 2 * exp_cost - sqrt_cost - 9 * div_cost - 7 * mult_cost - 9 * add_cost);
+    int n = number_of_people;
+    int nb = N_BORDERS;
+    int a, b, c, d, e, f;
+    a = add_cost;
+    b = mult_cost;
+    c = div_cost;
+    d = sqrt_cost;
+    e = exp_cost;
+    f = fabs_cost;
+    long long unsigned int flops = n * (3 * a + 2 * b + 2 * c * d) +
+                                   n * 2 * b +
+                                   n * (2 * a + 4 * b + 2 * c) +
+                                   (n * n - n) * (15 * a + 22 * b + 13 * c + 4 * d + 2 * e) +
+                                   (nb * n) * (a + 4 * b + 6 * c + 2 * e + f) +
+                                   n * (n + nb) * 2 * a +
+                                   n * (a * 6 + 12 * b + 3 * c + 2 * d);
+    return flops;
+}
+
+/*
+*   Function that returns the number of flops. Computed useing wxMaxima.
+*/
+long long unsigned int compute_simplified_flops(int number_of_people)
+{
+    int n = number_of_people;
+    int nb = N_BORDERS;
+    int a, b, c, d, fe;
+    a = add_cost;
+    b = mult_cost;
+    c = div_cost;
+    d = sqrt_cost;
+    fe = fast_exp_cost;
+    long long unsigned int flops = n * (3 * a + 2 * b + 2 * c * d) +
+                                   n * (2 * a + 4 * b) +
+                                   (n * n - n) * (12 * a + 20 * b + 7 * c + 4 * d + fe) +
+                                   (nb * n) * (a + 3 * b + 3 * c + fe) +
+                                   n * (n + nb) * 2 * a +
+                                   n * (5 * a + 9 * b + 3 * c + d);
+    return flops;
 }
 
 /*
 *   Appends a simulation function to the list
 */
-void add_function(sim_t **sim_list, int *sim_counter, sim_func f, char *name)
+void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f, char *name)
 {
     (*sim_counter) = *sim_counter + 1;
     sim_t *sim = (sim_t *)malloc(sizeof(sim_t));
     sim->f = f;
     sim->name = name;
+    sim->flops_f = flops_f;
     sim_list[*sim_counter - 1] = sim;
 }
 

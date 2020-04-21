@@ -126,8 +126,8 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
   set wrt the relative position.
   This function corresponds to formulae (4), (7) and (8) from the paper.
 
-  FLOPS = 54 * n * (n-1) = 51 * (n^2 - n)
-        = (n^2 - n) * (14 add, 22 mult, 13 div, 3 sqrt, 2 exp)
+  FLOPS = 56 * n * (n-1) = 56 * (n^2 - n)
+        = (n^2 - n) * (15 add, 22 mult, 13 div, 4 sqrt, 2 exp)
   Assumptions: two different people can not be in the same spot at the same time
   Parameters: 
                      position: (n,2) : array of 2d position of people
@@ -139,7 +139,6 @@ void update_acceleration_term(double *desired_direction, double *acceleration_te
 */
 void update_people_repulsion_term(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
 {
-
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < n; j++)
@@ -168,11 +167,11 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
 
       double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; //1 sqrt, 3 add, 2 mul, 1 div => 7 flops
 
-      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
-      repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //3 divs => 3 flops
+      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 2 mul, 1 add => 5 flops (?)
+      repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //1 mul, 3 divs => 4 flops
 
-      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 1 mul, 1 add => 4 flops (?)
-      repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //3 divs => 3 flops
+      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 2 mul, 1 add => 5 flops (?)
+      repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //1 mul, 3 divs => 4 flops
 
       double check = ex_a * (-repulsion_x) + ey_a * (-repulsion_y);                              //2 mult, 1 add => 3 flops
       double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * cos(PSI); //1 sqrt, 2 mults, 1 add => 4 flops
