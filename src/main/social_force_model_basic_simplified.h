@@ -9,9 +9,7 @@
 
 extern char fiename_global[80];
 
-void initialize_people_simplified(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
 //void compute_max_speed(double *desired_speed, double *desired_max_speed, int n);
-void initialize_borders_simplified(double *borders, int n_borders);
 void update_desired_direction_simplified(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term_simplified(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
 //void compute_actual_velocity_simplified(double *actual_speed, double *desired_direction, double *actual_velocity, int n);

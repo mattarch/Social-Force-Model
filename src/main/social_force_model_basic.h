@@ -9,8 +9,6 @@
 
 extern char filename_global[80];
 
-void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
-void initialize_borders(double *borders, int n_borders);
 void update_desired_direction(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
 void compute_actual_velocity(double *actual_speed, double *desired_direction, double *actual_velocity, int n);
