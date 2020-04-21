@@ -16,9 +16,9 @@ firstarg=basic
 # compile program
 # if macOS -> use gcc-9, else -> gcc
 if [ $os == "Darwin" ]; then
-  gcc-9 social_force.c parse_args.c utility.c testing.c social_force_model_basic.c social_force_model_basic_simplified.c social_force_model_vectorize_0.c -lm -O3 -ffast-math -g -o $prog
+  gcc-9 social_force.c parse_args.c utility.c testing.c social_force_model_basic.c social_force_model_basic_simplified.c social_force_model_vectorize_0.c -mavx2 -lm -O3 -ffast-math -g -o $prog
 else
-  gcc social_force.c parse_args.c utility.c testing.c social_force_model_basic.c social_force_model_basic_simplified.c social_force_model_vectorize_0.c -lm -O3 -ffast-math -g -o $prog
+  gcc social_force.c parse_args.c utility.c testing.c social_force_model_basic.c social_force_model_basic_simplified.c social_force_model_vectorize_0.c -mavx2 -lm -O3 -ffast-math -g -o $prog
 fi
 
 # perform benchmark or test
