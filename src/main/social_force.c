@@ -11,6 +11,10 @@
 #include <time.h>
 #include <string.h>
 
+// fix aligenment
+#include "aligned_free.h"
+#include "aligned_malloc.h"
+
 // parsing arguments
 #include "parse_args.h"
 
@@ -223,18 +227,30 @@ void run_bench(sim_t sim)
 
     long long unsigned int flops = arguments.n_timesteps * flops_f(number_of_people);
 
-    double *position = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *speed = (double *)calloc(number_of_people, sizeof(double));
-    double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *borders = (double *)calloc(N_BORDERS, sizeof(double));
-    double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
-    double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
-    double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
-    double *desired_max_speed = (double *)calloc(number_of_people, sizeof(double));
+    double *position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(position, number_of_people * 2);
+    double *speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(speed, number_of_people);
+    double *desired_direction = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(desired_direction, number_of_people * 2);
+    double *final_destination = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(final_destination, number_of_people * 2);
+    double *borders = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    set_zero(borders, N_BORDERS);
+    double *actual_velocity = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(actual_velocity, number_of_people * 2);
+    double *acceleration_term = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(acceleration_term, number_of_people * 2);
+    double *people_repulsion_term = (double *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(double), 32);
+    set_zero(people_repulsion_term, number_of_people * number_of_people * 2);
+    double *border_repulsion_term = (double *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(double), 32);
+    set_zero(border_repulsion_term, number_of_people * N_BORDERS * 2);
+    double *social_force = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(social_force, number_of_people * 2);
+    double *desired_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(desired_speed, number_of_people);
+    double *desired_max_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(desired_max_speed, number_of_people);
     // check if calloc worked correctly
     if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL || desired_max_speed == NULL)
     {
@@ -288,21 +304,21 @@ void run_bench(sim_t sim)
     }
     total_cycles /= REP;
 
-    free(position);
-    free(speed);
-    free(desired_direction);
-    free(final_destination);
-    free(borders);
-    free(actual_velocity);
-    free(acceleration_term);
-    free(people_repulsion_term);
-    free(border_repulsion_term);
-    free(social_force);
-    free(desired_speed);
-    free(desired_max_speed);
+    aligned_free(position);
+    aligned_free(speed);
+    aligned_free(desired_direction);
+    aligned_free(final_destination);
+    aligned_free(borders);
+    aligned_free(actual_velocity);
+    aligned_free(acceleration_term);
+    aligned_free(people_repulsion_term);
+    aligned_free(border_repulsion_term);
+    aligned_free(social_force);
+    aligned_free(desired_speed);
+    aligned_free(desired_max_speed);
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
-    free(cycles_list);
+    aligned_free(cycles_list);
 
     printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
 }

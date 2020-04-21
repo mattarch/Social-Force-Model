@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <string.h>
 
+// fix aligenment
+#include "aligned_free.h"
+#include "aligned_malloc.h"
+
 #include "parse_args.h"
 #include "social_force.h"
 #include "testing.h"
@@ -93,19 +97,31 @@ void run_finite_differences(sim_func f, struct arguments arguments)
     int number_of_people = arguments.n_people;
     int n_timesteps = arguments.n_timesteps;
     // allocate memory
+    double *position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(position, number_of_people * 2);
+    double *speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(speed, number_of_people);
+    double *desired_direction = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(desired_direction, number_of_people * 2);
+    double *final_destination = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(final_destination, number_of_people * 2);
+    double *borders = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    set_zero(borders, N_BORDERS);
+    double *actual_velocity = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(actual_velocity, number_of_people * 2);
+    double *acceleration_term = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(acceleration_term, number_of_people * 2);
+    double *people_repulsion_term = (double *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(double), 32);
+    set_zero(people_repulsion_term, number_of_people * number_of_people * 2);
+    double *border_repulsion_term = (double *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(double), 32);
+    set_zero(border_repulsion_term, number_of_people * N_BORDERS * 2);
+    double *social_force = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(social_force, number_of_people * 2);
+    double *desired_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(desired_speed, number_of_people);
+    double *desired_max_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(desired_max_speed, number_of_people);
 
-    double *position = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *speed = (double *)calloc(number_of_people, sizeof(double));
-    double *desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *borders = (double *)calloc(N_BORDERS, sizeof(double));
-    double *actual_velocity = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *acceleration_term = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *people_repulsion_term = (double *)calloc(number_of_people * number_of_people * 2, sizeof(double));
-    double *border_repulsion_term = (double *)calloc(number_of_people * N_BORDERS * 2, sizeof(double));
-    double *social_force = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *desired_speed = (double *)calloc(number_of_people, sizeof(double));
-    double *desired_max_speed = (double *)calloc(number_of_people, sizeof(double));
     // check if calloc worked correctly
     if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL || desired_max_speed == NULL)
     {
@@ -117,18 +133,18 @@ void run_finite_differences(sim_func f, struct arguments arguments)
     initialize_people(position, desired_direction, final_destination, desired_speed, number_of_people);
     initialize_borders(borders, N_BORDERS);
     f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
-    free(position);
-    free(speed);
-    free(desired_direction);
-    free(final_destination);
-    free(borders);
-    free(actual_velocity);
-    free(acceleration_term);
-    free(people_repulsion_term);
-    free(border_repulsion_term);
-    free(social_force);
-    free(desired_speed);
-    free(desired_max_speed);
+    aligned_free(position);
+    aligned_free(speed);
+    aligned_free(desired_direction);
+    aligned_free(final_destination);
+    aligned_free(borders);
+    aligned_free(actual_velocity);
+    aligned_free(acceleration_term);
+    aligned_free(people_repulsion_term);
+    aligned_free(border_repulsion_term);
+    aligned_free(social_force);
+    aligned_free(desired_speed);
+    aligned_free(desired_max_speed);
 }
 
 /*
@@ -146,13 +162,19 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
     double *current_position, *current_speed, *current_desired_direction, *current_final_destination,
         *current_borders, *current_actual_velocity, *current_acceleration_term, *current_people_repulsion_term,
         *current_border_repulsion_term, *current_social_force, *current_desired_speed, *current_desired_max_speed;
-    // allocate memory
-    double *starting_position = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *starting_desired_direction = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *starting_final_destination = (double *)calloc(number_of_people * 2, sizeof(double));
-    double *starting_borders = (double *)calloc(N_BORDERS, sizeof(double));
-    double *starting_desired_speed = (double *)calloc(number_of_people, sizeof(double));
-    double *starting_desired_max_speed = (double *)calloc(number_of_people, sizeof(double));
+
+    double *starting_position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(starting_position, number_of_people * 2);
+    double *starting_desired_direction = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(starting_desired_direction, number_of_people * 2);
+    double *starting_final_destination = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    set_zero(starting_final_destination, number_of_people * 2);
+    double *starting_borders = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    set_zero(starting_borders, N_BORDERS);
+    double *starting_desired_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(starting_desired_speed, number_of_people);
+    double *starting_desired_max_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    set_zero(starting_desired_max_speed, number_of_people);
     // // check if calloc worked correctly
     if (starting_position == NULL || starting_desired_direction == NULL || starting_final_destination == NULL || starting_borders == NULL || starting_desired_speed == NULL || starting_desired_max_speed == NULL)
     {
@@ -166,7 +188,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
     initialize_borders(starting_borders, N_BORDERS);
 
     copy_init(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed, starting_desired_max_speed,
-              &oracle_position, &oracle_desired_direction, &oracle_final_destination, &oracle_borders, &oracle_desired_speed,&oracle_desired_max_speed, number_of_people);
+              &oracle_position, &oracle_desired_direction, &oracle_final_destination, &oracle_borders, &oracle_desired_speed, &oracle_desired_max_speed, number_of_people);
     allocate_arrays(&oracle_speed, &oracle_actual_velocity, &oracle_acceleration_term, &oracle_people_repulsion_term,
                     &oracle_border_repulsion_term, &oracle_social_force, number_of_people);
 
@@ -413,12 +435,12 @@ void add_pos_implementation(void (*f)(double *, double *, double *, double *, do
 void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
                double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
 {
-    *pos = malloc(n * 2 * sizeof(double));
-    *dir = malloc(n * 2 * sizeof(double));
-    *fdes = malloc(n * 2 * sizeof(double));
-    *bor = malloc(N_BORDERS * sizeof(double));
-    *spe = malloc(n * sizeof(double));
-    *mspe = malloc(n * sizeof(double));
+    *pos = aligned_malloc(n * 2 * sizeof(double), 32);
+    *dir = aligned_malloc(n * 2 * sizeof(double), 32);
+    *fdes = aligned_malloc(n * 2 * sizeof(double), 32);
+    *bor = aligned_malloc(N_BORDERS * sizeof(double), 32);
+    *spe = aligned_malloc(n * sizeof(double), 32);
+    *mspe = aligned_malloc(n * sizeof(double), 32);
 
     memcpy(*pos, s_pos, n * 2 * sizeof(double));   //
     memcpy(*dir, s_dir, n * 2 * sizeof(double));   //
@@ -431,12 +453,18 @@ void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, doub
 void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
                      double **frc, int n)
 {
-    *spe = (double *)calloc(n, sizeof(double));
-    *vel = (double *)calloc(n * 2, sizeof(double));
-    *acc = (double *)calloc(n * 2, sizeof(double));
-    *prep = (double *)calloc(n * n * 2, sizeof(double));
-    *brep = (double *)calloc(n * N_BORDERS * 2, sizeof(double));
-    *frc = (double *)calloc(n * 2, sizeof(double));
+    *spe = (double *)aligned_malloc(n * sizeof(double), 32);
+    set_zero(*spe, n);
+    *vel = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    set_zero(*vel, n * 2);
+    *acc = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    set_zero(*acc, n * 2);
+    *prep = (double *)aligned_malloc(n * n * 2 * sizeof(double), 32);
+    set_zero(*prep, n * n * 2);
+    *brep = (double *)aligned_malloc(n * N_BORDERS * 2 * sizeof(double), 32);
+    set_zero(*brep, n * N_BORDERS * 2);
+    *frc = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    set_zero(*frc, n * 2);
 }
 
 /* finite-differences functions */
