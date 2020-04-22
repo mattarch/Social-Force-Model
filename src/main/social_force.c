@@ -318,7 +318,7 @@ void run_bench(sim_t sim)
     aligned_free(desired_max_speed);
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
-    aligned_free(cycles_list);
+    free(cycles_list);
 
     printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
 }

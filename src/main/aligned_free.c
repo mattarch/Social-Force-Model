@@ -13,8 +13,9 @@ void aligned_free(void * pointer) {
 #elif defined(_WIN32)
 
 #include <crtdbg.h>
+#include <malloc.h>
 void aligned_free(void * pointer) {
-	_aligned_free_dbg(pointer); // This is reduced to a call to `_aligned_free` when _DEBUG is not defined
+	_aligned_free(pointer); // This is reduced to a call to `_aligned_free` when _DEBUG is not defined
 }
 
 #else
