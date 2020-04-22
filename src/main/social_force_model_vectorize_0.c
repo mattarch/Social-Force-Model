@@ -46,16 +46,16 @@ void update_desired_direction_vectorize_0(double *position, double *final_destin
     current_xy = _mm256_load_pd(position + i); // now xy positions for two persons in register
     target_xy = _mm256_load_pd(final_destination + i);
 
+    // compute differences
     delta_xy = target_xy - current_xy;
 
+    // compute norm
     delta_xy_squared = _mm256_mul_pd(delta_xy, delta_xy); // square each entry
-
     delta_xy_squared_turned = _mm256_permute_pd(delta_xy_squared, 0b0101); //
-
     d = _mm256_add_pd(delta_xy_squared, delta_xy_squared_turned);
-
     normalizer = _mm256_sqrt_pd(d);
 
+    // update desired_direction
     delta_xy = _mm256_div_pd(delta_xy, normalizer);
 
     _mm256_store_pd(desired_direction + i, delta_xy);
