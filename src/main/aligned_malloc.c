@@ -3,6 +3,7 @@
 */
 
 #include "aligned_malloc.h"
+#include "malloc.h"
 
 #if defined(__APPLE__) || defined(__linux__)
 
@@ -16,8 +17,8 @@ void * aligned_malloc(size_t size, size_t alignment) {
 #elif defined(_WIN32)
 
 #include <crtdbg.h>
-void * aligned_malloc(size_t size, size_t alignment) {
-	return _aligned_malloc_dbg(size, alignment, __FILE__, __LINE__); // This is reduced to a call to `_aligned_malloc` when _DEBUG is not defined
+void * aligned_malloc(size_t size, size_t size) {
+	return _aligned_malloc(size, size);; // This is reduced to a call to `_aligned_malloc` when _DEBUG is not defined
 }
 
 #else
