@@ -38,7 +38,7 @@ void update_desired_direction_vectorize_0(double *position, double *final_destin
 {
 
   __m256d current_xy, target_xy, delta_xy, delta_xy_squared_turned, delta_xy_squared, d, normalizer;
-  
+
   // iterate over all persons and update desired_direction
   for (int i = 0; i < 2 * n - 3; i += 4)
   {
@@ -58,8 +58,7 @@ void update_desired_direction_vectorize_0(double *position, double *final_destin
 
     delta_xy = _mm256_div_pd(delta_xy, normalizer);
 
-    _mm256_store_pd(desired_direction + i,delta_xy);
-
+    _mm256_store_pd(desired_direction + i, delta_xy);
   }
 
   /*
@@ -111,26 +110,31 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
   //!ATTENTION: function compute_actual_velocity and uupdate_desired_direction have to be called befor this function in this order
 
   // compute the new acceleration terms for every person
-  // iterate over every person
+  // iterate over 2 persons at a time
 
-  // __m256d actual_velocity_xy_01, actual_velocity_xy_23, desired_direction_xy_01, desired_direction_xy_23, desired_speed_value, v_delta_xy_01, v_delta_xy_23
+  __m256d actual_velocity_xy, desired_direction_xy, desired_speed_value, desired_speed_permuted, v_delta_xy;
+  __m256d inv_relax_time_vec = _mm256_set1_pd(INV_RELAX_TIME);
+  for (int i = 0; i < 2 * n - 3; i += 4)
+  {
+    // get actual velocity, desired direction, desired speed
+    actual_velocity_xy = _mm256_load_pd(actual_velocity + i);
+    desired_direction_xy = _mm256_load_pd(desired_direction + i);
+    desired_speed_value = _mm256_load_pd(desired_speed + (i / 2));
+    desired_speed_permuted = _mm256_permute4x64_pd(desired_speed_value, 0b01010000);
 
+    // compute velocity difference
+    v_delta_xy = _mm256_mul_pd(desired_speed_permuted, desired_direction_xy);
+    v_delta_xy = _mm256_sub_pd(v_delta_xy, actual_velocity_xy);
+
+    // apply realxation time
+    v_delta_xy = _mm256_mul_pd(v_delta_xy, inv_relax_time_vec);
+
+    _mm256_store_pd(acceleration_term + i, v_delta_xy);
+  }
+
+  /*
   for (int i = 0; i < n; i++)
   {
-
-    /*
-    // get actual velocity, desired direction, desired speed
-    actual_velocity_xy_01 = _mm256_load_pd(actual_velocity + i);
-    actual_velocity_xy_23 = _mm256_load_pd(actual_velocity + i + 4);
-    desired_direction_xy_01 = _mm256_load_pd(desired_direction + i);
-    desired_direction_xy_23 = _mm256_load_pd(desired_direction + i + 4);
-    desired_speed_value = _mm256_load_pd(desired_speed + (i / 2));
-
-    // compute deltas
-    v_delta_xy_01 =
-
-    */
-
     // get actual velocity, desired direction, desired speed
     double actual_velocity_x = actual_velocity[2 * i];
     double actual_velocity_y = actual_velocity[2 * i + 1];
@@ -148,6 +152,8 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
     acceleration_term[2 * i] = INV_RELAX_TIME * v_delta_x;     // 1 mul => 1 flops
     acceleration_term[2 * i + 1] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
+
+  */
 }
 
 /*
