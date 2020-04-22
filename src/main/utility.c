@@ -14,6 +14,10 @@
 #include "social_force.h"
 #include "parse_args.h"
 
+// fix aligenment
+#include "aligned_free.h"
+#include "aligned_malloc.h"
+
 extern struct arguments arguments;
 extern char filename_global[80];
 
@@ -177,27 +181,46 @@ void free_all(int n, ...)
     for (int i = 0; i < n; i++)
     {
         cur = va_arg(list, double **);
-        free(*cur);
+        aligned_free(*cur);
     }
 
     va_end(list);
 }
 
-double exp_fast(double x) {
-  x = 1.0 + x / 16384;
-  x *= x; x *= x; x *= x; x *= x;
-  x *= x; x *= x; x *= x; x *= x;
-  x *= x; x *= x; x *= x; x *= x;
-  x *= x; x *= x;
-  return x;
+double exp_fast(double x)
+{
+    x = 1.0 + x / 16384;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    return x;
 }
 
-double exp_taylor(double x)  
-{  
-    double sum = 1.0f; // initialize sum of series  
-  
-    for (int i = 5; i > 0; --i )  
-        sum = 1 + x * sum / i;  
-  
-    return sum;  
-}  
+double exp_taylor(double x)
+{
+    double sum = 1.0f; // initialize sum of series
+
+    for (int i = 5; i > 0; --i)
+        sum = 1 + x * sum / i;
+
+    return sum;
+}
+
+void set_zero(double *p, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        p[i] = 0;
+    }
+}

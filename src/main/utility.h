@@ -20,5 +20,6 @@ double exp_fast(double x);
 double exp_taylor(double x);
 
 double sampleNormal(double sigma, double mu);
+void set_zero(double *p, int size);
 
 #endif
