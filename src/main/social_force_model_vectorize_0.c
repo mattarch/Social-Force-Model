@@ -119,7 +119,7 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
 
   // compute the new acceleration terms for every person
   // iterate over 2 persons at a time
-  /*
+  
   __m256d actual_velocity_xy, desired_direction_xy, desired_speed_value, desired_speed_permuted, v_delta_xy;
   __m256d inv_relax_time_vec = _mm256_set1_pd(INV_RELAX_TIME);
   for (int i = 0; i < 2 * n - 3; i += 4)
@@ -139,8 +139,8 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
 
     _mm256_store_pd(acceleration_term + i, v_delta_xy);
   }
-*/
 
+/*
   for (int i = 0; i < n; i++)
   {
     // get actual velocity, desired direction, desired speed
@@ -160,14 +160,13 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
     acceleration_term[2 * i] = INV_RELAX_TIME * v_delta_x;     // 1 mul => 1 flops
     acceleration_term[2 * i + 1] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
+  */
 }
 
-__m256d exp_fast_vec(__m256d x)
+__m256d exp_fast_vec(__m256d x, __m256d one, __m256d exp_constant)
 {
-  __m256d constant = _mm256_set1_pd(16384);
-  __m256d one = _mm256_set1_pd(1);
-  __m256d bruch = _mm256_div_pd(x, constant);
-  x = _mm256_add_pd(one, bruch);
+
+  x = _mm256_fmadd_pd(x, exp_constant, one);
   x = _mm256_mul_pd(x, x);
   x = _mm256_mul_pd(x, x);
   x = _mm256_mul_pd(x, x);
@@ -232,6 +231,7 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
   __m256d two_vec = _mm256_set1_pd(2);
   __m256d minus1_vec = _mm256_set1_pd(-1);
   __m256d eps = _mm256_set1_pd(1e-12);
+  __m256d exp_constant = _mm256_set1_pd(0.00006103515); // 1 / 16384
 
   for (int i = 0; i < n; i++)
   {
@@ -281,7 +281,7 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
 
       exp = _mm256_div_pd(b, sigma_vec);
       exp = _mm256_mul_pd(exp, minus1_vec);
-      exp = exp_fast_vec(exp);
+      exp = exp_fast_vec(exp, one,exp_constant);
 
       common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
       common_factor = _mm256_div_pd(common_factor, b);
