@@ -39,20 +39,23 @@
   } while (0)
 #endif
 
-#define IndexX(i) ((2 * i))        //(i)
-#define IndexY(i, n) ((2 * i + 1)) //((n + i))
-
-#define IndexX_matrix(i, j, n) ((i * (2 * n) + 2 * j))     // ((i * n + j))
-#define IndexY_matrix(i, j, n) ((i * (2 * n) + 2 * j + 1)) //((n * n + i * n + j))
-
-#define IndexX_border(i, j, n) ((i * (2 * 2) + 2 * j))     //((j * 2 * n + i))
-#define IndexY_border(i, j, n) ((i * (2 * 2) + 2 * j + 1)) //((n + j * 2 * n + i))
-
-#define IndexX_border_old(i, j, n) ((i * (2 * 2) + 2 * j))
-#define IndexY_border_old(i, j, n) ((i * (2 * 2) + 2 * j + 1))
+#define IndexX(i) ((i))
+#define IndexY(i, n) ((n + i))
 
 #define IndexX_old(i) ((2 * i))
 #define IndexY_old(i, n) ((2 * i + 1))
+
+#define IndexX_matrix(i, j, n) ((i * n + j))
+#define IndexY_matrix(i, j, n) ((n * n + i * n + j))
+
+#define IndexX_matrix_old(i, j, n) ((i * (2 * n) + 2 * j))
+#define IndexY_matrix_old(i, j, n) ((i * (2 * n) + 2 * j + 1))
+
+#define IndexX_border(i, j, n) ((j * 2 * n + i))
+#define IndexY_border(i, j, n) ((n + j * 2 * n + i))
+
+#define IndexX_border_old(i, j, n) ((i * (2 * 2) + 2 * j))
+#define IndexY_border_old(i, j, n) ((i * (2 * 2) + 2 * j + 1))
 
 // typedefs
 typedef void (*sim_func)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);

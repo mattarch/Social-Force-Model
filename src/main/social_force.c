@@ -130,22 +130,22 @@ void initialize_people(double *position, double *desired_direction, double *fina
     for (int i = 0; i < n; i++)
     {
         // initialize values independant of starting point and target point
-        position[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-        desired_direction[IndexY(i,n)] = 0.0;                                         // starting value for direct_y
-        final_destination[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
+        position[IndexY_old(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
+        desired_direction[IndexY_old(i,n)] = 0.0;                                         // starting value for direct_y
+        final_destination[IndexY_old(i,n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
         desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
         if (i % 2) // initialize this person to walk from left to right
         {
-            position[IndexX(i)] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[IndexX(i)] = 1.0;                                       // starting value for direct_x
-            final_destination[IndexX(i)] = arguments.walkway_length + 10;             // target x coordinate
+            position[IndexX_old(i)] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            desired_direction[IndexX_old(i)] = 1.0;                                       // starting value for direct_x
+            final_destination[IndexX_old(i)] = arguments.walkway_length + 10;             // target x coordinate
         }
         else // initialize this person to walk from right to left
         {
-            position[IndexX(i)] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[IndexX(i)] = -1.0;                                                           // starting value for direct_x
-            final_destination[IndexX(i)] = 0.0 - 10;                                                       // target x coordinate
+            position[IndexX_old(i)] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            desired_direction[IndexX_old(i)] = -1.0;                                                           // starting value for direct_x
+            final_destination[IndexX_old(i)] = 0.0 - 10;                                                       // target x coordinate
         }
     }
 }

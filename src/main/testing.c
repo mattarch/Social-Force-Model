@@ -154,9 +154,9 @@ void run_finite_differences(sim_func f, struct arguments arguments)
 int compare_simulations(sim_t **sim_list, int sim_counter)
 {
     int error_check = 0;
-    int number_of_people = 40;
+    int number_of_people = 80;
     int n_timesteps = 1;
-    int n_test_timesteps = 500;
+    int n_test_timesteps = 100;
     double *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
         *oracle_borders, *oracle_actual_velocity, *oracle_acceleration_term, *oracle_people_repulsion_term,
         *oracle_border_repulsion_term, *oracle_social_force, *oracle_desired_speed, *oracle_desired_max_speed;
@@ -196,8 +196,8 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
         allocate_arrays(&oracle_speed, &oracle_actual_velocity, &oracle_acceleration_term, &oracle_people_repulsion_term,
                         &oracle_border_repulsion_term, &oracle_social_force, number_of_people);
 
-        copy_init(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed, starting_desired_max_speed,
-                  &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people);
+        copy_init_new(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed, starting_desired_max_speed,
+                      &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people);
         allocate_arrays(&current_speed, &current_actual_velocity, &current_acceleration_term, &current_people_repulsion_term,
                         &current_border_repulsion_term, &current_social_force, number_of_people);
 
@@ -216,14 +216,13 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
               current_borders, current_actual_velocity, current_acceleration_term,
               current_people_repulsion_term, current_border_repulsion_term, current_social_force, current_desired_speed, current_desired_max_speed);
 
-            check += check_square_distance(oracle_position, current_position, number_of_people * 2);
-            check += check_square_distance(oracle_speed, current_speed, number_of_people);
-            //check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people * 2);
-            check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people * 2);
-            check += check_square_distance(oracle_acceleration_term, current_acceleration_term, number_of_people * 2);
-            check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people * number_of_people * 2);
+            check += check_square_distance(oracle_position, current_position, number_of_people, 1);
+            check += check_square_distance(oracle_speed, current_speed, number_of_people, 0);
+            check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people, 1);
+            check += check_square_distance(oracle_acceleration_term, current_acceleration_term, number_of_people, 1);
+            check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people, 2);
 
-            check += check_square_distance(oracle_border_repulsion_term, current_border_repulsion_term, 2 * number_of_people * 2);
+            check += check_square_distance(oracle_border_repulsion_term, current_border_repulsion_term, number_of_people, 3);
 
             if (check)
             {
@@ -334,7 +333,7 @@ int run_testcases()
                 default:
                     break;
                 }
-                if (check_square_distance(control, result, np))
+                if (check_square_distance(control, result, np, 0))
                 {
                     printf("\tTest %s '%s': ERROR!\n", id, testname);
                     error_check = 1;
@@ -354,17 +353,99 @@ int run_testcases()
 *   and the result of the function testes.
 *   This function returns 1 if the distance is greater than the threshold, 0 otherwise.
 */
-int check_square_distance(double *expected, double *res, int n)
+int check_square_distance(double *expected, double *res, int n, int case_n)
 {
     int wrong = 0;
     double acc = 0.0;
-    for (int i = 0; i < n; i++)
+    if (case_n == 0)
     {
-        acc = (expected[i] - res[i]) * (expected[i] - res[i]);
-        if (isnan(acc) || acc > EPS)
+        for (int i = 0; i < n; i++)
         {
-            wrong = 1;
-            printf("%lf %lf %d \n", expected[i], res[i], i);
+            acc = (expected[i] - res[i]) * (expected[i] - res[i]);
+            if (isnan(acc) || acc > EPS)
+            {
+                wrong = 1;
+                printf("%lf %lf %d \n", expected[i], res[i], i);
+            }
+        }
+    }
+    else if (case_n == 1)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            acc = (expected[IndexX_old(i)] - res[IndexX(i)]) * (expected[IndexX_old(i)] - res[IndexX(i)]);
+            if (isnan(acc) || acc > EPS)
+            {
+                wrong = 1;
+                printf("%lf %lf %d \n", expected[IndexX_old(i)], res[IndexX(i)], IndexX(i));
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            acc = (expected[IndexY_old(i, n)] - res[IndexY(i, n)]) * (expected[IndexY_old(i, n)] - res[IndexY(i, n)]);
+            if (isnan(acc) || acc > EPS)
+            {
+                wrong = 1;
+                printf("%lf %lf %d \n", expected[IndexY_old(i, n)], res[IndexY(i, n)], IndexY(i, n));
+            }
+        }
+    }
+    else if (case_n == 2)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+
+                acc = (expected[IndexX_matrix_old(i, j, n)] - res[IndexX_matrix(i, j, n)]) * (expected[IndexX_matrix_old(i, j, n)] - res[IndexX_matrix(i, j, n)]);
+                if (isnan(acc) || acc > EPS)
+                {
+                    wrong = 1;
+                    printf("%lf %lf %d \n", expected[IndexX_matrix_old(i, j, n)], res[IndexX_matrix(i, j, n)], IndexX_matrix(i, j, n));
+                }
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                acc = (expected[IndexY_matrix_old(i, j, n)] - res[IndexY_matrix(i, j, n)]) * (expected[IndexY_matrix_old(i, j, n)] - res[IndexY_matrix(i, j, n)]);
+                if (isnan(acc) || acc > EPS)
+                {
+                    wrong = 1;
+                    printf("%lf %lf %d \n", expected[IndexY_matrix_old(i, j, n)], res[IndexY_matrix(i, j, n)], IndexY_matrix(i, j, n));
+                }
+            }
+        }
+    }
+    else if (case_n == 3)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+
+                acc = (expected[IndexX_border_old(i, j, n)] - res[IndexX_border(i, j, n)]) * (expected[IndexX_border_old(i, j, n)] - res[IndexX_border(i, j, n)]);
+                if (isnan(acc) || acc > EPS)
+                {
+                    wrong = 1;
+                    printf("%lf %lf %d \n", expected[IndexX_border_old(i, j, n)], res[IndexX_border(i, j, n)], IndexX_border(i, j, n));
+                }
+            }
+        }
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                acc = (expected[IndexY_border_old(i, j, n)] - res[IndexY_border(i, j, n)]) * (expected[IndexY_border_old(i, j, n)] - res[IndexY_border(i, j, n)]);
+                if (isnan(acc) || acc > EPS)
+                {
+                    wrong = 1;
+                    printf("%lf %lf %d \n", expected[IndexY_border_old(i, j, n)], res[IndexY_border(i, j, n)], IndexY_border(i, j, n));
+                }
+            }
         }
     }
     return wrong;
@@ -471,12 +552,58 @@ void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, doub
     memcpy(*mspe, s_mspe, n * sizeof(double));
 }
 
+void copy_init_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
+                   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
+{
+
+    *pos = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    *dir = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    *fdes = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    *bor = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    *spe = (double *)aligned_malloc(n * sizeof(double), 32);
+    *mspe = (double *)aligned_malloc(n * sizeof(double), 32);
+
+    for (int i = 0; i < n; i++)
+    {
+        double *posk = *pos;
+        double *dirk = *dir;
+        double *fdesk = *fdes;
+
+        posk[IndexX(i)] = s_pos[IndexX_old(i)];
+        posk[IndexY(i, n)] = s_pos[IndexY_old(i, n)];
+
+        dirk[IndexX(i)] = s_dir[IndexX_old(i)];
+        dirk[IndexY(i, n)] = s_dir[IndexY_old(i, n)];
+
+        fdesk[IndexX(i)] = s_fdes[IndexX_old(i)];
+        fdesk[IndexY(i, n)] = s_fdes[IndexY_old(i, n)];
+    }
+
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
+    memcpy(*spe, s_spe, n * sizeof(double));
+    memcpy(*mspe, s_mspe, n * sizeof(double));
+}
+
 void copy_state(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
                 double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
 {
-    memcpy(*pos, s_pos, n * 2 * sizeof(double));   //
-    memcpy(*dir, s_dir, n * 2 * sizeof(double));   //
-    memcpy(*fdes, s_fdes, n * 2 * sizeof(double)); //
+
+    for (int i = 0; i < n; i++)
+    {
+        double *posk = *pos;
+        double *dirk = *dir;
+        double *fdesk = *fdes;
+
+        posk[IndexX(i)] = s_pos[IndexX_old(i)];
+        posk[IndexY(i, n)] = s_pos[IndexY_old(i, n)];
+
+        dirk[IndexX(i)] = s_dir[IndexX_old(i)];
+        dirk[IndexY(i, n)] = s_dir[IndexY_old(i, n)];
+
+        fdesk[IndexX(i)] = s_fdes[IndexX_old(i)];
+        fdesk[IndexY(i, n)] = s_fdes[IndexY_old(i, n)];
+    }
+
     memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
     memcpy(*spe, s_spe, n * sizeof(double));
     memcpy(*mspe, s_mspe, n * sizeof(double));
