@@ -223,7 +223,6 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
             check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people * 2);
             check += check_square_distance(oracle_acceleration_term, current_acceleration_term, number_of_people * 2);
             check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people * number_of_people * 2);
-            
 
             //check += check_square_distance(oracle_border_repulsion_term, current_border_repulsion_term, 2 * number_of_people * 2);
 

@@ -531,37 +531,93 @@ void compute_social_force_vectorize_0(double *acceleration_term, double *people_
 */
 void update_position_vectorize_0(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
 {
-  double control_value;
-  double norm_value;
-  for (int i = 0; i < n; i++)
+
+  __m256d prefered_velocity_xy;
+  __m256d position_xy;
+
+  __m256d prefered_velocity_xy_2;
+  __m256d prefered_velocity_xy_2_turned;
+  __m256d prefered_velocity_xy_norm;
+  __m256d max_speed;
+  __m256d control_value;
+  __m256d mask;
+  __m256d social_force_xy;
+
+  __m128d actual_speed_xy;
+  __m256d actual_speed_xy_256;
+
+  __m256d control_value_prefered_velocity_xy_norm;
+
+  __m256d timestep_vec = _mm256_set1_pd(TIMESTEP);
+  __m256d one = _mm256_set1_pd(1);
+
+  for (int i = 0; i < n - 1; i += 2)
   {
+    prefered_velocity_xy = _mm256_load_pd(actual_velocity + 2 * i);
+    social_force_xy = _mm256_load_pd(social_force + 2 * i);
 
-    //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-    double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP;         // 1 add, 1 mult => 2 flops
-    double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP; // 1 add, 1 mult => 2 flops
+    prefered_velocity_xy = _mm256_fmadd_pd(social_force_xy, timestep_vec, prefered_velocity_xy);
 
-    //compute the norm of the preferd velocity
-    double x_sq_plus_y_sq = (prefered_velocity_x * prefered_velocity_x) + (prefered_velocity_y * prefered_velocity_y); // 1 add, 2 mults => 3 flops
-    norm_value = sqrt(x_sq_plus_y_sq);                                                                                 // 1 sqrt => 1 flops
+    // norm
+    prefered_velocity_xy_2 = _mm256_mul_pd(prefered_velocity_xy, prefered_velocity_xy);
+    prefered_velocity_xy_2_turned = _mm256_permute_pd(prefered_velocity_xy_2, 0b0101); //
+    prefered_velocity_xy_norm = _mm256_sqrt_pd(_mm256_add_pd(prefered_velocity_xy_2, prefered_velocity_xy_2_turned));
 
-    //fromula 12 in the paper --> compute control_value according to norm
-    double max_speed = desired_max_speed[i];
-    control_value = norm_value > max_speed ? (max_speed / norm_value) : 1.0; // 1 div => 1 flops
+    max_speed = _mm256_load_pd(desired_max_speed + i);
+    max_speed = _mm256_permute4x64_pd(max_speed, 0b01010000);
 
-    //apply control value
-    prefered_velocity_x *= control_value; // 1 mul, 1 flop
-    prefered_velocity_y *= control_value; // 1 mul, 1 flop
+    mask = _mm256_cmp_pd(prefered_velocity_xy_norm, max_speed, _CMP_GT_OQ);
+    control_value = _mm256_blendv_pd(one, _mm256_div_pd(max_speed, prefered_velocity_xy_norm), mask);
 
-    //update speed value, desire direction, actual_velocity
-    actual_speed[i] = control_value * norm_value;                         // 1 mul, 1 flop
-    desired_direction[i * 2] = prefered_velocity_x / actual_speed[i];     // 1 div, 1 flop
-    desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i]; // 1 div, 1 flop
-    actual_velocity[2 * i] = prefered_velocity_x;
-    actual_velocity[2 * i + 1] = prefered_velocity_y;
-    //update position
-    position[i * 2] += prefered_velocity_x * TIMESTEP;     // 1 add, 1 mul => 2 flops
-    position[i * 2 + 1] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
+    prefered_velocity_xy = _mm256_mul_pd(prefered_velocity_xy, control_value);
+
+    _mm256_store_pd(actual_velocity + 2 * i, prefered_velocity_xy);
+    control_value_prefered_velocity_xy_norm = _mm256_mul_pd(control_value, prefered_velocity_xy_norm);
+
+    actual_speed_xy_256 = _mm256_permute4x64_pd(control_value_prefered_velocity_xy_norm, 0b00001000);
+    actual_speed_xy = _mm256_extractf128_pd(actual_speed_xy_256, 0);
+    _mm_store_pd(actual_speed + i, actual_speed_xy);
+
+    _mm256_store_pd(desired_direction + 2 * i, _mm256_div_pd(prefered_velocity_xy, control_value_prefered_velocity_xy_norm));
+
+    position_xy = _mm256_load_pd(position + 2 * i);
+
+    _mm256_store_pd(position + 2 * i, _mm256_fmadd_pd(prefered_velocity_xy, timestep_vec, position_xy));
   }
+
+  /*
+    double control_value;
+    double norm_value;
+    for (int i = 0; i < n; i++)
+    {
+      
+      //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
+      double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP;         // 1 add, 1 mult => 2 flops
+      double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP; // 1 add, 1 mult => 2 flops
+
+      //compute the norm of the preferd velocity
+      double x_sq_plus_y_sq = (prefered_velocity_x*prefered_velocity_x) + (prefered_velocity_y*prefered_velocity_y); // 1 add, 2 mults => 3 flops
+      norm_value = sqrt(x_sq_plus_y_sq); // 1 sqrt => 1 flops
+
+      //fromula 12 in the paper --> compute control_value according to norm
+      double max_speed = desired_max_speed[i]; 
+      control_value = norm_value > max_speed ? (max_speed/norm_value) : 1.0; // 1 div => 1 flops
+
+      //apply control value
+      prefered_velocity_x *= control_value; // 1 mul, 1 flop
+      prefered_velocity_y *= control_value; // 1 mul, 1 flop
+
+      //update speed value, desire direction, actual_velocity
+      actual_speed[i] = control_value*norm_value;   // 1 mul, 1 flop
+      desired_direction[i * 2] = prefered_velocity_x / actual_speed[i];                  // 1 div, 1 flop
+      desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i];              // 1 div, 1 flop
+      actual_velocity[2 * i] = prefered_velocity_x;
+      actual_velocity[2 * i + 1] = prefered_velocity_y;
+      //update position
+      position[i * 2] += prefered_velocity_x * TIMESTEP;     // 1 add, 1 mul => 2 flops
+      position[i * 2 + 1] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
+    }
+  */
 }
 
 void simulation_basic_vectorize_0(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
