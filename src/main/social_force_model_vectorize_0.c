@@ -479,6 +479,41 @@ void update_border_repulsion_term_vectorize_0(double *position, double *borders,
 */
 void compute_social_force_vectorize_0(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
 {
+  __m256d social_force_xy;
+  __m256d border0;
+  __m256d border1;
+
+  __m128d people_repulsion0;
+  __m128d people_repulsion1;
+
+  __m256d merged;
+
+  for (int p = 0; p < n - 1; p += 2)
+  {
+    social_force_xy = _mm256_load_pd(acceleration_term + 2 * p);
+    border0 = _mm256_load_pd(border_repulsion_term + 0 * (2 * n) + 2 * p);
+    border1 = _mm256_load_pd(border_repulsion_term + 1 * (2 * n) + 2 * p);
+
+    social_force_xy = _mm256_add_pd(social_force_xy, border0);
+    social_force_xy = _mm256_add_pd(social_force_xy, border1);
+
+    // add repulsive terms toward other people
+    for (int beta = 0; beta < n; beta++)
+    {
+      people_repulsion0 = _mm_load_pd(people_repulsion_term + p * (2 * n) + 2 * beta);
+      people_repulsion1 = _mm_load_pd(people_repulsion_term + (p + 1) * (2 * n) + 2 * beta);
+
+      merged = _mm256_insertf128_pd(merged, people_repulsion0, 0); // insert in low 128-bit lane
+
+      merged = _mm256_insertf128_pd(merged, people_repulsion1, 1); // insert in high 128-bit lane
+
+      social_force_xy = _mm256_add_pd(social_force_xy, merged);
+    }
+
+    _mm256_store_pd(social_force + 2 * p, social_force_xy);
+  }
+
+  /*
   // compute the social force for each person
   for (int p = 0; p < n; p++)
   {
@@ -499,16 +534,15 @@ void compute_social_force_vectorize_0(double *acceleration_term, double *people_
       social_force[2 * p] += people_repulsion_term[p * (2 * n) + 2 * beta];         // 1 add => 1 flop
       social_force[2 * p + 1] += people_repulsion_term[p * (2 * n) + 2 * beta + 1]; // 1 add => 1 flop
     }
-  }
-  // add repulsive terms of borders
-  for (int b = 0; b < n_borders; b++)
-  {
-    for (int p = 0; p < n; p++)
+
+    // add repulsive terms of borders
+    for (int b = 0; b < n_borders; b++)
     {
-      social_force[2 * p] += border_repulsion_term[b * (2 * n) + 2 * p];         // 1 add => 1 flop
-      social_force[2 * p + 1] += border_repulsion_term[b * (2 * n) + 2 * p + 1]; // 1 add => 1 flop
+      social_force[2 * p] += border_repulsion_term[p * (2 * n_borders) + 2 * b];         // 1 add => 1 flop
+      social_force[2 * p + 1] += border_repulsion_term[p * (2 * n_borders) + 2 * b + 1]; // 1 add => 1 flop
     }
   }
+  */
 }
 
 /*
