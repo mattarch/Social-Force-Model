@@ -4,6 +4,7 @@
   Group: Simon Zurfluh, Matthias Matti, Tommaso Pegolotti, Lino Telschow
 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <math.h>
 #include <immintrin.h>
@@ -15,6 +16,14 @@
 
 extern char filename_global[80];
 extern struct arguments arguments;
+
+typedef union U256d {
+  __m256d v;
+  double a[4];
+} U256D;
+
+#define FIRST(pos) pos.a[0]
+#define SECOND(pos) pos.a[1]
 
 /*
   This function updates the desired direction for all people.
@@ -36,7 +45,7 @@ extern struct arguments arguments;
 */
 void update_desired_direction_vectorize_0(double *position, double *final_destination, double *desired_direction, int n)
 {
-
+  /*
   __m256d current_xy, target_xy, delta_xy, delta_xy_squared_turned, delta_xy_squared, d, normalizer;
 
   // iterate over all persons and update desired_direction
@@ -61,7 +70,7 @@ void update_desired_direction_vectorize_0(double *position, double *final_destin
     _mm256_store_pd(desired_direction + i, delta_xy);
   }
 
-  /*
+  */
 
   for (int i = 0; i < n; i++)
   {
@@ -83,7 +92,6 @@ void update_desired_direction_vectorize_0(double *position, double *final_destin
     desired_direction[i * 2] = delta_x / normalizer;     // 1 div => 1 flop
     desired_direction[i * 2 + 1] = delta_y / normalizer; // 1 div => 1 flop
   }
-  */
 }
 
 /*
@@ -111,7 +119,7 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
 
   // compute the new acceleration terms for every person
   // iterate over 2 persons at a time
-
+  /*
   __m256d actual_velocity_xy, desired_direction_xy, desired_speed_value, desired_speed_permuted, v_delta_xy;
   __m256d inv_relax_time_vec = _mm256_set1_pd(INV_RELAX_TIME);
   for (int i = 0; i < 2 * n - 3; i += 4)
@@ -131,8 +139,8 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
 
     _mm256_store_pd(acceleration_term + i, v_delta_xy);
   }
+*/
 
-  /*
   for (int i = 0; i < n; i++)
   {
     // get actual velocity, desired direction, desired speed
@@ -152,8 +160,6 @@ void update_acceleration_term_vectorize_0(double *desired_direction, double *acc
     acceleration_term[2 * i] = INV_RELAX_TIME * v_delta_x;     // 1 mul => 1 flops
     acceleration_term[2 * i + 1] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
-
-  */
 }
 
 __m256d exp_fast_vec(__m256d x)
@@ -225,7 +231,7 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
   __m256d one = _mm256_set1_pd(1);
   __m256d two_vec = _mm256_set1_pd(2);
   __m256d minus1_vec = _mm256_set1_pd(-1);
-  __m256d eps = _mm256_set1_pd(1e-3);
+  __m256d eps = _mm256_set1_pd(1e-12);
 
   for (int i = 0; i < n; i++)
   {
@@ -238,7 +244,7 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
       e_xy_b = _mm256_load_pd(desired_direction + 2 * j); // load two persons
       r_xy_ab = _mm256_sub_pd(position_i, position_j);
 
-      vb = _mm256_load_pd(actual_speed + (j / 2));
+      vb = _mm256_load_pd(actual_speed + j);
       vb_permuted = _mm256_permute4x64_pd(vb, 0b01010000);
 
       delta_b = _mm256_mul_pd(vb_permuted, timestep_vec);
@@ -295,7 +301,7 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
 
       mask = _mm256_cmp_pd(_mm256_mul_pd(check, minus1_vec), threshold, _CMP_GE_OQ);
 
-      w = _mm256_blendv_pd(one, influencer_vec, mask);
+      w = _mm256_blendv_pd(influencer_vec, one, mask);
 
       w = _mm256_mul_pd(w, repulsion_xy);
 
@@ -303,7 +309,89 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
     }
   }
 
+  for (int i = 0; i < n; i++)
+  {
+    people_repulsion_term[i * (2 * n) + 2 * i] = 0;
+    people_repulsion_term[i * (2 * n) + 2 * i + 1] = 0;
+  }
+
   /*
+  for (int i = 0; i < n; i++)
+  {
+    position_i = _mm256_set_pd(position[i * 2 + 1], position[i * 2], position[i * 2 + 1], position[i * 2]);
+    e_xy_a = _mm256_set_pd(desired_direction[i * 2 + 1], desired_direction[i * 2], desired_direction[i * 2 + 1], desired_direction[i * 2]);
+
+    for (int j = 0; j < n; j++)
+    {
+      if(i==j)
+        continue;
+      position_j = _mm256_load_pd(position + 2 * j);      // load two persons
+      e_xy_b = _mm256_load_pd(desired_direction + 2 * j); // load two persons
+      r_xy_ab = _mm256_sub_pd(position_i, position_j);
+
+      vb = _mm256_load_pd(actual_speed + j);
+      vb_permuted = _mm256_permute4x64_pd(vb, 0b01010000);
+
+      delta_b = _mm256_mul_pd(vb_permuted, timestep_vec);
+
+      // norm r_xy_ab
+      r_xy_ab_2 = _mm256_mul_pd(r_xy_ab, r_xy_ab);             // square each entry
+      r_xy_ab_2_turned = _mm256_permute_pd(r_xy_ab_2, 0b0101); //
+      r_ab_norm = _mm256_sqrt_pd(_mm256_add_pd(r_xy_ab_2, r_xy_ab_2_turned));
+
+      r_ab_mexy = _mm256_sub_pd(r_xy_ab, _mm256_mul_pd(delta_b, e_xy_b));
+
+      // norm r_xy_ab
+      r_ab_mexy_2 = _mm256_mul_pd(r_ab_mexy, r_ab_mexy);           // square each entry
+      r_ab_mexy_2_turned = _mm256_permute_pd(r_ab_mexy_2, 0b0101); //
+      r_ab_mexy_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_mexy_2, r_ab_mexy_2_turned));
+
+      // take care of i == j
+
+
+      norm_sum = _mm256_add_pd(r_ab_norm, r_ab_mexy_norm);
+
+      repulsion_xy = _mm256_div_pd(r_xy_ab, r_ab_norm);
+      repulsion_xy = _mm256_add_pd(repulsion_xy, _mm256_div_pd(r_ab_mexy, r_ab_mexy_norm));
+
+      norm_sum_2 = _mm256_mul_pd(norm_sum, norm_sum);
+      delta_b_2 = _mm256_mul_pd(delta_b, delta_b);
+      b = _mm256_sqrt_pd(_mm256_sub_pd(norm_sum_2, delta_b_2));
+      b = _mm256_div_pd(b, two_vec);
+
+      exp = _mm256_div_pd(b, sigma_vec);
+      exp = _mm256_mul_pd(exp, minus1_vec);
+      exp = exp_fast_vec(exp);
+
+      common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
+      common_factor = _mm256_div_pd(common_factor, b);
+      common_factor = _mm256_mul_pd(exp, common_factor);
+
+      repulsion_xy = _mm256_mul_pd(repulsion_xy, common_factor);
+
+      check = _mm256_mul_pd(e_xy_a, repulsion_xy);
+      check_turned = _mm256_permute_pd(check, 0b0101);
+      check = _mm256_add_pd(check, check_turned);
+
+      // norm threshold
+      repulsion_xy_2 = _mm256_mul_pd(repulsion_xy, repulsion_xy);        // square each entry
+      repulsion_xy_2_turned = _mm256_permute_pd(repulsion_xy_2, 0b0101); //
+      threshold = _mm256_sqrt_pd(_mm256_add_pd(repulsion_xy_2, repulsion_xy_2_turned));
+      threshold = _mm256_mul_pd(threshold, projection_factor_vec);
+
+      mask = _mm256_cmp_pd(_mm256_mul_pd(check, minus1_vec), threshold, _CMP_GE_OQ);
+
+      w = _mm256_blendv_pd(influencer_vec, one, mask);
+
+      w = _mm256_mul_pd(w, repulsion_xy);
+      const U256D pos = {w};
+
+      people_repulsion_term[i * (2 * n) + 2 * j] = FIRST(pos);      //1 mult
+      people_repulsion_term[i * (2 * n) + 2 * j + 1] = SECOND(pos); //1 mult
+    }
+  }
+
+  
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < n; j++)

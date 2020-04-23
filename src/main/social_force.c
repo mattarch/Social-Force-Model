@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 */
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n)
 {
-    srand(0);
+    srand(42);
     for (int i = 0; i < n; i++)
     {
         // initialize values independant of starting point and target point

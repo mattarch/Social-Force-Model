@@ -167,10 +167,10 @@ void update_people_repulsion_term(double *position, double *desired_direction, d
 
       double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2; //1 sqrt, 3 add, 2 mul, 1 div => 7 flops
 
-      repulsion_x *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 2 mul, 1 add => 5 flops (?)
+      repulsion_x *= exp_fast(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 2 mul, 1 add => 5 flops (?)
       repulsion_x *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //1 mul, 3 divs => 4 flops
 
-      repulsion_y *= exp(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 2 mul, 1 add => 5 flops (?)
+      repulsion_y *= exp_fast(-b / SIGMA) * (r_ab_norm + r_ab_me_norm); //1 exp, 1 div, 2 mul, 1 add => 5 flops (?)
       repulsion_y *= V_ALPHA_BETA / 4.0 / SIGMA / b;               //1 mul, 3 divs => 4 flops
 
       double check = ex_a * (-repulsion_x) + ey_a * (-repulsion_y);                              //2 mult, 1 add => 3 flops
@@ -218,10 +218,10 @@ void update_border_repulsion_term(double *position, double *borders, double *bor
 
       double r_aB_norm = fabs(ry_aB); // 1 fabs => 1 flop
 
-      double repulsion_x = exp((-r_aB_norm) / R) * (rx_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
+      double repulsion_x = exp_fast((-r_aB_norm) / R) * (rx_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
       repulsion_x *= U_ALPHA_B / R;                                     // 1 mult, 1 div => 2 flops
 
-      double repulsion_y = exp((-r_aB_norm) / R) * (ry_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
+      double repulsion_y = exp_fast((-r_aB_norm) / R) * (ry_aB / r_aB_norm); //1 exp, 2 div, 1 mult => 3 flops + 1 exp
       repulsion_y *= U_ALPHA_B / R;                                     // 1 mult, 1 div => 2 flops
 
       border_repulsion_term[i * (2 * n_borders) + 2 * j] = repulsion_x;
