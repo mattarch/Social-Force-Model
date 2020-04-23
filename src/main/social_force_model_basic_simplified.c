@@ -39,10 +39,10 @@ void update_desired_direction_simplified(double *position, double *final_destina
   for (int i = 0; i < n; i++)
   {
     // get current position and target
-    double current_x = position[i * 2];
-    double current_y = position[i * 2 + 1];
-    double target_x = final_destination[i * 2];
-    double target_y = final_destination[i * 2 + 1];
+    double current_x = position[IndexX(i)];
+    double current_y = position[IndexY(i,n)];
+    double target_x = final_destination[IndexX(i)];
+    double target_y = final_destination[IndexY(i,n)];
 
     // compute differences
     double delta_x = target_x - current_x; // 1 add => 1 flop
@@ -53,11 +53,10 @@ void update_desired_direction_simplified(double *position, double *final_destina
     double normalizer = sqrt(d);                      // 1 sqrt => 1 flop
 
     // update desired_direction
-    desired_direction[i * 2] = delta_x / normalizer;     // 1 div => 1 flop
-    desired_direction[i * 2 + 1] = delta_y / normalizer; // 1 div => 1 flop
+    desired_direction[IndexX(i)] = delta_x / normalizer;     // 1 div => 1 flop
+    desired_direction[IndexY(i,n)] = delta_y / normalizer; // 1 div => 1 flop
   }
 }
-
 
 /*
   This function updates the acceleration term for all people.
@@ -87,21 +86,21 @@ void update_acceleration_term_simplified(double *desired_direction, double *acce
   for (int i = 0; i < n; i++)
   {
     // get actual velocity, desired direction, desired speed
-    double actual_velocity_x      = actual_velocity[2 * i];
-    double actual_velocity_y      = actual_velocity[2 * i + 1];
-    double desired_direction_x    = desired_direction[2 * i];
-    double desired_direction_y    = desired_direction[2 * i + 1];
-    double desired_speed_value    = desired_speed[i];
+    double actual_velocity_x = actual_velocity[IndexX(i)];
+    double actual_velocity_y = actual_velocity[IndexY(i,n)];
+    double desired_direction_x = desired_direction[IndexX(i)];
+    double desired_direction_y = desired_direction[IndexY(i,n)];
+    double desired_speed_value = desired_speed[i];
 
     // compute velocity difference
-    double v_delta_x              = desired_speed_value * desired_direction_x; // 1 mul, 1 flop
-    double v_delta_y              = desired_speed_value * desired_direction_y; // 1 mul, 1 flop
-    v_delta_x                     -= actual_velocity_x; // 1 add, 1 flop
-    v_delta_y                     -= actual_velocity_y; // 1 add, 1 flop
+    double v_delta_x = desired_speed_value * desired_direction_x; // 1 mul, 1 flop
+    double v_delta_y = desired_speed_value * desired_direction_y; // 1 mul, 1 flop
+    v_delta_x -= actual_velocity_x;                               // 1 add, 1 flop
+    v_delta_y -= actual_velocity_y;                               // 1 add, 1 flop
 
     // apply realxation time
-    acceleration_term[2 * i] = INV_RELAX_TIME * v_delta_x;         // 1 mul => 1 flops
-    acceleration_term[2 * i + 1] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
+    acceleration_term[IndexX(i)] = INV_RELAX_TIME * v_delta_x;     // 1 mul => 1 flops
+    acceleration_term[IndexY(i,n)] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
 }
 
@@ -128,14 +127,14 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
     {
       if (i == j)
         continue;
-      double rx_ab = position[i * 2] - position[j * 2];         //1 add
-      double ry_ab = position[i * 2 + 1] - position[j * 2 + 1];   //1 add
-      double ex_a = desired_direction[i * 2];
-      double ey_a = desired_direction[i * 2 + 1];
-      double ex_b = desired_direction[j * 2];
-      double ey_b = desired_direction[j * 2 + 1];
+      double rx_ab = position[IndexX(i)] - position[IndexX(j)];         //1 add
+      double ry_ab = position[IndexY(i,n)] - position[IndexY(j,n)]; //1 add
+      double ex_a = desired_direction[IndexX(i)];
+      double ey_a = desired_direction[IndexY(i,n)];
+      double ex_b = desired_direction[IndexX(j)];
+      double ey_b = desired_direction[IndexY(j,n)];
       double vb = actual_speed[j];
-      double delta_b = vb * TIMESTEP;  //1 mult
+      double delta_b = vb * TIMESTEP; //1 mult
 
       double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab); //1 add, 2 mult, 1 sqrt
 
@@ -144,7 +143,7 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
       double ry_ab_mey = ry_ab - delta_b * ey_b; //1 add, 1 mult
 
       double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey); //1 add, 2 mult, 1 sqrt
-      double norm_sum = r_ab_norm + r_ab_me_norm; //1 add
+      double norm_sum = r_ab_norm + r_ab_me_norm;                                //1 add
 
       double repulsion_x = rx_ab / r_ab_norm + rx_ab_mex / r_ab_me_norm; //1 add, 2 div
       double repulsion_y = ry_ab / r_ab_norm + ry_ab_mey / r_ab_me_norm; //1 add, 2 div
@@ -154,14 +153,14 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
       double common_factor = exp_fast(-b / SIGMA) * norm_sum * DIV_FACTOR / b; //2 mult, 2 div, 1 exp
 
       repulsion_x *= common_factor; //1 mult
-      repulsion_y *= common_factor; //1 mult        
+      repulsion_y *= common_factor; //1 mult
 
-      double check = ex_a * repulsion_x + ey_a * repulsion_y; //1 add, 2 mult                        
-      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * PROJECTION_FACTOR; //1 add, 3 mult, 1 sqrt 
+      double check = ex_a * repulsion_x + ey_a * repulsion_y;                                             //1 add, 2 mult
+      double threshold = sqrt(repulsion_x * repulsion_x + repulsion_y * repulsion_y) * PROJECTION_FACTOR; //1 add, 3 mult, 1 sqrt
       double w = -check >= threshold ? 1 : INFLUENCE;
 
-      people_repulsion_term[i * (2 * n) + 2 * j] = w * repulsion_x; //1 mult
-      people_repulsion_term[i * (2 * n) + 2 * j + 1] = w * repulsion_y; //1 mult
+      people_repulsion_term[IndexX_matrix(i,j,n)] = w * repulsion_x;         //1 mult
+      people_repulsion_term[IndexY_matrix(i,j,n)] = w * repulsion_y; //1 mult
     }
   }
 }
@@ -188,12 +187,13 @@ void update_people_repulsion_term_simplified(double *position, double *desired_d
 */
 void update_border_repulsion_term_simplified(double *position, double *borders, double *border_repulsion_term, int n, int n_borders)
 {
-  for (int i = 0; i < n; i++)
+  for (int j = 0; j < n_borders; j++)
   {
-    for (int j = 0; j < n_borders; j++)
+    for (int i = 0; i < n; i++)
     {
-      double rx_a = position[i * 2];
-      double ry_a = position[i * 2 + 1];
+
+      double rx_a = position[IndexX(i)];
+      double ry_a = position[IndexY(i,n)];
 
       double rx_aB = 0.0;
       double ry_aB = ry_a - borders[j]; //1 add => 1 flop
@@ -202,12 +202,14 @@ void update_border_repulsion_term_simplified(double *position, double *borders, 
 
       double shared_expression = exp_fast((-r_aB_norm) / R) * U_ALPHA_B / R / r_aB_norm; // 1 exp, 3 div, 1 mult => 4 flops + 1 exp
 
-      double repulsion_x = shared_expression * rx_aB ; // 1 mult => 1 flop
+      double repulsion_x = shared_expression * rx_aB; // 1 mult => 1 flop
 
       double repulsion_y = shared_expression * ry_aB; // 1 mult => 1 flop
 
-      border_repulsion_term[i * (2 * n_borders) + 2 * j] = repulsion_x;
-      border_repulsion_term[i * (2 * n_borders) + 2 * j + 1] = repulsion_y;
+      //       | xb0 | yb0 | xb1 | yb1 |
+      border_repulsion_term[IndexX_border(i,j,n)] = repulsion_x;
+      border_repulsion_term[IndexY_border(i,j,n)] = repulsion_y;
+
     } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
   }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
 }
@@ -232,8 +234,8 @@ void compute_social_force_simplified(double *acceleration_term, double *people_r
   for (int p = 0; p < n; p++)
   {
     // acceleration term
-    social_force[2 * p] = acceleration_term[2 * p];
-    social_force[2 * p + 1] = acceleration_term[2 * p + 1];
+    social_force[IndexX(p)] = acceleration_term[IndexX(p)];
+    social_force[IndexY(p,n)] = acceleration_term[IndexY(p,n)];
 
     // add repulsive terms toward other people
     for (int beta = 0; beta < n; beta++)
@@ -245,15 +247,18 @@ void compute_social_force_simplified(double *acceleration_term, double *people_r
       }
 
       // add repulsive term towards person beta
-      social_force[2 * p] += people_repulsion_term[p * (2 * n) + 2 * beta];         // 1 add => 1 flop
-      social_force[2 * p + 1] += people_repulsion_term[p * (2 * n) + 2 * beta + 1]; // 1 add => 1 flop
+      social_force[IndexX(p)] += people_repulsion_term[IndexX_matrix(p,beta,n)];             // 1 add => 1 flop
+      social_force[IndexY(p,n)] += people_repulsion_term[IndexY_matrix(p,beta,n)]; // 1 add => 1 flop
     }
+  }
 
-    // add repulsive terms of borders
-    for (int b = 0; b < n_borders; b++)
+  // add repulsive terms of borders
+  for (int b = 0; b < n_borders; b++)
+  {
+    for (int p = 0; p < n; p++)
     {
-      social_force[2 * p] += border_repulsion_term[p * (2 * n_borders) + 2 * b];         // 1 add => 1 flop
-      social_force[2 * p + 1] += border_repulsion_term[p * (2 * n_borders) + 2 * b + 1]; // 1 add => 1 flop
+      social_force[IndexX(p)] += border_repulsion_term[IndexX_border(p,b,n)];         // 1 add => 1 flop
+      social_force[IndexY(p,n)] += border_repulsion_term[IndexY_border(p,b,n)]; // 1 add => 1 flop
     }
   }
 }
@@ -282,37 +287,37 @@ void update_position_simplified(double *position, double *desired_direction, dou
   double norm_value;
   for (int i = 0; i < n; i++)
   {
-    
+
     //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-    double prefered_velocity_x = actual_velocity[2 * i] + social_force[2 * i] * TIMESTEP;         // 1 add, 1 mult => 2 flops
-    double prefered_velocity_y = actual_velocity[2 * i + 1] + social_force[2 * i + 1] * TIMESTEP; // 1 add, 1 mult => 2 flops
+    double prefered_velocity_x = actual_velocity[IndexX(i)] + social_force[IndexX(i)] * TIMESTEP;         // 1 add, 1 mult => 2 flops
+    double prefered_velocity_y = actual_velocity[IndexY(i,n)] + social_force[IndexY(i,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
 
     //compute the norm of the preferd velocity
-    double x_sq_plus_y_sq = (prefered_velocity_x*prefered_velocity_x) + (prefered_velocity_y*prefered_velocity_y); // 1 add, 2 mults => 3 flops
-    norm_value = sqrt(x_sq_plus_y_sq); // 1 sqrt => 1 flops
+    double x_sq_plus_y_sq = (prefered_velocity_x * prefered_velocity_x) + (prefered_velocity_y * prefered_velocity_y); // 1 add, 2 mults => 3 flops
+    norm_value = sqrt(x_sq_plus_y_sq);                                                                                 // 1 sqrt => 1 flops
 
     //fromula 12 in the paper --> compute control_value according to norm
-    double max_speed = desired_max_speed[i]; 
-    control_value = norm_value > max_speed ? (max_speed/norm_value) : 1.0; // 1 div => 1 flops
+    double max_speed = desired_max_speed[i];
+    control_value = norm_value > max_speed ? (max_speed / norm_value) : 1.0; // 1 div => 1 flops
 
     //apply control value
     prefered_velocity_x *= control_value; // 1 mul, 1 flop
     prefered_velocity_y *= control_value; // 1 mul, 1 flop
 
     //update speed value, desire direction, actual_velocity
-    actual_speed[i] = control_value*norm_value;   // 1 mul, 1 flop
-    desired_direction[i * 2] = prefered_velocity_x / actual_speed[i];                  // 1 div, 1 flop
-    desired_direction[i * 2 + 1] = prefered_velocity_y / actual_speed[i];              // 1 div, 1 flop
-    actual_velocity[2 * i] = prefered_velocity_x;
-    actual_velocity[2 * i + 1] = prefered_velocity_y;
+    actual_speed[i] = control_value * norm_value;                     // 1 mul, 1 flop
+    desired_direction[IndexX(i)] = prefered_velocity_x / actual_speed[i];     // 1 div, 1 flop
+    desired_direction[IndexY(i,n)] = prefered_velocity_y / actual_speed[i]; // 1 div, 1 flop
+    actual_velocity[IndexX(i)] = prefered_velocity_x;
+    actual_velocity[IndexY(i,n)] = prefered_velocity_y;
     //update position
-    position[i * 2] += prefered_velocity_x * TIMESTEP;     // 1 add, 1 mul => 2 flops
-    position[i * 2 + 1] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
+    position[IndexX(i)] += prefered_velocity_x * TIMESTEP;     // 1 add, 1 mul => 2 flops
+    position[IndexY(i,n)] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
   }
 }
 
 void simulation_basic_simplified(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double*desired_max_speed)
+                                 double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
@@ -334,7 +339,7 @@ void simulation_basic_simplified(int number_of_people, int n_timesteps, double *
 }
 
 void test_simulation_basic_simplified(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
+                                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
 
   // start simulation
@@ -356,7 +361,7 @@ void test_simulation_basic_simplified(int number_of_people, int n_timesteps, dou
 
     compute_social_force_simplified(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position_simplified(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
-    
+
     //printf("Finished iteration %d\n", (step + 1));
   }
 

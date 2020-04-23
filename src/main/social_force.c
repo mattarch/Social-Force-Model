@@ -125,26 +125,27 @@ int main(int argc, char *argv[])
 */
 void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n)
 {
+
     srand(42);
     for (int i = 0; i < n; i++)
     {
         // initialize values independant of starting point and target point
-        position[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-        desired_direction[i * 2 + 1] = 0.0;                                         // starting value for direct_y
-        final_destination[i * 2 + 1] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
+        position[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
+        desired_direction[IndexY(i,n)] = 0.0;                                         // starting value for direct_y
+        final_destination[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
         desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
         if (i % 2) // initialize this person to walk from left to right
         {
-            position[i * 2] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[i * 2] = 1.0;                                       // starting value for direct_x
-            final_destination[i * 2] = arguments.walkway_length + 10;             // target x coordinate
+            position[IndexX(i)] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            desired_direction[IndexX(i)] = 1.0;                                       // starting value for direct_x
+            final_destination[IndexX(i)] = arguments.walkway_length + 10;             // target x coordinate
         }
         else // initialize this person to walk from right to left
         {
-            position[i * 2] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[i * 2] = -1.0;                                                           // starting value for direct_x
-            final_destination[i * 2] = 0.0 - 10;                                                       // target x coordinate
+            position[IndexX(i)] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            desired_direction[IndexX(i)] = -1.0;                                                           // starting value for direct_x
+            final_destination[IndexX(i)] = 0.0 - 10;                                                       // target x coordinate
         }
     }
 }
@@ -199,8 +200,7 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
     add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
     add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_0, compute_simplified_flops, "vectorize_0");
-
+  //  add_function(sim_list, sim_counter, simulation_basic_vectorize_0, compute_simplified_flops, "vectorize_0");
 
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
     add_test_function(test_functions_list, test_simulation_basic_simplified, test_func_counter);
