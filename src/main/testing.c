@@ -268,11 +268,11 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
                   current_borders, current_actual_velocity, current_acceleration_term,
                   current_people_repulsion_term, current_border_repulsion_term, current_social_force, current_desired_speed, current_desired_max_speed);
 
-                //check += check_square_distance(oracle_position, current_position, number_of_people, 1);
-                //check += check_square_distance(oracle_speed, current_speed, number_of_people, 0);
-                //check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people, 1);
-                //check += check_square_distance(oracle_acceleration_term, current_acceleration_term, number_of_people, 1);
-                //check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people, 2);
+                check += check_square_distance(oracle_position, current_position, number_of_people, 1);
+                check += check_square_distance(oracle_speed, current_speed, number_of_people, 0);
+                check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people, 1);
+                check += check_square_distance(oracle_acceleration_term, current_acceleration_term, number_of_people, 1);
+                check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people, 2);
 
                 check += check_square_distance(oracle_border_repulsion_term, current_border_repulsion_term, number_of_people, 3);
 

@@ -590,6 +590,76 @@ void compute_social_force_vectorize_2(double *acceleration_term, double *people_
 */
 void update_position_vectorize_2(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
 {
+
+  __m256d prefered_velocity_x;
+  __m256d prefered_velocity_y;
+
+  __m256d position_x;
+  __m256d position_y;
+
+  __m256d prefered_velocity_2_x;
+  __m256d prefered_velocity_2_y;
+
+  __m256d prefered_velocity_norm;
+  __m256d max_speed;
+  __m256d control_value;
+  __m256d mask;
+  __m256d social_force_x;
+  __m256d social_force_y;
+
+  __m128d actual_speed_x;
+  __m128d actual_speed_y;
+
+  __m256d actual_speed_xy_256;
+
+  __m256d control_value_prefered_velocity_xy_norm;
+
+  __m256d timestep_vec = _mm256_set1_pd(TIMESTEP);
+  __m256d one = _mm256_set1_pd(1);
+
+  for (int i = 0; i < n - 3; i += 4)
+  {
+    prefered_velocity_x = _mm256_load_pd(actual_velocity + i);
+    prefered_velocity_y = _mm256_load_pd(actual_velocity + n + i);
+
+    social_force_x = _mm256_load_pd(social_force + i);
+    social_force_y = _mm256_load_pd(social_force + n + i);
+
+    prefered_velocity_x = _mm256_fmadd_pd(social_force_x, timestep_vec, prefered_velocity_x);
+    prefered_velocity_y = _mm256_fmadd_pd(social_force_y, timestep_vec, prefered_velocity_y);
+
+    // norm
+    prefered_velocity_2_x = _mm256_mul_pd(prefered_velocity_x, prefered_velocity_x);
+    prefered_velocity_2_y = _mm256_mul_pd(prefered_velocity_y, prefered_velocity_y);
+
+    prefered_velocity_norm = _mm256_sqrt_pd(_mm256_add_pd(prefered_velocity_2_x, prefered_velocity_2_y));
+
+    max_speed = _mm256_load_pd(desired_max_speed + i);
+
+    mask = _mm256_cmp_pd(prefered_velocity_norm, max_speed, _CMP_GT_OQ);
+    control_value = _mm256_blendv_pd(one, _mm256_div_pd(max_speed, prefered_velocity_norm), mask);
+
+    prefered_velocity_x = _mm256_mul_pd(prefered_velocity_x, control_value);
+    prefered_velocity_y = _mm256_mul_pd(prefered_velocity_y, control_value);
+
+    _mm256_store_pd(actual_velocity + i, prefered_velocity_x);
+    _mm256_store_pd(actual_velocity + n + i, prefered_velocity_y);
+
+    control_value_prefered_velocity_xy_norm = _mm256_mul_pd(control_value, prefered_velocity_norm);
+
+    _mm256_store_pd(actual_speed + i, control_value_prefered_velocity_xy_norm);
+
+    _mm256_store_pd(desired_direction + i, _mm256_div_pd(prefered_velocity_x, control_value_prefered_velocity_xy_norm));
+    _mm256_store_pd(desired_direction + n + i, _mm256_div_pd(prefered_velocity_y, control_value_prefered_velocity_xy_norm));
+
+    position_x = _mm256_load_pd(position + i);
+    position_y = _mm256_load_pd(position + n + i);
+
+    _mm256_store_pd(position + i, _mm256_fmadd_pd(prefered_velocity_x, timestep_vec, position_x));
+    _mm256_store_pd(position + n + i, _mm256_fmadd_pd(prefered_velocity_y, timestep_vec, position_y));
+  }
+  
+  /*
   double control_value;
   double norm_value;
   for (int i = 0; i < n; i++)
@@ -621,6 +691,7 @@ void update_position_vectorize_2(double *position, double *desired_direction, do
     position[IndexX(i)] += prefered_velocity_x * TIMESTEP;    // 1 add, 1 mul => 2 flops
     position[IndexY(i, n)] += prefered_velocity_y * TIMESTEP; // 1 add, 1 mul => 2 flops
   }
+  */
 }
 
 void simulation_basic_vectorize_2(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
