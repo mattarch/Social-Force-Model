@@ -272,9 +272,9 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
                 //check += check_square_distance(oracle_speed, current_speed, number_of_people, 0);
                 //check += check_square_distance(oracle_desired_direction, current_desired_direction, number_of_people, 1);
                 //check += check_square_distance(oracle_acceleration_term, current_acceleration_term, number_of_people, 1);
-                check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people, 2);
+                //check += check_square_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people, 2);
 
-                //check += check_square_distance(oracle_border_repulsion_term, current_border_repulsion_term, number_of_people, 3);
+                check += check_square_distance(oracle_border_repulsion_term, current_border_repulsion_term, number_of_people, 3);
 
                 if (check)
                 {
@@ -431,7 +431,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
-                printf("%lf %lf %d \n", expected[IndexX_old(i)], res[IndexX(i)], IndexX(i));
+                printf("x: %lf %lf %d \n", expected[IndexX_old(i)], res[IndexX(i)], IndexX(i));
             }
         }
 
@@ -441,7 +441,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
-                printf("%lf %lf %d \n", expected[IndexY_old(i, n)], res[IndexY(i, n)], IndexY(i, n));
+                printf("y: %lf %lf %d \n", expected[IndexY_old(i, n)], res[IndexY(i, n)], IndexY(i, n));
             }
         }
     }
@@ -456,7 +456,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("%lf %lf %d \n", expected[IndexX_matrix_old(i, j, n)], res[IndexX_matrix(i, j, n)], IndexX_matrix(i, j, n));
+                    printf("x: %lf %lf %d %d\n", expected[IndexX_matrix_old(i, j, n)], res[IndexX_matrix(i, j, n)], i,j);
                 }
             }
         }
@@ -469,7 +469,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("%lf %lf %d %d \n", expected[IndexY_matrix_old(i, j, n)], res[IndexY_matrix(i, j, n)], i,j);
+                    printf("y: %lf %lf %d %d\n", expected[IndexY_matrix_old(i, j, n)], res[IndexY_matrix(i, j, n)], i,j);
                 }
             }
         }
@@ -485,7 +485,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("%lf %lf %d \n", expected[IndexX_border_old(i, j, n)], res[IndexX_border(i, j, n)], IndexX_border(i, j, n));
+                    printf("x: %lf %lf %d %d\n", expected[IndexX_border_old(i, j, n)], res[IndexX_border(i, j, n)], i,j);
                 }
             }
         }
@@ -497,7 +497,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("%lf %lf %d \n", expected[IndexY_border_old(i, j, n)], res[IndexY_border(i, j, n)], IndexY_border(i, j, n));
+                    printf("y: %lf %lf %d %d\n", expected[IndexY_border_old(i, j, n)], res[IndexY_border(i, j, n)], i,j);
                 }
             }
         }

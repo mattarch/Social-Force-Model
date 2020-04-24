@@ -437,6 +437,62 @@ void update_people_repulsion_term_vectorize_2(double *position, double *desired_
 */
 void update_border_repulsion_term_vectorize_2(double *position, double *borders, double *border_repulsion_term, int n, int n_borders)
 {
+
+  __m256d border;
+  __m256d r_a_y;
+
+  __m256d r_aB_y;
+
+  __m256d r_aB_minus_y;
+
+  __m256d r_aB_norm;
+
+  __m256d mask_y;
+
+  __m256d common_factor;
+  __m256d exp;
+
+  __m256d zero = _mm256_set1_pd(0);
+  __m256d one = _mm256_set1_pd(1);
+
+  __m256d minus1 = _mm256_set1_pd(-1);
+
+  __m256d r_vec = _mm256_set1_pd(R);
+  __m256d u_alpha_b_vec = _mm256_set1_pd(U_ALPHA_B);
+
+  __m256d exp_constant = _mm256_set1_pd(0.00006103515); // 1 / 16384
+
+  for (int j = 0; j < 2; j++)
+  {
+    border = _mm256_broadcast_sd(borders + j);
+
+    for (int i = 0; i < n - 3; i += 4)
+    {
+      r_a_y = _mm256_load_pd(position + n + i);
+
+      r_aB_y = _mm256_sub_pd(r_a_y, border);
+
+      r_aB_minus_y = _mm256_mul_pd(r_aB_y, minus1);
+
+      mask_y = _mm256_cmp_pd(r_aB_y, zero, _CMP_GE_OQ);
+      r_aB_norm = _mm256_blendv_pd(r_aB_minus_y, r_aB_y, mask_y);
+
+      exp = _mm256_div_pd(r_aB_norm, r_vec);
+      exp = _mm256_mul_pd(exp, minus1);
+      exp = exp_fast_vec_2(exp, one, exp_constant);
+
+      common_factor = _mm256_div_pd(u_alpha_b_vec, r_vec);
+      common_factor = _mm256_div_pd(common_factor, r_aB_norm);
+      common_factor = _mm256_mul_pd(exp, common_factor);
+
+      common_factor = _mm256_mul_pd(r_aB_y, common_factor);
+
+      _mm256_store_pd(border_repulsion_term + (n + j * 2 * n + i), common_factor);
+
+    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
+  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+
+  /*
   for (int j = 0; j < n_borders; j++)
   {
     for (int i = 0; i < n; i++)
@@ -462,6 +518,7 @@ void update_border_repulsion_term_vectorize_2(double *position, double *borders,
 
     } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
   }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+  */
 }
 
 /*
