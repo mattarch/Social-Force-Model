@@ -7,8 +7,11 @@
 #ifndef VECTORIZE_1_H_ /* Include guard */
 #define VECTORIZE_1_H_
 
+#include <immintrin.h>
+
 extern char fiename_global[80];
 
+__m256d exp_fast_vec_1(__m256d x, __m256d one, __m256d exp_constant);
 void update_desired_direction_vectorize_1(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term_vectorize_1(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
 //void compute_actual_velocity_vectorize_1(double *actual_speed, double *desired_direction, double *actual_velocity, int n);

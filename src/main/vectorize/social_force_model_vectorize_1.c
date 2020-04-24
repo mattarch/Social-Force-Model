@@ -10,9 +10,9 @@
 #include <immintrin.h>
 
 #include "social_force_model_vectorize_1.h"
-#include "social_force.h"
-#include "testing.h"
-#include "utility.h"
+#include "../social_force.h"
+#include "../testing.h"
+#include "../utility.h"
 
 extern char filename_global[80];
 
@@ -154,7 +154,8 @@ void update_acceleration_term_vectorize_1(double *desired_direction, double *acc
   */
 }
 
-__m256d exp_fast_vec(__m256d x, __m256d one, __m256d exp_constant)
+
+__m256d exp_fast_vec_1(__m256d x, __m256d one, __m256d exp_constant)
 {
 
   x = _mm256_fmadd_pd(x, exp_constant, one);
@@ -272,7 +273,7 @@ void update_people_repulsion_term_vectorize_1(double *position, double *desired_
 
       exp = _mm256_div_pd(b, sigma_vec);
       exp = _mm256_mul_pd(exp, minus1_vec);
-      exp = exp_fast_vec(exp, one, exp_constant);
+      exp = exp_fast_vec_1(exp, one, exp_constant);
 
       common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
       common_factor = _mm256_div_pd(common_factor, b);
@@ -412,7 +413,7 @@ void update_border_repulsion_term_vectorize_1(double *position, double *borders,
 
       exp = _mm256_div_pd(r_xy_aB_norm, r_vec);
       exp = _mm256_mul_pd(exp, minus1);
-      exp = exp_fast_vec(exp, one, exp_constant);
+      exp = exp_fast_vec_1(exp, one, exp_constant);
 
       common_factor = _mm256_div_pd(u_alpha_b_vec, r_vec);
       common_factor = _mm256_div_pd(common_factor, r_xy_aB_norm);
