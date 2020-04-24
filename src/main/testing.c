@@ -190,7 +190,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
     for (int i = 1; i < sim_counter; i++)
     {
 
-        if (strstr("vectorize_0",sim_list[i]->name)  )
+        if (strstr("vectorize_1",sim_list[i]->name)  )
         {
 
             copy_init(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed, starting_desired_max_speed,

@@ -24,7 +24,7 @@
 #include "social_force_model_basic_simplified.h"
 
 // vectorized versions
-#include "social_force_model_vectorize_0.h"
+#include "vectorize/social_force_model_vectorize_1.h"
 
 // testing
 #include "testing.h"
@@ -200,7 +200,7 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
     add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
     add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_0, compute_simplified_flops, "vectorize_0");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_0, compute_simplified_flops, "vectorize_1");
 
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }

@@ -9,7 +9,7 @@
 #include <math.h>
 #include <immintrin.h>
 
-#include "social_force_model_vectorize_0.h"
+#include "social_force_model_vectorize_1.h"
 #include "social_force.h"
 #include "testing.h"
 #include "utility.h"
