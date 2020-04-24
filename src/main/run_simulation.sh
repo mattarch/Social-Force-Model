@@ -3,7 +3,7 @@
 # set variables
 options="Benchmark Test Visualization/Test"
 timesteps=(25) # talk about number of iterations
-persons=(4 8 16 32 64  ) #128 256 512 ) ##1024 2048)
+persons=(4 8 16 32 64 ) #128 256 512 ) ##1024 2048)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
