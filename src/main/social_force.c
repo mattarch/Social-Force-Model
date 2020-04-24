@@ -130,9 +130,9 @@ void initialize_people(double *position, double *desired_direction, double *fina
     for (int i = 0; i < n; i++)
     {
         // initialize values independant of starting point and target point
-        position[IndexY_old(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-        desired_direction[IndexY_old(i,n)] = 0.0;                                         // starting value for direct_y
-        final_destination[IndexY_old(i,n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
+        position[IndexY_old(i, n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
+        desired_direction[IndexY_old(i, n)] = 0.0;                                         // starting value for direct_y
+        final_destination[IndexY_old(i, n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
         desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
         if (i % 2) // initialize this person to walk from left to right
@@ -200,10 +200,9 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
     add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
     add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
-  //  add_function(sim_list, sim_counter, simulation_basic_vectorize_0, compute_simplified_flops, "vectorize_0");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_0, compute_simplified_flops, "vectorize_0");
 
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
-    add_test_function(test_functions_list, test_simulation_basic_simplified, test_func_counter);
 }
 
 /*

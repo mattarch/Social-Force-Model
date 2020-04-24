@@ -14,6 +14,7 @@
 #define PRINT_DEF printf("\033[0m");
 
 #define EPS 1e-03
+#define EPS_NEW 1e-05
 #define N_TESTS 4
 #define TDIR 0
 #define TACC 1
@@ -30,8 +31,10 @@ int check_square_distance(double *expected, double *res, int n, int case_n);
 void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
 			   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
 void copy_init_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-			   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
+				   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
 void copy_state(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
+				double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
+void copy_state_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
 				double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
 void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
 					 double **frc, int n);
