@@ -15,15 +15,6 @@
 #include "utility.h"
 
 extern char filename_global[80];
-extern struct arguments arguments;
-
-typedef union U256d {
-  __m256d v;
-  double a[4];
-} U256D;
-
-#define FIRST(pos) pos.a[0]
-#define SECOND(pos) pos.a[1]
 
 /*
   This function updates the desired direction for all people.
@@ -43,7 +34,7 @@ typedef union U256d {
                                 towards the corresponging final_destination
                      n: number of people
 */
-void update_desired_direction_vectorize_0(double *position, double *final_destination, double *desired_direction, int n)
+void update_desired_direction_vectorize_1(double *position, double *final_destination, double *desired_direction, int n)
 {
 
   __m256d current_xy, target_xy, delta_xy, delta_xy_squared_turned, delta_xy_squared, d, normalizer;
@@ -113,7 +104,7 @@ void update_desired_direction_vectorize_0(double *position, double *final_destin
                                 actual_velocity = actual_speed * desired_direction
                      n: number of people
 */
-void update_acceleration_term_vectorize_0(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n)
+void update_acceleration_term_vectorize_1(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n)
 {
   //!ATTENTION: function compute_actual_velocity and uupdate_desired_direction have to be called befor this function in this order
 
@@ -199,7 +190,7 @@ __m256d exp_fast_vec(__m256d x, __m256d one, __m256d exp_constant)
         people_repulsion_term: (2n,2n) : matrix containing the force of repulsion between person i and j
                             n: number of people
 */
-void update_people_repulsion_term_vectorize_0(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
+void update_people_repulsion_term_vectorize_1(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
 {
 
   __m256d position_i, position_j;
@@ -381,7 +372,7 @@ void update_people_repulsion_term_vectorize_0(double *position, double *desired_
                         n: number of people
                 n_borders: number of borders
 */
-void update_border_repulsion_term_vectorize_0(double *position, double *borders, double *border_repulsion_term, int n, int n_borders)
+void update_border_repulsion_term_vectorize_1(double *position, double *borders, double *border_repulsion_term, int n, int n_borders)
 {
   __m256d border;
   __m256d r_xy_a;
@@ -477,7 +468,7 @@ void update_border_repulsion_term_vectorize_0(double *position, double *borders,
                              n: number of people
                      n_borders: number of borders
 */
-void compute_social_force_vectorize_0(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
+void compute_social_force_vectorize_1(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
 {
   __m256d social_force_xy;
   __m256d border0;
@@ -563,7 +554,7 @@ void compute_social_force_vectorize_0(double *acceleration_term, double *people_
                                      actual_velocity = actual_speed * desired_direction
                           n: number of people
 */
-void update_position_vectorize_0(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
+void update_position_vectorize_1(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
 {
 
   __m256d prefered_velocity_xy;
@@ -654,7 +645,7 @@ void update_position_vectorize_0(double *position, double *desired_direction, do
   */
 }
 
-void simulation_basic_vectorize_0(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+void simulation_basic_vectorize_1(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
                                   double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
@@ -664,12 +655,12 @@ void simulation_basic_vectorize_0(int number_of_people, int n_timesteps, double 
   for (int step = 0; step < n_timesteps; step++)
   {
     // update variables
-    update_desired_direction_vectorize_0(position, final_destination, desired_direction, number_of_people);
-    update_acceleration_term_vectorize_0(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
-    update_people_repulsion_term_vectorize_0(position, desired_direction, speed, people_repulsion_term, number_of_people);
-    update_border_repulsion_term_vectorize_0(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
-    compute_social_force_vectorize_0(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
-    update_position_vectorize_0(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
+    update_desired_direction_vectorize_1(position, final_destination, desired_direction, number_of_people);
+    update_acceleration_term_vectorize_1(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
+    update_people_repulsion_term_vectorize_1(position, desired_direction, speed, people_repulsion_term, number_of_people);
+    update_border_repulsion_term_vectorize_1(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
+    compute_social_force_vectorize_1(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
+    update_position_vectorize_1(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
   }
 
