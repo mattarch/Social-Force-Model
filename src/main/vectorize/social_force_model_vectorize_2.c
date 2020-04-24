@@ -145,8 +145,38 @@ void update_desired_direction_vectorize_2(double *position, double *final_destin
 */
 void update_acceleration_term_vectorize_2(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n)
 {
-  //!ATTENTION: function compute_actual_velocity and uupdate_desired_direction have to be called befor this function in this order
+  //!ATTENTION: function compute_actual_velocity and update_desired_direction have to be called befor this function in this order
 
+  __m256d actual_velocity_x;
+  __m256d actual_velocity_y;
+  __m256d desired_direction_x;
+  __m256d desired_direction_y;
+  __m256d desired_speed_value;
+  __m256d v_delta_x;
+  __m256d v_delta_y;
+  __m256d inv_relax_time_vec = _mm256_set1_pd(INV_RELAX_TIME);
+
+  for (int i = 0; i < n - 3; i += 4)
+  {
+    actual_velocity_x = _mm256_load_pd(actual_velocity + i);
+    actual_velocity_y = _mm256_load_pd(actual_velocity + n + i);
+    desired_direction_x = _mm256_load_pd(desired_direction + i);
+    desired_direction_y = _mm256_load_pd(desired_direction + n + i);
+    desired_speed_value = _mm256_load_pd(desired_speed + i);
+
+    v_delta_x = _mm256_mul_pd(desired_speed_value, desired_direction_x);
+    v_delta_y = _mm256_mul_pd(desired_speed_value, desired_direction_y);
+    v_delta_x = _mm256_sub_pd(v_delta_x, actual_velocity_x);
+    v_delta_y = _mm256_sub_pd(v_delta_y, actual_velocity_y);
+
+    v_delta_x = _mm256_mul_pd(v_delta_x, inv_relax_time_vec);
+    v_delta_y = _mm256_mul_pd(v_delta_y, inv_relax_time_vec);
+
+    _mm256_store_pd(acceleration_term + i, v_delta_x);
+    _mm256_store_pd(acceleration_term + n + i, v_delta_y);
+  }
+
+  /*
   // compute the new acceleration terms for every person
   // iterate over every person
   for (int i = 0; i < n; i++)
@@ -168,6 +198,7 @@ void update_acceleration_term_vectorize_2(double *desired_direction, double *acc
     acceleration_term[IndexX(i)] = INV_RELAX_TIME * v_delta_x;    // 1 mul => 1 flops
     acceleration_term[IndexY(i, n)] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
+  */
 }
 
 /*
