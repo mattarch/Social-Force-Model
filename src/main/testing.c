@@ -190,7 +190,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
     for (int i = 1; i < sim_counter; i++)
     {
 
-        if (strstr("vectorize_1",sim_list[i]->name)  )
+        if (strstr("vectorize_1", sim_list[i]->name))
         {
 
             copy_init(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed, starting_desired_max_speed,
@@ -456,7 +456,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("x: %lf %lf %d %d\n", expected[IndexX_matrix_old(i, j, n)], res[IndexX_matrix(i, j, n)], i,j);
+                    printf("x: %lf %lf %d %d\n", expected[IndexX_matrix_old(i, j, n)], res[IndexX_matrix(i, j, n)], i, j);
                 }
             }
         }
@@ -469,7 +469,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("y: %lf %lf %d %d\n", expected[IndexY_matrix_old(i, j, n)], res[IndexY_matrix(i, j, n)], i,j);
+                    printf("y: %lf %lf %d %d\n", expected[IndexY_matrix_old(i, j, n)], res[IndexY_matrix(i, j, n)], i, j);
                 }
             }
         }
@@ -485,7 +485,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("x: %lf %lf %d %d\n", expected[IndexX_border_old(i, j, n)], res[IndexX_border(i, j, n)], i,j);
+                    printf("x: %lf %lf %d %d\n", expected[IndexX_border_old(i, j, n)], res[IndexX_border(i, j, n)], i, j);
                 }
             }
         }
@@ -497,7 +497,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
-                    printf("y: %lf %lf %d %d\n", expected[IndexY_border_old(i, j, n)], res[IndexY_border(i, j, n)], i,j);
+                    printf("y: %lf %lf %d %d\n", expected[IndexY_border_old(i, j, n)], res[IndexY_border(i, j, n)], i, j);
                 }
             }
         }

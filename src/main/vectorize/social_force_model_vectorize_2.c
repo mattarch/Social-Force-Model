@@ -537,6 +537,109 @@ void update_border_repulsion_term_vectorize_2(double *position, double *borders,
 */
 void compute_social_force_vectorize_2(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
 {
+
+  __m256d social_force_x;
+  __m256d social_force_y;
+
+  __m256d border0_x;
+  __m256d border0_y;
+  __m256d border1_x;
+  __m256d border1_y;
+  __m256d unpacked;
+  __m256d unpacked1;
+
+  __m256d people_repulsion_x;
+  __m256d people_repulsion_y;
+
+  __m256d row_add0_x = _mm256_set1_pd(0);
+  __m256d row_add1_x = _mm256_set1_pd(0);
+  __m256d row_add2_x = _mm256_set1_pd(0);
+  __m256d row_add3_x = _mm256_set1_pd(0);
+
+  __m256d row_add0_y = _mm256_set1_pd(0);
+  __m256d row_add1_y = _mm256_set1_pd(0);
+  __m256d row_add2_y = _mm256_set1_pd(0);
+  __m256d row_add3_y = _mm256_set1_pd(0);
+
+  for (int p = 0; p < n - 3; p += 4)
+  {
+
+    row_add0_x = _mm256_set1_pd(0);
+    row_add1_x = _mm256_set1_pd(0);
+    row_add2_x = _mm256_set1_pd(0);
+    row_add3_x = _mm256_set1_pd(0);
+
+    row_add0_y = _mm256_set1_pd(0);
+    row_add1_y = _mm256_set1_pd(0);
+    row_add2_y = _mm256_set1_pd(0);
+    row_add3_y = _mm256_set1_pd(0);
+
+    social_force_x = _mm256_load_pd(acceleration_term + p);
+    social_force_y = _mm256_load_pd(acceleration_term + n + p);
+
+    border0_y = _mm256_load_pd(border_repulsion_term + n + p);
+    border1_y = _mm256_load_pd(border_repulsion_term + 3 * n + p);
+
+    social_force_y = _mm256_add_pd(social_force_y, border0_y);
+    social_force_y = _mm256_add_pd(social_force_y, border1_y);
+
+    // add repulsive terms toward other people
+    for (int beta = 0; beta < n - 3; beta += 4)
+    {
+      row_add0_x = _mm256_add_pd(row_add0_x, _mm256_load_pd(people_repulsion_term + p * n + beta));
+      row_add1_x = _mm256_add_pd(row_add1_x, _mm256_load_pd(people_repulsion_term + (p + 1) * n + beta));
+      row_add2_x = _mm256_add_pd(row_add2_x, _mm256_load_pd(people_repulsion_term + (p + 2) * n + beta));
+      row_add3_x = _mm256_add_pd(row_add3_x, _mm256_load_pd(people_repulsion_term + (p + 3) * n + beta));
+    }
+
+    row_add0_x = _mm256_hadd_pd(row_add0_x, _mm256_permute2f128_pd(row_add0_x, row_add0_x, 1));
+    row_add1_x = _mm256_hadd_pd(row_add1_x, _mm256_permute2f128_pd(row_add1_x, row_add1_x, 1));
+    row_add2_x = _mm256_hadd_pd(row_add2_x, _mm256_permute2f128_pd(row_add2_x, row_add2_x, 1));
+    row_add3_x = _mm256_hadd_pd(row_add3_x, _mm256_permute2f128_pd(row_add3_x, row_add3_x, 1));
+
+    row_add0_x = _mm256_hadd_pd(row_add0_x, row_add0_x);
+    row_add1_x = _mm256_hadd_pd(row_add1_x, row_add1_x);
+    row_add2_x = _mm256_hadd_pd(row_add2_x, row_add2_x);
+    row_add3_x = _mm256_hadd_pd(row_add3_x, row_add3_x);
+
+    unpacked = _mm256_unpacklo_pd(row_add0_x, row_add1_x);
+    unpacked1 = _mm256_unpacklo_pd(row_add2_x, row_add3_x);
+
+    unpacked = _mm256_blend_pd(unpacked, unpacked1, 12);
+
+    social_force_x = _mm256_add_pd(unpacked, social_force_x);
+    _mm256_store_pd(social_force + p, social_force_x);
+
+    // add repulsive terms toward other people
+    for (int beta = 0; beta < n - 3; beta += 4)
+    {
+      row_add0_y = _mm256_add_pd(row_add0_y, _mm256_load_pd(people_repulsion_term + n * n + p * n + beta));
+      row_add1_y = _mm256_add_pd(row_add1_y, _mm256_load_pd(people_repulsion_term + n * n + (p + 1) * n + beta));
+      row_add2_y = _mm256_add_pd(row_add2_y, _mm256_load_pd(people_repulsion_term + n * n + (p + 2) * n + beta));
+      row_add3_y = _mm256_add_pd(row_add3_y, _mm256_load_pd(people_repulsion_term + n * n + (p + 3) * n + beta));
+    }
+
+    row_add0_y = _mm256_hadd_pd(row_add0_y, _mm256_permute2f128_pd(row_add0_y, row_add0_y, 1));
+    row_add1_y = _mm256_hadd_pd(row_add1_y, _mm256_permute2f128_pd(row_add1_y, row_add1_y, 1));
+    row_add2_y = _mm256_hadd_pd(row_add2_y, _mm256_permute2f128_pd(row_add2_y, row_add2_y, 1));
+    row_add3_y = _mm256_hadd_pd(row_add3_y, _mm256_permute2f128_pd(row_add3_y, row_add3_y, 1));
+
+    row_add0_y = _mm256_hadd_pd(row_add0_y, row_add0_y);
+    row_add1_y = _mm256_hadd_pd(row_add1_y, row_add1_y);
+    row_add2_y = _mm256_hadd_pd(row_add2_y, row_add2_y);
+    row_add3_y = _mm256_hadd_pd(row_add3_y, row_add3_y);
+
+    unpacked = _mm256_unpacklo_pd(row_add0_y, row_add1_y);
+    unpacked1 = _mm256_unpacklo_pd(row_add2_y, row_add3_y);
+
+    unpacked = _mm256_blend_pd(unpacked, unpacked1, 12);
+
+    social_force_y = _mm256_add_pd(unpacked, social_force_y);
+
+    _mm256_store_pd(social_force + n + p, social_force_y);
+  }
+
+  /*
   // compute the social force for each person
   for (int p = 0; p < n; p++)
   {
@@ -568,6 +671,7 @@ void compute_social_force_vectorize_2(double *acceleration_term, double *people_
       social_force[IndexY(p, n)] += border_repulsion_term[IndexY_border(p, b, n)]; // 1 add => 1 flop
     }
   }
+  */
 }
 
 /*
@@ -658,7 +762,7 @@ void update_position_vectorize_2(double *position, double *desired_direction, do
     _mm256_store_pd(position + i, _mm256_fmadd_pd(prefered_velocity_x, timestep_vec, position_x));
     _mm256_store_pd(position + n + i, _mm256_fmadd_pd(prefered_velocity_y, timestep_vec, position_y));
   }
-  
+
   /*
   double control_value;
   double norm_value;
