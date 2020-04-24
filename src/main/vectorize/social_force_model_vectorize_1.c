@@ -16,6 +16,27 @@
 
 extern char filename_global[80];
 
+__m256d exp_fast_vec_1(__m256d x, __m256d one, __m256d exp_constant)
+{
+
+  x = _mm256_fmadd_pd(x, exp_constant, one);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  return x;
+}
+
 /*
   This function updates the desired direction for all people.
   This function corresponds to formula (1) from the paper.
@@ -152,28 +173,6 @@ void update_acceleration_term_vectorize_1(double *desired_direction, double *acc
     acceleration_term[2 * i + 1] = INV_RELAX_TIME * v_delta_y; // 1 mul => 1 flops
   }
   */
-}
-
-
-__m256d exp_fast_vec_1(__m256d x, __m256d one, __m256d exp_constant)
-{
-
-  x = _mm256_fmadd_pd(x, exp_constant, one);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  return x;
 }
 
 /*
