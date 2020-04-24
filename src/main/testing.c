@@ -18,6 +18,7 @@
 #include "testing.h"
 #include "test_sets.h"
 #include "social_force_model_basic.h"
+#include "social_force_model_basic_simplified.h"
 #include "utility.h"
 
 testcase_t **testcases[N_TESTS];
@@ -58,12 +59,15 @@ void add_function_implementations()
 {
     //update direction implementations
     add_direction_implementation(update_desired_direction);
+    add_direction_implementation(update_desired_direction_simplified);
 
     //update acceleration implementations
     add_acceleration_implementation(update_acceleration_term);
+    add_acceleration_implementation(update_acceleration_term_simplified);
 
     //compute social force implementations
     add_social_implementation(compute_social_force);
+    add_social_implementation(compute_social_force_simplified);
 
     //update position implementations
     add_pos_implementation(update_position);
