@@ -154,9 +154,9 @@ void run_finite_differences(sim_func f, struct arguments arguments)
 int compare_simulations(sim_t **sim_list, int sim_counter)
 {
     int error_check = 0;
-    int number_of_people = 80;
+    int number_of_people = 100;
     int n_timesteps = 1;
-    int n_test_timesteps = 10;
+    int n_test_timesteps = 100;
     double *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
         *oracle_borders, *oracle_actual_velocity, *oracle_acceleration_term, *oracle_people_repulsion_term,
         *oracle_border_repulsion_term, *oracle_social_force, *oracle_desired_speed, *oracle_desired_max_speed;
@@ -415,7 +415,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
     {
         for (int i = 0; i < n; i++)
         {
-            acc = (expected[i] - res[i]) * (expected[i] - res[i]);
+            acc = fabs(expected[i] - res[i]);
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
@@ -427,7 +427,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
     {
         for (int i = 0; i < n; i++)
         {
-            acc = (expected[IndexX_old(i)] - res[IndexX(i)]) * (expected[IndexX_old(i)] - res[IndexX(i)]);
+            acc = fabs(expected[IndexX_old(i)] - res[IndexX(i)]);
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
@@ -437,7 +437,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
 
         for (int i = 0; i < n; i++)
         {
-            acc = (expected[IndexY_old(i, n)] - res[IndexY(i, n)]) * (expected[IndexY_old(i, n)] - res[IndexY(i, n)]);
+            acc = fabs(expected[IndexY_old(i, n)] - res[IndexY(i, n)]) ;
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
@@ -452,7 +452,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
             for (int j = 0; j < n; j++)
             {
 
-                acc = (expected[IndexX_matrix_old(i, j, n)] - res[IndexX_matrix(i, j, n)]) * (expected[IndexX_matrix_old(i, j, n)] - res[IndexX_matrix(i, j, n)]);
+                acc = fabs(expected[IndexX_matrix_old(i, j, n)] - res[IndexX_matrix(i, j, n)]) ;
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
@@ -465,7 +465,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
         {
             for (int j = 0; j < n; j++)
             {
-                acc = (expected[IndexY_matrix_old(i, j, n)] - res[IndexY_matrix(i, j, n)]) * (expected[IndexY_matrix_old(i, j, n)] - res[IndexY_matrix(i, j, n)]);
+                acc = fabs(expected[IndexY_matrix_old(i, j, n)] - res[IndexY_matrix(i, j, n)]) ;
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
@@ -481,7 +481,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
             for (int j = 0; j < 2; j++)
             {
 
-                acc = (expected[IndexX_border_old(i, j, n)] - res[IndexX_border(i, j, n)]) * (expected[IndexX_border_old(i, j, n)] - res[IndexX_border(i, j, n)]);
+                acc = fabs(expected[IndexX_border_old(i, j, n)] - res[IndexX_border(i, j, n)]);
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
@@ -493,7 +493,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
         {
             for (int j = 0; j < 2; j++)
             {
-                acc = (expected[IndexY_border_old(i, j, n)] - res[IndexY_border(i, j, n)]) * (expected[IndexY_border_old(i, j, n)] - res[IndexY_border(i, j, n)]);
+                acc = fabs(expected[IndexY_border_old(i, j, n)] - res[IndexY_border(i, j, n)]);
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
