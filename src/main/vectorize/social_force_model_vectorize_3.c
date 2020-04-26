@@ -302,7 +302,6 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
       r_ab_2_y = _mm256_mul_pd(r_ab_y, r_ab_y);
       r_ab_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_2_x, r_ab_2_y));
 
-
       r_ab_me_x = _mm256_fmadd_pd(delta_b, e_b_x, r_ab_x);
       r_ab_me_y = _mm256_fmadd_pd(delta_b, e_b_y, r_ab_y);
 
@@ -319,11 +318,15 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
       mask = _mm256_cmp_pd(r_ab_me_norm, eps, _CMP_GE_OQ);
       r_ab_me_norm = _mm256_blendv_pd(one, r_ab_me_norm, mask);
 
-      repulsion_x = _mm256_div_pd(r_ab_x, r_ab_norm);
-      repulsion_x = _mm256_add_pd(repulsion_x, _mm256_div_pd(r_ab_me_x, r_ab_me_norm));
+      // invert norm to save divs
+      r_ab_norm = _mm256_div_pd(one, r_ab_norm);
+      r_ab_me_norm = _mm256_div_pd(one, r_ab_me_norm);
 
-      repulsion_y = _mm256_div_pd(r_ab_y, r_ab_norm);
-      repulsion_y = _mm256_add_pd(repulsion_y, _mm256_div_pd(r_ab_me_y, r_ab_me_norm));
+      repulsion_x = _mm256_mul_pd(r_ab_x, r_ab_norm);
+      repulsion_x = _mm256_fmadd_pd(r_ab_me_x, r_ab_me_norm, repulsion_x);
+
+      repulsion_y = _mm256_mul_pd(r_ab_y, r_ab_norm);
+      repulsion_y = _mm256_fmadd_pd(r_ab_me_y, r_ab_me_norm, repulsion_y);
 
       norm_sum_2 = _mm256_mul_pd(norm_sum, norm_sum);
       delta_b_2 = _mm256_mul_pd(delta_b, delta_b);
