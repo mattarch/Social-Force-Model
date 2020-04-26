@@ -299,17 +299,16 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
 
       // compute norm r_ab
       r_ab_2_x = _mm256_mul_pd(r_ab_x, r_ab_x);
-      r_ab_2_y = _mm256_mul_pd(r_ab_y, r_ab_y);
-      r_ab_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_2_x, r_ab_2_y));
+      r_ab_norm = _mm256_sqrt_pd(_mm256_fmadd_pd(r_ab_y, r_ab_y, r_ab_2_x));
 
       r_ab_me_x = _mm256_fmadd_pd(delta_b, e_b_x, r_ab_x);
       r_ab_me_y = _mm256_fmadd_pd(delta_b, e_b_y, r_ab_y);
 
       // compute norm r_ab_me
       r_ab_me_2_x = _mm256_mul_pd(r_ab_me_x, r_ab_me_x);
-      r_ab_me_2_y = _mm256_mul_pd(r_ab_me_y, r_ab_me_y);
-      r_ab_me_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_me_2_x, r_ab_me_2_y));
+      r_ab_me_norm = _mm256_sqrt_pd(_mm256_fmadd_pd(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
 
+      // sum up norms
       norm_sum = _mm256_add_pd(r_ab_norm, r_ab_me_norm);
 
       // take care of i==j
@@ -328,9 +327,8 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
       repulsion_y = _mm256_mul_pd(r_ab_y, r_ab_norm);
       repulsion_y = _mm256_fmadd_pd(r_ab_me_y, r_ab_me_norm, repulsion_y);
 
-      norm_sum_2 = _mm256_mul_pd(norm_sum, norm_sum);
       delta_b_2 = _mm256_mul_pd(delta_b, delta_b);
-      b = _mm256_sqrt_pd(_mm256_sub_pd(norm_sum_2, delta_b_2));
+      b = _mm256_sqrt_pd(_mm256_fmsub_pd(norm_sum, norm_sum, delta_b_2));
       b = _mm256_div_pd(b, two_vec);
 
       exp = _mm256_div_pd(b, sigma_vec);
@@ -345,9 +343,8 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
       repulsion_y = _mm256_mul_pd(repulsion_y, common_factor);
 
       // compute norm r_ab
-      repulsion_2_x = _mm256_mul_pd(repulsion_x, repulsion_x);
       repulsion_2_y = _mm256_mul_pd(repulsion_y, repulsion_y);
-      threshold = _mm256_sqrt_pd(_mm256_add_pd(repulsion_2_x, repulsion_2_y));
+      threshold = _mm256_sqrt_pd(_mm256_fmadd_pd(repulsion_x,repulsion_x, repulsion_2_y));
 
       check_x = _mm256_mul_pd(e_a_x, repulsion_x);
       check_y = _mm256_mul_pd(e_a_y, repulsion_y);
