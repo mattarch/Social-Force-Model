@@ -16,7 +16,7 @@ firstarg=basic
 # compile program
 # if macOS -> use gcc-9, else -> gcc
 if [ $os == "Darwin" ]; then
-  gcc-9 *.c  vectorize/*.c    -lm -O3 -mavx2 -mfma  -g -o $prog
+  gcc-9 *.c  vectorize/*.c  -lm -O3 -mavx2 -mfma -g -o $prog
 else
   gcc *.c vectorize/*.c  -lm -O3 -mavx2 -mfma -g -o $prog
 fi

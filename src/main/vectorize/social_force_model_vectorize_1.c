@@ -252,14 +252,6 @@ void update_people_repulsion_term_vectorize_1(double *position, double *desired_
       r_ab_mexy_2_turned = _mm256_permute_pd(r_ab_mexy_2, 0b0101); //
       r_ab_mexy_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_mexy_2, r_ab_mexy_2_turned));
 
-      // take care of i == j
-
-      mask = _mm256_cmp_pd(r_ab_norm, eps, _CMP_GE_OQ);
-      r_ab_norm = _mm256_blendv_pd(one, r_ab_norm, mask);
-
-      mask = _mm256_cmp_pd(r_ab_mexy_norm, eps, _CMP_GE_OQ);
-      r_ab_mexy_norm = _mm256_blendv_pd(one, r_ab_mexy_norm, mask);
-
       norm_sum = _mm256_add_pd(r_ab_norm, r_ab_mexy_norm);
 
       repulsion_xy = _mm256_div_pd(r_xy_ab, r_ab_norm);

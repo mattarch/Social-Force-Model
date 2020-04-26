@@ -311,12 +311,6 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
       // sum up norms
       norm_sum = _mm256_add_pd(r_ab_norm, r_ab_me_norm);
 
-      // take care of i==j
-      mask = _mm256_cmp_pd(r_ab_norm, eps, _CMP_GE_OQ);
-      r_ab_norm = _mm256_blendv_pd(one, r_ab_norm, mask);
-      mask = _mm256_cmp_pd(r_ab_me_norm, eps, _CMP_GE_OQ);
-      r_ab_me_norm = _mm256_blendv_pd(one, r_ab_me_norm, mask);
-
       // invert norm to save divs
       r_ab_norm = _mm256_div_pd(one, r_ab_norm);
       r_ab_me_norm = _mm256_div_pd(one, r_ab_me_norm);
