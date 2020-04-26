@@ -263,7 +263,7 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
   __m256d w;
   __m256d mask;
 
-  __m256d timestep_vec = _mm256_set1_pd(TIMESTEP);
+  __m256d timestep_vec = _mm256_set1_pd(-TIMESTEP);
   __m256d sigma_vec = _mm256_set1_pd(SIGMA);
   __m256d div_factor_vec = _mm256_set1_pd(DIV_FACTOR);
   __m256d projection_factor_vec = _mm256_set1_pd(PROJECTION_FACTOR);
@@ -302,8 +302,9 @@ void update_people_repulsion_term_vectorize_3(double *position, double *desired_
       r_ab_2_y = _mm256_mul_pd(r_ab_y, r_ab_y);
       r_ab_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_2_x, r_ab_2_y));
 
-      r_ab_me_x = _mm256_sub_pd(r_ab_x, _mm256_mul_pd(delta_b, e_b_x));
-      r_ab_me_y = _mm256_sub_pd(r_ab_y, _mm256_mul_pd(delta_b, e_b_y));
+
+      r_ab_me_x = _mm256_fmadd_pd(delta_b, e_b_x, r_ab_x);
+      r_ab_me_y = _mm256_fmadd_pd(delta_b, e_b_y, r_ab_y);
 
       // compute norm r_ab_me
       r_ab_me_2_x = _mm256_mul_pd(r_ab_me_x, r_ab_me_x);
