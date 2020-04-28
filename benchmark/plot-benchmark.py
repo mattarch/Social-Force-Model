@@ -94,7 +94,7 @@ plt.title(title,loc='left',y=1.06,fontsize=12)
 
 ax = plt.gca()
 ax.grid(which='major', axis='y')
-plt.ylim((0, 4))
+plt.ylim((0, 10))
 plt.yticks(fontsize=10)
 plt.axes().xaxis.set_label_coords(0.5, -0.15)
 plt.axes().tick_params(left= False)

@@ -72,7 +72,7 @@ void update_desired_direction_vectorize_3(float *position, float *final_destinat
   __m256 one = _mm256_set1_ps(1);
 
   // iterate over all persons and update desired_direction
-  for (int i = 0; i < n - 3; i += 4)
+  for (int i = 0; i < n - 7; i += 8)
   {
     // get current position and target
     current_x = _mm256_load_ps(position + i); // now xy positions for two persons in register
@@ -81,8 +81,8 @@ void update_desired_direction_vectorize_3(float *position, float *final_destinat
     target_y = _mm256_load_ps(final_destination + n + i);
 
     // compute differences
-    delta_x = target_x - current_x;
-    delta_y = target_y - current_y;
+    delta_x = _mm256_sub_ps(target_x, current_x);
+    delta_y = _mm256_sub_ps(target_y, current_y);
 
     // compute norm
     delta_x_2 = _mm256_mul_ps(delta_x, delta_x); // square each entry
@@ -155,7 +155,7 @@ void update_acceleration_term_vectorize_3(float *desired_direction, float *accel
   __m256 v_delta_y;
   __m256 inv_relax_time_vec = _mm256_set1_ps(INV_RELAX_TIME);
 
-  for (int i = 0; i < n - 3; i += 4)
+  for (int i = 0; i < n - 7; i += 8)
   {
     actual_velocity_x = _mm256_load_ps(actual_velocity + i);
     actual_velocity_y = _mm256_load_ps(actual_velocity + n + i);
@@ -282,7 +282,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
     e_a_x = _mm256_broadcast_ss(desired_direction + i);
     e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
 
-    for (int j = 0; j < n - 3; j += 4)
+    for (int j = 0; j < n - 7; j += 8)
     {
       position_j_x = _mm256_load_ps(position + j);
       position_j_y = _mm256_load_ps(position + n + j);
@@ -459,7 +459,7 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
   {
     border = _mm256_broadcast_ss(borders + j);
 
-    for (int i = 0; i < n - 3; i += 4)
+    for (int i = 0; i < n - 7; i += 8)
     {
       r_a_y = _mm256_load_ps(position + n + i);
 
@@ -528,6 +528,7 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
                              n: number of people
                      n_borders: number of borders
 */
+
 void compute_social_force_vectorize_3(float *acceleration_term, float *people_repulsion_term, float *border_repulsion_term, float *social_force, int n, int n_borders)
 {
 
@@ -544,28 +545,45 @@ void compute_social_force_vectorize_3(float *acceleration_term, float *people_re
   __m256 people_repulsion_x;
   __m256 people_repulsion_y;
 
-  __m256 row_add0_x = _mm256_set1_ps(0);
-  __m256 row_add1_x = _mm256_set1_ps(0);
-  __m256 row_add2_x = _mm256_set1_ps(0);
-  __m256 row_add3_x = _mm256_set1_ps(0);
+  __m256 row_add0_x;
+  __m256 row_add1_x;
+  __m256 row_add2_x;
+  __m256 row_add3_x;
+  __m256 row_add4_x;
+  __m256 row_add5_x;
+  __m256 row_add6_x;
+  __m256 row_add7_x;
 
-  __m256 row_add0_y = _mm256_set1_ps(0);
-  __m256 row_add1_y = _mm256_set1_ps(0);
-  __m256 row_add2_y = _mm256_set1_ps(0);
-  __m256 row_add3_y = _mm256_set1_ps(0);
+  __m256 row_add0_y;
+  __m256 row_add1_y;
+  __m256 row_add2_y;
+  __m256 row_add3_y;
+  __m256 row_add4_y;
+  __m256 row_add5_y;
+  __m256 row_add6_y;
+  __m256 row_add7_y;
 
-  for (int p = 0; p < n - 3; p += 4)
+
+  for (int p = 0; p < n - 7; p += 8)
   {
 
     row_add0_x = _mm256_set1_ps(0);
     row_add1_x = _mm256_set1_ps(0);
     row_add2_x = _mm256_set1_ps(0);
     row_add3_x = _mm256_set1_ps(0);
+    row_add4_x = _mm256_set1_ps(0);
+    row_add5_x = _mm256_set1_ps(0);
+    row_add6_x = _mm256_set1_ps(0);
+    row_add7_x = _mm256_set1_ps(0);
 
     row_add0_y = _mm256_set1_ps(0);
     row_add1_y = _mm256_set1_ps(0);
     row_add2_y = _mm256_set1_ps(0);
     row_add3_y = _mm256_set1_ps(0);
+    row_add4_y = _mm256_set1_ps(0);
+    row_add5_y = _mm256_set1_ps(0);
+    row_add6_y = _mm256_set1_ps(0);
+    row_add7_y = _mm256_set1_ps(0);
 
     social_force_x = _mm256_load_ps(acceleration_term + p);
     social_force_y = _mm256_load_ps(acceleration_term + n + p);
@@ -577,55 +595,107 @@ void compute_social_force_vectorize_3(float *acceleration_term, float *people_re
     social_force_y = _mm256_add_ps(social_force_y, border1_y);
 
     // add repulsive terms toward other people
-    for (int beta = 0; beta < n - 3; beta += 4)
+    for (int beta = 0; beta < n - 7; beta += 8)
     {
       row_add0_x = _mm256_add_ps(row_add0_x, _mm256_load_ps(people_repulsion_term + p * n + beta));
       row_add1_x = _mm256_add_ps(row_add1_x, _mm256_load_ps(people_repulsion_term + (p + 1) * n + beta));
       row_add2_x = _mm256_add_ps(row_add2_x, _mm256_load_ps(people_repulsion_term + (p + 2) * n + beta));
       row_add3_x = _mm256_add_ps(row_add3_x, _mm256_load_ps(people_repulsion_term + (p + 3) * n + beta));
+      row_add4_x = _mm256_add_ps(row_add4_x, _mm256_load_ps(people_repulsion_term + (p + 4) * n + beta));
+      row_add5_x = _mm256_add_ps(row_add5_x, _mm256_load_ps(people_repulsion_term + (p + 5) * n + beta));
+      row_add6_x = _mm256_add_ps(row_add6_x, _mm256_load_ps(people_repulsion_term + (p + 6) * n + beta));
+      row_add7_x = _mm256_add_ps(row_add7_x, _mm256_load_ps(people_repulsion_term + (p + 7) * n + beta));
     }
 
-    row_add0_x = _mm256_hadd_ps(row_add0_x, _mm256_permute2f128_ps(row_add0_x, row_add0_x, 1));
-    row_add1_x = _mm256_hadd_ps(row_add1_x, _mm256_permute2f128_ps(row_add1_x, row_add1_x, 1));
-    row_add2_x = _mm256_hadd_ps(row_add2_x, _mm256_permute2f128_ps(row_add2_x, row_add2_x, 1));
-    row_add3_x = _mm256_hadd_ps(row_add3_x, _mm256_permute2f128_ps(row_add3_x, row_add3_x, 1));
+    row_add0_x = _mm256_hadd_ps(row_add0_x, _mm256_permute2f128_ps(row_add0_x, row_add0_x, 3));
+    row_add1_x = _mm256_hadd_ps(row_add1_x, _mm256_permute2f128_ps(row_add1_x, row_add1_x, 3));
+    row_add2_x = _mm256_hadd_ps(row_add2_x, _mm256_permute2f128_ps(row_add2_x, row_add2_x, 3));
+    row_add3_x = _mm256_hadd_ps(row_add3_x, _mm256_permute2f128_ps(row_add3_x, row_add3_x, 3));
+    row_add4_x = _mm256_hadd_ps(row_add4_x, _mm256_permute2f128_ps(row_add4_x, row_add4_x, 3));
+    row_add5_x = _mm256_hadd_ps(row_add5_x, _mm256_permute2f128_ps(row_add5_x, row_add5_x, 3));
+    row_add6_x = _mm256_hadd_ps(row_add6_x, _mm256_permute2f128_ps(row_add6_x, row_add6_x, 3));
+    row_add7_x = _mm256_hadd_ps(row_add7_x, _mm256_permute2f128_ps(row_add7_x, row_add7_x, 3));
 
     row_add0_x = _mm256_hadd_ps(row_add0_x, row_add0_x);
     row_add1_x = _mm256_hadd_ps(row_add1_x, row_add1_x);
     row_add2_x = _mm256_hadd_ps(row_add2_x, row_add2_x);
     row_add3_x = _mm256_hadd_ps(row_add3_x, row_add3_x);
+    row_add4_x = _mm256_hadd_ps(row_add4_x, row_add4_x);
+    row_add5_x = _mm256_hadd_ps(row_add5_x, row_add5_x);
+    row_add6_x = _mm256_hadd_ps(row_add6_x, row_add6_x);
+    row_add7_x = _mm256_hadd_ps(row_add7_x, row_add7_x);
 
-    unpacked = _mm256_unpacklo_ps(row_add0_x, row_add1_x);
-    unpacked1 = _mm256_unpacklo_ps(row_add2_x, row_add3_x);
+    row_add0_x = _mm256_hadd_ps(row_add0_x, row_add0_x);
+    row_add1_x = _mm256_hadd_ps(row_add1_x, row_add1_x);
+    row_add2_x = _mm256_hadd_ps(row_add2_x, row_add2_x);
+    row_add3_x = _mm256_hadd_ps(row_add3_x, row_add3_x);
+    row_add4_x = _mm256_hadd_ps(row_add4_x, row_add4_x);
+    row_add5_x = _mm256_hadd_ps(row_add5_x, row_add5_x);
+    row_add6_x = _mm256_hadd_ps(row_add6_x, row_add6_x);
+    row_add7_x = _mm256_hadd_ps(row_add7_x, row_add7_x);
 
-    unpacked = _mm256_blend_ps(unpacked, unpacked1, 12);
+    unpacked = _mm256_setzero_ps();
+    unpacked = _mm256_blend_ps(unpacked, row_add0_x, 0b00000001);
+    unpacked = _mm256_blend_ps(unpacked, row_add1_x, 0b00000010);
+    unpacked = _mm256_blend_ps(unpacked, row_add2_x, 0b00000100);
+    unpacked = _mm256_blend_ps(unpacked, row_add3_x, 0b00001000);
+    unpacked = _mm256_blend_ps(unpacked, row_add4_x, 0b00010000);
+    unpacked = _mm256_blend_ps(unpacked, row_add5_x, 0b00100000);
+    unpacked = _mm256_blend_ps(unpacked, row_add6_x, 0b01000000);
+    unpacked = _mm256_blend_ps(unpacked, row_add7_x, 0b10000000); 
 
     social_force_x = _mm256_add_ps(unpacked, social_force_x);
     _mm256_store_ps(social_force + p, social_force_x);
 
     // add repulsive terms toward other people
-    for (int beta = 0; beta < n - 3; beta += 4)
+    for (int beta = 0; beta < n - 7; beta += 8)
     {
       row_add0_y = _mm256_add_ps(row_add0_y, _mm256_load_ps(people_repulsion_term + n * n + p * n + beta));
       row_add1_y = _mm256_add_ps(row_add1_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 1) * n + beta));
       row_add2_y = _mm256_add_ps(row_add2_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 2) * n + beta));
       row_add3_y = _mm256_add_ps(row_add3_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 3) * n + beta));
+      row_add4_y = _mm256_add_ps(row_add4_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 4) * n + beta));
+      row_add5_y = _mm256_add_ps(row_add5_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 5) * n + beta));
+      row_add6_y = _mm256_add_ps(row_add6_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 6) * n + beta));
+      row_add7_y = _mm256_add_ps(row_add7_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 7) * n + beta));
     }
 
-    row_add0_y = _mm256_hadd_ps(row_add0_y, _mm256_permute2f128_ps(row_add0_y, row_add0_y, 1));
-    row_add1_y = _mm256_hadd_ps(row_add1_y, _mm256_permute2f128_ps(row_add1_y, row_add1_y, 1));
-    row_add2_y = _mm256_hadd_ps(row_add2_y, _mm256_permute2f128_ps(row_add2_y, row_add2_y, 1));
-    row_add3_y = _mm256_hadd_ps(row_add3_y, _mm256_permute2f128_ps(row_add3_y, row_add3_y, 1));
+    row_add0_y = _mm256_hadd_ps(row_add0_y, _mm256_permute2f128_ps(row_add0_y, row_add0_y, 3));
+    row_add1_y = _mm256_hadd_ps(row_add1_y, _mm256_permute2f128_ps(row_add1_y, row_add1_y, 3));
+    row_add2_y = _mm256_hadd_ps(row_add2_y, _mm256_permute2f128_ps(row_add2_y, row_add2_y, 3));
+    row_add3_y = _mm256_hadd_ps(row_add3_y, _mm256_permute2f128_ps(row_add3_y, row_add3_y, 3));
+    row_add4_y = _mm256_hadd_ps(row_add4_y, _mm256_permute2f128_ps(row_add4_y, row_add4_y, 3));
+    row_add5_y = _mm256_hadd_ps(row_add5_y, _mm256_permute2f128_ps(row_add5_y, row_add5_y, 3));
+    row_add6_y = _mm256_hadd_ps(row_add6_y, _mm256_permute2f128_ps(row_add6_y, row_add6_y, 3));
+    row_add7_y = _mm256_hadd_ps(row_add7_y, _mm256_permute2f128_ps(row_add7_y, row_add7_y, 3));
 
     row_add0_y = _mm256_hadd_ps(row_add0_y, row_add0_y);
     row_add1_y = _mm256_hadd_ps(row_add1_y, row_add1_y);
     row_add2_y = _mm256_hadd_ps(row_add2_y, row_add2_y);
     row_add3_y = _mm256_hadd_ps(row_add3_y, row_add3_y);
+    row_add4_y = _mm256_hadd_ps(row_add4_y, row_add4_y);
+    row_add5_y = _mm256_hadd_ps(row_add5_y, row_add5_y);
+    row_add6_y = _mm256_hadd_ps(row_add6_y, row_add6_y);
+    row_add7_y = _mm256_hadd_ps(row_add7_y, row_add7_y);
 
-    unpacked = _mm256_unpacklo_ps(row_add0_y, row_add1_y);
-    unpacked1 = _mm256_unpacklo_ps(row_add2_y, row_add3_y);
+    row_add0_y = _mm256_hadd_ps(row_add0_y, row_add0_y);
+    row_add1_y = _mm256_hadd_ps(row_add1_y, row_add1_y);
+    row_add2_y = _mm256_hadd_ps(row_add2_y, row_add2_y);
+    row_add3_y = _mm256_hadd_ps(row_add3_y, row_add3_y);
+    row_add4_y = _mm256_hadd_ps(row_add4_y, row_add4_y);
+    row_add5_y = _mm256_hadd_ps(row_add5_y, row_add5_y);
+    row_add6_y = _mm256_hadd_ps(row_add6_y, row_add6_y);
+    row_add7_y = _mm256_hadd_ps(row_add7_y, row_add7_y);
 
-    unpacked = _mm256_blend_ps(unpacked, unpacked1, 12);
+    unpacked = _mm256_setzero_ps();
+    unpacked = _mm256_blend_ps(unpacked, row_add0_y, 0b00000001);
+    unpacked = _mm256_blend_ps(unpacked, row_add1_y, 0b00000010);
+    unpacked = _mm256_blend_ps(unpacked, row_add2_y, 0b00000100);
+    unpacked = _mm256_blend_ps(unpacked, row_add3_y, 0b00001000);
+    unpacked = _mm256_blend_ps(unpacked, row_add4_y, 0b00010000);
+    unpacked = _mm256_blend_ps(unpacked, row_add5_y, 0b00100000);
+    unpacked = _mm256_blend_ps(unpacked, row_add6_y, 0b01000000);
+    unpacked = _mm256_blend_ps(unpacked, row_add7_y, 0b10000000); 
 
     social_force_y = _mm256_add_ps(unpacked, social_force_y);
 
@@ -714,7 +784,7 @@ void update_position_vectorize_3(float *position, float *desired_direction, floa
   __m256 timestep_vec = _mm256_set1_ps(TIMESTEP);
   __m256 one = _mm256_set1_ps(1);
 
-  for (int i = 0; i < n - 3; i += 4)
+  for (int i = 0; i < n - 7; i += 8)
   {
     prefered_velocity_x = _mm256_load_ps(actual_velocity + i);
     prefered_velocity_y = _mm256_load_ps(actual_velocity + n + i);

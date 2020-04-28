@@ -81,8 +81,8 @@ void update_desired_direction_vectorize_2(float *position, float *final_destinat
     target_y = _mm256_load_ps(final_destination + n + i);
 
     // compute differences
-    delta_x = target_x - current_x;
-    delta_y = target_y - current_y;
+    delta_x = _mm256_sub_ps(target_x, current_x);
+    delta_y = _mm256_sub_ps(target_y, current_y);
 
     // compute norm
     delta_x_2 = _mm256_mul_ps(delta_x, delta_x); // square each entry
