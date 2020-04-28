@@ -9,15 +9,15 @@
 
 extern char fiename_global[80];
 
-__m256d exp_fast_vec_3(__m256d x, __m256d one, __m256d exp_constant);
-void update_desired_direction_vectorize_3(double *position, double *final_destination, double *desired_direction, int n);
-void update_acceleration_term_vectorize_3(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
-//void compute_actual_velocity_vectorize_3(double *actual_speed, double *desired_direction, double *actual_velocity, int n);
-void update_people_repulsion_term_vectorize_3(double *position, double *desired_direction, double *actual_speed, double *Repulsion_term, int n);
-void update_border_repulsion_term_vectorize_3(double *position, double *borders, double *border_repulsion_term, int n, int n_borders);
-void compute_social_force_vectorize_3(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
-void update_position_vectorize_3(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n);
-void simulation_basic_vectorize_3(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                                  double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed);
+__m256 exp_fast_vec_3(__m256 x, __m256 one, __m256 exp_constant);
+void update_desired_direction_vectorize_3(float *position, float *final_destination, float *desired_direction, int n);
+void update_acceleration_term_vectorize_3(float *desired_direction, float *acceleration_term, float *actual_velocity, float *desired_speed, int n);
+//void compute_actual_velocity_vectorize_3(float *actual_speed, float *desired_direction, float *actual_velocity, int n);
+void update_people_repulsion_term_vectorize_3(float *position, float *desired_direction, float *actual_speed, float *Repulsion_term, int n);
+void update_border_repulsion_term_vectorize_3(float *position, float *borders, float *border_repulsion_term, int n, int n_borders);
+void compute_social_force_vectorize_3(float *acceleration_term, float *people_repulsion_term, float *border_repulsion_term, float *social_force, int n, int n_borders);
+void update_position_vectorize_3(float *position, float *desired_direction, float *actual_speed, float *social_force, float *actual_velocity, float *desired_max_speed, int n);
+void simulation_basic_vectorize_3(int number_of_people, int n_timesteps, float *position, float *speed, float *desired_direction, float *final_destination, float *borders, float *actual_velocity, float *acceleration_term,
+                                  float *people_repulsion_term, float *border_repulsion_term, float *social_force, float *desired_speed, float *desired_max_speed);
 
 #endif

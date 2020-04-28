@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
      final_destination: (n,2) : array with 2d coordinate of the final destinations of people
                      n: number of people
 */
-void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n)
+void initialize_people(float *position, float *desired_direction, float *final_destination, float *desired_speed, int n)
 {
 
     srand(42);
@@ -160,7 +160,7 @@ void initialize_people(double *position, double *desired_direction, double *fina
               desired_max_speed (n,1) = vector of max speed values
                      n: number of people
 */
-void compute_max_speed(double *desired_speed, double *desired_max_speed, int n)
+void compute_max_speed(float *desired_speed, float *desired_max_speed, int n)
 {
     for (int i = 0; i < n; i++)
     {
@@ -176,7 +176,7 @@ void compute_max_speed(double *desired_speed, double *desired_max_speed, int n)
                borders: (n_borders,2) : array of borders
              n_borders: number of borders
 */
-void initialize_borders(double *borders, int n_borders)
+void initialize_borders(float *borders, int n_borders)
 {
     // check for the basic scenario
     if (n_borders != 2)
@@ -202,9 +202,9 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
     add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
     add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_1, compute_simplified_flops, "vectorize_1");
+    //add_function(sim_list, sim_counter, simulation_basic_vectorize_1, compute_simplified_flops, "vectorize_1");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_2, compute_simplified_flops, "vectorize_2");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
+    //add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
 
     add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
@@ -236,29 +236,29 @@ void run_bench(sim_t sim)
 
     long long unsigned int flops = arguments.n_timesteps * flops_f(number_of_people);
 
-    double *position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *position = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(position, number_of_people * 2);
-    double *speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(speed, number_of_people);
-    double *desired_direction = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *desired_direction = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(desired_direction, number_of_people * 2);
-    double *final_destination = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *final_destination = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(final_destination, number_of_people * 2);
-    double *borders = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    float *borders = (float *)aligned_malloc(N_BORDERS * sizeof(float), 32);
     set_zero(borders, N_BORDERS);
-    double *actual_velocity = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *actual_velocity = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(actual_velocity, number_of_people * 2);
-    double *acceleration_term = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *acceleration_term = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(acceleration_term, number_of_people * 2);
-    double *people_repulsion_term = (double *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(double), 32);
+    float *people_repulsion_term = (float *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(float), 32);
     set_zero(people_repulsion_term, number_of_people * number_of_people * 2);
-    double *border_repulsion_term = (double *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(double), 32);
+    float *border_repulsion_term = (float *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(float), 32);
     set_zero(border_repulsion_term, number_of_people * N_BORDERS * 2);
-    double *social_force = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *social_force = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(social_force, number_of_people * 2);
-    double *desired_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *desired_speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(desired_speed, number_of_people);
-    double *desired_max_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *desired_max_speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(desired_max_speed, number_of_people);
     // check if calloc worked correctly
     if (position == NULL || speed == NULL || desired_direction == NULL || final_destination == NULL || borders == NULL || actual_velocity == NULL || acceleration_term == NULL || people_repulsion_term == NULL || border_repulsion_term == NULL || social_force == NULL || desired_speed == NULL || desired_max_speed == NULL)

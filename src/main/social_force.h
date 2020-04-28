@@ -58,7 +58,7 @@
 #define IndexY_border_old(i, j, n) ((i * (2 * 2) + 2 * j + 1))
 
 // typedefs
-typedef void (*sim_func)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
+typedef void (*sim_func)(int, int, float *, float *, float *, float *, float *, float *, float *, float *, float *, float *, float *, float *);
 typedef long long unsigned int (*flops_func)(int);
 
 typedef struct
@@ -69,9 +69,9 @@ typedef struct
 } sim_t;
 
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter);
-void initialize_people(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
-void compute_max_speed(double *desired_speed, double *desired_max_speed, int n);
-void initialize_borders(double *borders, int n_borders);
+void initialize_people(float *position, float *desired_direction, float *final_destination, float *desired_speed, int n);
+void compute_max_speed(float *desired_speed, float *desired_max_speed, int n);
+void initialize_borders(float *borders, int n_borders);
 void run_bench(sim_t sim);
 int compare(const void *a, const void *b);
 long long unsigned int compute_basic_flops(int number_of_people);

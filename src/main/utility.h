@@ -12,14 +12,14 @@ extern char filename_global[80];
 
 /* function defined in the header file itself */
 void get_filename();
-void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
-void output_to_file_persons(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
+void output_to_file_initial_state(char *filename, float *position, float *actual_speed, float *desired_direction, float *final_destination, int n, int n_timestep);
+void output_to_file_persons(char *filename, float *position, float *actual_speed, float *desired_direction, float *final_destination, int n, int n_timestep);
 void output_to_file_constants(char *);
 void free_all(int n, ...);
-double exp_fast(double x);
-double exp_taylor(double x);
+float exp_fast(float x);
+float exp_taylor(float x);
 
-double sampleNormal(double sigma, double mu);
-void set_zero(double *p, int size);
+float sampleNormal(float sigma, float mu);
+void set_zero(float *p, int size);
 
 #endif

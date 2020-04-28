@@ -26,17 +26,17 @@ extern char filename_global[80];
 
     Assumptions: The parameters are positive
   Parameters: 
-              sigma: (double) : squared value of the std.deviation of the distribution
-                 mu: (double) : mean of the distribution            
+              sigma: (float) : squared value of the std.deviation of the distribution
+                 mu: (float) : mean of the distribution            
 */
-double sampleNormal(double sigma, double mu)
+float sampleNormal(float sigma, float mu)
 {
-    double u = ((double)rand() / (RAND_MAX)) * 2 - 1;
-    double v = ((double)rand() / (RAND_MAX)) * 2 - 1;
-    double r = u * u + v * v;
+    float u = ((float)rand() / (RAND_MAX)) * 2 - 1;
+    float v = ((float)rand() / (RAND_MAX)) * 2 - 1;
+    float r = u * u + v * v;
     if (r == 0 || r > 1)
         return sampleNormal(sigma, mu);
-    double c = sqrt(-2 * log(r) / r);
+    float c = sqrt(-2 * log(r) / r);
     return ((u * c * sigma) + mu);
 }
 
@@ -47,7 +47,7 @@ double sampleNormal(double sigma, double mu)
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_initial_state(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep)
+void output_to_file_initial_state(char *filename, float *position, float *actual_speed, float *desired_direction, float *final_destination, int n, int n_timestep)
 {
     FILE *fptr;
 
@@ -106,7 +106,7 @@ void output_to_file_constants(char *filename)
                      n: number of people
             n_features: number of features per person
 */
-void output_to_file_persons(char *filename, double *position, double *speed, double *desired_direction, double *final_destination, int n, int n_timestep)
+void output_to_file_persons(char *filename, float *position, float *speed, float *desired_direction, float *final_destination, int n, int n_timestep)
 {
     FILE *fptr;
 
@@ -119,15 +119,15 @@ void output_to_file_persons(char *filename, double *position, double *speed, dou
 
     for (int i = 0; i < n; i++)
     {
-        double position_x = position[2 * i];
-        double position_y = position[2 * i + 1];
-        double speed_c = speed[i];
-        double desired_direction_x = desired_direction[2 * i];
-        double desired_direction_y = desired_direction[2 * i + 1];
-        double final_destination_x = final_destination[2 * i];
-        double final_destination_y = final_destination[2 * i + 1];
-        double vel_x = desired_direction_x * speed_c;
-        double vel_y = desired_direction_y * speed_c;
+        float position_x = position[2 * i];
+        float position_y = position[2 * i + 1];
+        float speed_c = speed[i];
+        float desired_direction_x = desired_direction[2 * i];
+        float desired_direction_y = desired_direction[2 * i + 1];
+        float final_destination_x = final_destination[2 * i];
+        float final_destination_y = final_destination[2 * i + 1];
+        float vel_x = desired_direction_x * speed_c;
+        float vel_y = desired_direction_y * speed_c;
 
         fprintf(fptr, "%f ", position_x);
         fprintf(fptr, "%f ", position_y);
@@ -168,26 +168,26 @@ void get_filename()
 }
 
 /*
-*   Function that frees all the pointers to double passed as an argument
+*   Function that frees all the pointers to float passed as an argument
 */
 void free_all(int n, ...)
 {
     int i;
-    double **cur;
+    float **cur;
 
     va_list list;
     va_start(list, n);
 
     for (int i = 0; i < n; i++)
     {
-        cur = va_arg(list, double **);
+        cur = va_arg(list, float **);
         aligned_free(*cur);
     }
 
     va_end(list);
 }
 
-double exp_fast(double x)
+float exp_fast(float x)
 {
     x = 1.0 + x / 16384;
     x *= x;
@@ -207,9 +207,9 @@ double exp_fast(double x)
     return x;
 }
 
-double exp_taylor(double x)
+float exp_taylor(float x)
 {
-    double sum = 1.0f; // initialize sum of series
+    float sum = 1.0f; // initialize sum of series
 
     for (int i = 5; i > 0; --i)
         sum = 1 + x * sum / i;
@@ -217,7 +217,7 @@ double exp_taylor(double x)
     return sum;
 }
 
-void set_zero(double *p, int size)
+void set_zero(float *p, int size)
 {
     for (int i = 0; i < size; i++)
     {

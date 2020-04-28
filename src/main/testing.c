@@ -24,10 +24,10 @@ testcase_t **testcases[N_TESTS];
 
 int counter[2 * N_TESTS];
 
-void (**direction_ptr_v)(double *, double *, double *, int);
-void (**acceleration_ptr_v)(double *, double *, double *, double *, int);
-void (**social_ptr_v)(double *, double *, double *, double *, int, int);
-void (**pos_ptr_v)(double *, double *, double *, double *, double *, double *, int);
+void (**direction_ptr_v)(float *, float *, float *, int);
+void (**acceleration_ptr_v)(float *, float *, float *, float *, int);
+void (**social_ptr_v)(float *, float *, float *, float *, int, int);
+void (**pos_ptr_v)(float *, float *, float *, float *, float *, float *, int);
 
 /*
 *   Function that adds all the testcases to try to the list
@@ -97,29 +97,29 @@ void run_finite_differences(sim_func f, struct arguments arguments)
     int number_of_people = arguments.n_people;
     int n_timesteps = arguments.n_timesteps;
     // allocate memory
-    double *position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *position = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(position, number_of_people * 2);
-    double *speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(speed, number_of_people);
-    double *desired_direction = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *desired_direction = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(desired_direction, number_of_people * 2);
-    double *final_destination = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *final_destination = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(final_destination, number_of_people * 2);
-    double *borders = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    float *borders = (float *)aligned_malloc(N_BORDERS * sizeof(float), 32);
     set_zero(borders, N_BORDERS);
-    double *actual_velocity = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *actual_velocity = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(actual_velocity, number_of_people * 2);
-    double *acceleration_term = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *acceleration_term = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(acceleration_term, number_of_people * 2);
-    double *people_repulsion_term = (double *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(double), 32);
+    float *people_repulsion_term = (float *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(float), 32);
     set_zero(people_repulsion_term, number_of_people * number_of_people * 2);
-    double *border_repulsion_term = (double *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(double), 32);
+    float *border_repulsion_term = (float *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(float), 32);
     set_zero(border_repulsion_term, number_of_people * N_BORDERS * 2);
-    double *social_force = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *social_force = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(social_force, number_of_people * 2);
-    double *desired_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *desired_speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(desired_speed, number_of_people);
-    double *desired_max_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *desired_max_speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(desired_max_speed, number_of_people);
 
     // check if calloc worked correctly
@@ -157,24 +157,24 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
     int number_of_people = 100;
     int n_timesteps = 1;
     int n_test_timesteps = 100;
-    double *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
+    float *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
         *oracle_borders, *oracle_actual_velocity, *oracle_acceleration_term, *oracle_people_repulsion_term,
         *oracle_border_repulsion_term, *oracle_social_force, *oracle_desired_speed, *oracle_desired_max_speed;
-    double *current_position, *current_speed, *current_desired_direction, *current_final_destination,
+    float *current_position, *current_speed, *current_desired_direction, *current_final_destination,
         *current_borders, *current_actual_velocity, *current_acceleration_term, *current_people_repulsion_term,
         *current_border_repulsion_term, *current_social_force, *current_desired_speed, *current_desired_max_speed;
 
-    double *starting_position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *starting_position = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(starting_position, number_of_people * 2);
-    double *starting_desired_direction = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *starting_desired_direction = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(starting_desired_direction, number_of_people * 2);
-    double *starting_final_destination = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
+    float *starting_final_destination = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(starting_final_destination, number_of_people * 2);
-    double *starting_borders = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
+    float *starting_borders = (float *)aligned_malloc(N_BORDERS * sizeof(float), 32);
     set_zero(starting_borders, N_BORDERS);
-    double *starting_desired_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *starting_desired_speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(starting_desired_speed, number_of_people);
-    double *starting_desired_max_speed = (double *)aligned_malloc(number_of_people * sizeof(double), 32);
+    float *starting_desired_max_speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
     set_zero(starting_desired_max_speed, number_of_people);
     // // check if calloc worked correctly
     if (starting_position == NULL || starting_desired_direction == NULL || starting_final_destination == NULL || starting_borders == NULL || starting_desired_speed == NULL || starting_desired_max_speed == NULL)
@@ -338,9 +338,9 @@ int run_testcases()
         PRINT_RED;
         printf("Running %s tests\n", id);
         PRINT_DEF;
-        double *result;
+        float *result;
         size_t result_size;
-        double *control;
+        float *control;
         int np;
         char *testname;
         testcase_t *cur;
@@ -358,28 +358,28 @@ int run_testcases()
                 {
                 case TDIR:
                     result_size = np * 2;
-                    void (*f0)(double *, double *, double *, int) = direction_ptr_v[i];
-                    result = (double *)calloc(result_size, sizeof(double));
+                    void (*f0)(float *, float *, float *, int) = direction_ptr_v[i];
+                    result = (float *)calloc(result_size, sizeof(float));
                     f0(cur->pos, cur->des, result, np);
                     control = cur->dir;
                     break;
                 case TACC:
                     result_size = np * 2;
-                    void (*f1)(double *, double *, double *, double *, int) = acceleration_ptr_v[i];
-                    result = (double *)calloc(result_size, sizeof(double));
+                    void (*f1)(float *, float *, float *, float *, int) = acceleration_ptr_v[i];
+                    result = (float *)calloc(result_size, sizeof(float));
                     f1(cur->dir, result, cur->vel, cur->spe, np);
                     control = cur->acc;
                     break;
                 case TFRC:
                     result_size = np * 2;
-                    void (*f4)(double *, double *, double *, double *, int, int) = social_ptr_v[i];
-                    result = (double *)calloc(result_size, sizeof(double));
+                    void (*f4)(float *, float *, float *, float *, int, int) = social_ptr_v[i];
+                    result = (float *)calloc(result_size, sizeof(float));
                     f4(cur->acc, cur->pre, cur->bre, result, np, cur->n_borders);
                     control = cur->frc;
                     break;
                 case TPOS:
                     result_size = np * 2;
-                    void (*f5)(double *, double *, double *, double *, double *, double *, int) = pos_ptr_v[i];
+                    void (*f5)(float *, float *, float *, float *, float *, float *, int) = pos_ptr_v[i];
                     f5(cur->pos, cur->dir, cur->spe, cur->frc, cur->vel, cur->dspe, np);
                     control = cur->des;
                     result = cur->pos; //TODO: right now it only check the final position, not the direction
@@ -407,10 +407,10 @@ int run_testcases()
 *   and the result of the function testes.
 *   This function returns 1 if the distance is greater than the threshold, 0 otherwise.
 */
-int check_square_distance(double *expected, double *res, int n, int case_n)
+int check_square_distance(float *expected, float *res, int n, int case_n)
 {
     int wrong = 0;
-    double acc = 0.0;
+    float acc = 0.0;
     if (case_n == 0)
     {
         for (int i = 0; i < n; i++)
@@ -505,7 +505,7 @@ int check_square_distance(double *expected, double *res, int n, int case_n)
     return wrong;
 }
 
-void add_direction_testcase(char *name, double *pos, double *des, double *output, int n)
+void add_direction_testcase(char *name, float *pos, float *des, float *output, int n)
 {
     counter[2 * TDIR]++;
     testcases[TDIR] = realloc(testcases[TDIR], sizeof(testcase_t *) * counter[2 * TDIR]);
@@ -517,7 +517,7 @@ void add_direction_testcase(char *name, double *pos, double *des, double *output
     testcases[TDIR][counter[2 * TDIR] - 1]->n = n;
 }
 
-void add_acceleration_testcase(char *name, double *dir, double *vel, double *spe, double *output, int n)
+void add_acceleration_testcase(char *name, float *dir, float *vel, float *spe, float *output, int n)
 {
     counter[2 * TACC]++;
     testcases[TACC] = realloc(testcases[TACC], sizeof(testcase_t *) * counter[2 * TACC]);
@@ -530,7 +530,7 @@ void add_acceleration_testcase(char *name, double *dir, double *vel, double *spe
     testcases[TACC][counter[2 * TACC] - 1]->n = n;
 }
 
-void add_compute_social_force_testcase(char *name, double *acc, double *people_rep, double *border_rep, double *output, int n, int n_borders)
+void add_compute_social_force_testcase(char *name, float *acc, float *people_rep, float *border_rep, float *output, int n, int n_borders)
 {
     counter[2 * TFRC]++;
     testcases[TFRC] = realloc(testcases[TFRC], sizeof(testcase_t *) * counter[2 * TFRC]);
@@ -544,7 +544,7 @@ void add_compute_social_force_testcase(char *name, double *acc, double *people_r
     testcases[TFRC][counter[2 * TFRC] - 1]->n_borders = n_borders;
 }
 
-void add_position_testcase(char *name, double *pos, double *dir, double *speed, double *force, double *actual_vel, double *desired_speed, double *output_pos, int n)
+void add_position_testcase(char *name, float *pos, float *dir, float *speed, float *force, float *actual_vel, float *desired_speed, float *output_pos, int n)
 {
     counter[2 * TPOS]++;
     testcases[TPOS] = realloc(testcases[TPOS], sizeof(testcase_t *) * counter[2 * TPOS]);
@@ -560,68 +560,68 @@ void add_position_testcase(char *name, double *pos, double *dir, double *speed, 
     testcases[TPOS][counter[2 * TPOS] - 1]->n = n;
 }
 
-void add_direction_implementation(void (*f)(double *, double *, double *, int))
+void add_direction_implementation(void (*f)(float *, float *, float *, int))
 {
     counter[2 * TDIR + 1]++;
-    direction_ptr_v = realloc(direction_ptr_v, counter[2 * TDIR + 1] * sizeof(void (*)(double *, double *, double *, int)));
+    direction_ptr_v = realloc(direction_ptr_v, counter[2 * TDIR + 1] * sizeof(void (*)(float *, float *, float *, int)));
     direction_ptr_v[counter[2 * TDIR + 1] - 1] = f;
 }
 
-void add_acceleration_implementation(void (*f)(double *, double *, double *, double *, int))
+void add_acceleration_implementation(void (*f)(float *, float *, float *, float *, int))
 {
     counter[2 * TACC + 1]++;
-    acceleration_ptr_v = realloc(acceleration_ptr_v, counter[2 * TACC + 1] * sizeof(void (*)(double *, double *, double *, double *, int)));
+    acceleration_ptr_v = realloc(acceleration_ptr_v, counter[2 * TACC + 1] * sizeof(void (*)(float *, float *, float *, float *, int)));
     acceleration_ptr_v[counter[2 * TACC + 1] - 1] = f;
 }
 
-void add_social_implementation(void (*f)(double *, double *, double *, double *, int, int))
+void add_social_implementation(void (*f)(float *, float *, float *, float *, int, int))
 {
     counter[2 * TFRC + 1]++;
-    social_ptr_v = realloc(social_ptr_v, counter[2 * TFRC + 1] * sizeof(void (*)(double *, double *, double *, double *, int, int)));
+    social_ptr_v = realloc(social_ptr_v, counter[2 * TFRC + 1] * sizeof(void (*)(float *, float *, float *, float *, int, int)));
     social_ptr_v[counter[2 * TFRC + 1] - 1] = f;
 }
 
-void add_pos_implementation(void (*f)(double *, double *, double *, double *, double *, double *, int))
+void add_pos_implementation(void (*f)(float *, float *, float *, float *, float *, float *, int))
 {
     counter[2 * TPOS + 1]++;
-    pos_ptr_v = realloc(pos_ptr_v, counter[2 * TPOS + 1] * sizeof(void (*)(double *, double *, double *, double *, double *, double *, int)));
+    pos_ptr_v = realloc(pos_ptr_v, counter[2 * TPOS + 1] * sizeof(void (*)(float *, float *, float *, float *, float *, float *, int)));
     pos_ptr_v[counter[2 * TPOS + 1] - 1] = f;
 }
 
-void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-               double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
+void copy_init(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+               float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n)
 {
-    *pos = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
-    *dir = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
-    *fdes = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
-    *bor = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
-    *spe = (double *)aligned_malloc(n * sizeof(double), 32);
-    *mspe = (double *)aligned_malloc(n * sizeof(double), 32);
+    *pos = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
+    *dir = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
+    *fdes = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
+    *bor = (float *)aligned_malloc(N_BORDERS * sizeof(float), 32);
+    *spe = (float *)aligned_malloc(n * sizeof(float), 32);
+    *mspe = (float *)aligned_malloc(n * sizeof(float), 32);
 
-    memcpy(*pos, s_pos, n * 2 * sizeof(double));   //
-    memcpy(*dir, s_dir, n * 2 * sizeof(double));   //
-    memcpy(*fdes, s_fdes, n * 2 * sizeof(double)); //
-    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
-    memcpy(*spe, s_spe, n * sizeof(double));
-    memcpy(*mspe, s_mspe, n * sizeof(double));
+    memcpy(*pos, s_pos, n * 2 * sizeof(float));   //
+    memcpy(*dir, s_dir, n * 2 * sizeof(float));   //
+    memcpy(*fdes, s_fdes, n * 2 * sizeof(float)); //
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
+    memcpy(*spe, s_spe, n * sizeof(float));
+    memcpy(*mspe, s_mspe, n * sizeof(float));
 }
 
-void copy_init_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-                   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
+void copy_init_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+                   float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n)
 {
 
-    *pos = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
-    *dir = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
-    *fdes = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
-    *bor = (double *)aligned_malloc(N_BORDERS * sizeof(double), 32);
-    *spe = (double *)aligned_malloc(n * sizeof(double), 32);
-    *mspe = (double *)aligned_malloc(n * sizeof(double), 32);
+    *pos = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
+    *dir = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
+    *fdes = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
+    *bor = (float *)aligned_malloc(N_BORDERS * sizeof(float), 32);
+    *spe = (float *)aligned_malloc(n * sizeof(float), 32);
+    *mspe = (float *)aligned_malloc(n * sizeof(float), 32);
 
     for (int i = 0; i < n; i++)
     {
-        double *posk = *pos;
-        double *dirk = *dir;
-        double *fdesk = *fdes;
+        float *posk = *pos;
+        float *dirk = *dir;
+        float *fdesk = *fdes;
 
         posk[IndexX(i)] = s_pos[IndexX_old(i)];
         posk[IndexY(i, n)] = s_pos[IndexY_old(i, n)];
@@ -633,31 +633,31 @@ void copy_init_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, 
         fdesk[IndexY(i, n)] = s_fdes[IndexY_old(i, n)];
     }
 
-    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
-    memcpy(*spe, s_spe, n * sizeof(double));
-    memcpy(*mspe, s_mspe, n * sizeof(double));
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
+    memcpy(*spe, s_spe, n * sizeof(float));
+    memcpy(*mspe, s_mspe, n * sizeof(float));
 }
 
-void copy_state(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-                double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
+void copy_state(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+                float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n)
 {
-    memcpy(*pos, s_pos, n * 2 * sizeof(double));   //
-    memcpy(*dir, s_dir, n * 2 * sizeof(double));   //
-    memcpy(*fdes, s_fdes, n * 2 * sizeof(double)); //
-    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
-    memcpy(*spe, s_spe, n * sizeof(double));
-    memcpy(*mspe, s_mspe, n * sizeof(double));
+    memcpy(*pos, s_pos, n * 2 * sizeof(float));   //
+    memcpy(*dir, s_dir, n * 2 * sizeof(float));   //
+    memcpy(*fdes, s_fdes, n * 2 * sizeof(float)); //
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
+    memcpy(*spe, s_spe, n * sizeof(float));
+    memcpy(*mspe, s_mspe, n * sizeof(float));
 }
 
-void copy_state_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-                    double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n)
+void copy_state_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+                    float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n)
 {
 
     for (int i = 0; i < n; i++)
     {
-        double *posk = *pos;
-        double *dirk = *dir;
-        double *fdesk = *fdes;
+        float *posk = *pos;
+        float *dirk = *dir;
+        float *fdesk = *fdes;
 
         posk[IndexX(i)] = s_pos[IndexX_old(i)];
         posk[IndexY(i, n)] = s_pos[IndexY_old(i, n)];
@@ -669,62 +669,62 @@ void copy_state_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor,
         fdesk[IndexY(i, n)] = s_fdes[IndexY_old(i, n)];
     }
 
-    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
-    memcpy(*spe, s_spe, n * sizeof(double));
-    memcpy(*mspe, s_mspe, n * sizeof(double));
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
+    memcpy(*spe, s_spe, n * sizeof(float));
+    memcpy(*mspe, s_mspe, n * sizeof(float));
 }
 
-void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
-                     double **frc, int n)
+void allocate_arrays(float **spe, float **vel, float **acc, float **prep, float **brep,
+                     float **frc, int n)
 {
-    *spe = (double *)aligned_malloc(n * sizeof(double), 32);
+    *spe = (float *)aligned_malloc(n * sizeof(float), 32);
     set_zero(*spe, n);
-    *vel = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    *vel = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
     set_zero(*vel, n * 2);
-    *acc = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    *acc = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
     set_zero(*acc, n * 2);
-    *prep = (double *)aligned_malloc(n * n * 2 * sizeof(double), 32);
+    *prep = (float *)aligned_malloc(n * n * 2 * sizeof(float), 32);
     set_zero(*prep, n * n * 2);
-    *brep = (double *)aligned_malloc(n * N_BORDERS * 2 * sizeof(double), 32);
+    *brep = (float *)aligned_malloc(n * N_BORDERS * 2 * sizeof(float), 32);
     set_zero(*brep, n * N_BORDERS * 2);
-    *frc = (double *)aligned_malloc(n * 2 * sizeof(double), 32);
+    *frc = (float *)aligned_malloc(n * 2 * sizeof(float), 32);
     set_zero(*frc, n * 2);
 }
 
 /* finite-differences functions */
 
-double compute_people_repulsion_fd(double *position, double *parameters, double *desired_direction, double *actual_speed, int i, int j)
+float compute_people_repulsion_fd(float *position, float *parameters, float *desired_direction, float *actual_speed, int i, int j)
 {
-    double rx_ab = parameters[0];
-    double ry_ab = parameters[1];
-    double ex_a = desired_direction[i * 2];
-    double ey_a = desired_direction[i * 2 + 1];
-    double ex_b = desired_direction[j * 2];
-    double ey_b = desired_direction[j * 2 + 1];
-    double vb = actual_speed[j];
-    double delta_b = vb * TIMESTEP;
+    float rx_ab = parameters[0];
+    float ry_ab = parameters[1];
+    float ex_a = desired_direction[i * 2];
+    float ey_a = desired_direction[i * 2 + 1];
+    float ex_b = desired_direction[j * 2];
+    float ey_b = desired_direction[j * 2 + 1];
+    float vb = actual_speed[j];
+    float delta_b = vb * TIMESTEP;
 
-    double r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab);
+    float r_ab_norm = sqrt(rx_ab * rx_ab + ry_ab * ry_ab);
 
-    double rx_ab_mex = rx_ab - delta_b * ex_b;
-    double ry_ab_mey = ry_ab - delta_b * ey_b;
+    float rx_ab_mex = rx_ab - delta_b * ex_b;
+    float ry_ab_mey = ry_ab - delta_b * ey_b;
 
-    double r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey);
+    float r_ab_me_norm = sqrt(rx_ab_mex * rx_ab_mex + ry_ab_mey * ry_ab_mey);
 
-    double b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2;
+    float b = sqrt((r_ab_norm + r_ab_me_norm) * (r_ab_norm + r_ab_me_norm) - (delta_b * delta_b)) / 2;
 
     return V_ALPHA_BETA * exp(-b / SIGMA);
 }
 
-void add_estimated_gradient_people_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *desired_direction, double *actual_speed, int i, int j)
+void add_estimated_gradient_people_repulsion(float *gradient, float *parameters, int n_parameters, float *position, float *desired_direction, float *actual_speed, int i, int j)
 {
 
-    double dp = 1.0e-7;
-    double f_P, f_M;
+    float dp = 1.0e-7;
+    float f_P, f_M;
 
     for (int p = 0; p < n_parameters; p++)
     {
-        double tmpVal = parameters[p];
+        float tmpVal = parameters[p];
         parameters[p] = tmpVal + dp;
         f_P = compute_people_repulsion_fd(position, parameters, desired_direction, actual_speed, i, j);
 
@@ -733,24 +733,24 @@ void add_estimated_gradient_people_repulsion(double *gradient, double *parameter
 
         gradient[p] = (f_P - f_M) / (2 * dp);
     }
-    double ex_a = desired_direction[i * 2];
-    double ey_a = desired_direction[i * 2 + 1];
-    double check = ex_a * (gradient[0]) + ey_a * (gradient[1]);
-    double threshold = sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) * cos(PSI);
-    double w = check >= threshold ? 1 : INFLUENCE;
+    float ex_a = desired_direction[i * 2];
+    float ey_a = desired_direction[i * 2 + 1];
+    float check = ex_a * (gradient[0]) + ey_a * (gradient[1]);
+    float threshold = sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) * cos(PSI);
+    float w = check >= threshold ? 1 : INFLUENCE;
     gradient[0] = w * -gradient[0];
     gradient[1] = w * -gradient[1];
 }
 
-void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double *position, double *desired_direction, double *actual_speed)
+void test_people_repulsion_with_FD(float *people_repulsion_term, int n, float *position, float *desired_direction, float *actual_speed)
 {
     int num_errors = 0;
-    double tol = 1e-4;
-    double eps = 1e-10;
+    float tol = 1e-4;
+    float eps = 1e-10;
 
-    double fd_gradient[2];
-    double parameters[2];
-    double *analytic_gradient = people_repulsion_term;
+    float fd_gradient[2];
+    float parameters[2];
+    float *analytic_gradient = people_repulsion_term;
 
     for (int i = 0; i < n; i++)
     {
@@ -758,15 +758,15 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
         {
             if (i == j)
                 continue;
-            double rx_ab = position[i * 2] - position[j * 2];
-            double ry_ab = position[i * 2 + 1] - position[j * 2 + 1];
+            float rx_ab = position[i * 2] - position[j * 2];
+            float ry_ab = position[i * 2 + 1] - position[j * 2 + 1];
             parameters[0] = rx_ab;
             parameters[1] = ry_ab;
             add_estimated_gradient_people_repulsion(fd_gradient, parameters, 2, position, desired_direction, actual_speed, i, j);
             for (int p = 0; p < 2; p++)
             {
-                double absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n) + 2 * j + p]);
-                double relError = 2 * absErr / (eps + analytic_gradient[i * (2 * n) + 2 * j + p] + fd_gradient[p]);
+                float absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n) + 2 * j + p]);
+                float relError = 2 * absErr / (eps + analytic_gradient[i * (2 * n) + 2 * j + p] + fd_gradient[p]);
 
                 if (relError > tol && absErr > EPS)
                 {
@@ -784,28 +784,28 @@ void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double 
 }
 // default values
 
-double compute_border_repulsion_fd(double *position, double *parameters, double *borders, int i, int j)
+float compute_border_repulsion_fd(float *position, float *parameters, float *borders, int i, int j)
 {
-    double rx_a = parameters[0];
-    double ry_a = parameters[1];
+    float rx_a = parameters[0];
+    float ry_a = parameters[1];
 
-    double rx_aB = 0.0;
-    double ry_aB = ry_a - borders[j];
+    float rx_aB = 0.0;
+    float ry_aB = ry_a - borders[j];
 
-    double r_aB_norm = fabs(ry_aB);
+    float r_aB_norm = fabs(ry_aB);
 
     return U_ALPHA_B * exp(-r_aB_norm / R);
 }
 
-void add_estimated_gradient_border_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *borders, int i, int j)
+void add_estimated_gradient_border_repulsion(float *gradient, float *parameters, int n_parameters, float *position, float *borders, int i, int j)
 {
 
-    double dp = 1.0e-7;
-    double f_P, f_M;
+    float dp = 1.0e-7;
+    float f_P, f_M;
 
     for (int p = 0; p < n_parameters; p++)
     {
-        double tmpVal = parameters[p];
+        float tmpVal = parameters[p];
         parameters[p] = tmpVal + dp;
         f_P = compute_border_repulsion_fd(position, parameters, borders, i, j);
 
@@ -818,32 +818,32 @@ void add_estimated_gradient_border_repulsion(double *gradient, double *parameter
     gradient[1] *= -1;
 }
 
-void test_border_repulsion_with_FD(double *border_repulsion_term, double *position, double *borders, int n_borders, int n)
+void test_border_repulsion_with_FD(float *border_repulsion_term, float *position, float *borders, int n_borders, int n)
 {
     int num_errors = 0;
-    double tol = 1e-4;
-    double eps = 1e-10;
+    float tol = 1e-4;
+    float eps = 1e-10;
 
-    double fd_gradient[2];
-    double parameters[2];
-    double *analytic_gradient = border_repulsion_term;
+    float fd_gradient[2];
+    float parameters[2];
+    float *analytic_gradient = border_repulsion_term;
 
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n_borders; j++)
         {
-            double rx_a = position[i * 2];
-            double ry_a = position[i * 2 + 1];
-            double rx_aB = 0.0;
-            double ry_aB = ry_a - borders[j];
+            float rx_a = position[i * 2];
+            float ry_a = position[i * 2 + 1];
+            float rx_aB = 0.0;
+            float ry_aB = ry_a - borders[j];
 
             parameters[0] = rx_aB;
             parameters[1] = ry_aB;
             add_estimated_gradient_border_repulsion(fd_gradient, parameters, 2, position, borders, i, j);
             for (int p = 0; p < 2; p++)
             {
-                double absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n_borders) + 2 * j + p]);
-                double relError = 2 * absErr / (eps + analytic_gradient[i * (2 * n_borders) + 2 * j + p] + fd_gradient[p]);
+                float absErr = fabs(fd_gradient[p] - analytic_gradient[i * (2 * n_borders) + 2 * j + p]);
+                float relError = 2 * absErr / (eps + analytic_gradient[i * (2 * n_borders) + 2 * j + p] + fd_gradient[p]);
 
                 if (relError > tol && absErr > EPS)
                 {

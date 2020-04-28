@@ -27,51 +27,51 @@ int run_tests(sim_t **sim_list, int sim_counter);
 void run_finite_differences(sim_func f, struct arguments arguments);
 int run_testcases();
 int compare_simulations(sim_t **sim_list, int sim_counter);
-int check_square_distance(double *expected, double *res, int n, int case_n);
-void copy_init(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-			   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
-void copy_init_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-				   double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
-void copy_state(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-				double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
-void copy_state_new(double *s_pos, double *s_dir, double *s_fdes, double *s_bor, double *s_spe, double *s_mspe,
-				double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n);
-void allocate_arrays(double **spe, double **vel, double **acc, double **prep, double **brep,
-					 double **frc, int n);
-void add_direction_testcase(char *name, double *pos, double *speed, double *output, int n);
-void add_acceleration_testcase(char *name, double *dir, double *vel, double *spe, double *output, int n);
-void add_compute_social_force_testcase(char *name, double *acc, double *people_rep, double *border_rep, double *output, int n, int n_borders);
-void add_position_testcase(char *name, double *pos, double *dir, double *speed, double *force, double *actual_vel, double *desired_speed, double *output_pos, int n);
-void add_direction_implementation(void (*f)(double *, double *, double *, int));
-void add_acceleration_implementation(void (*f)(double *, double *, double *, double *, int));
-void add_social_implementation(void (*f)(double *, double *, double *, double *, int, int));
-void add_pos_implementation(void (*f)(double *, double *, double *, double *, double *, double *, int));
+int check_square_distance(float *expected, float *res, int n, int case_n);
+void copy_init(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+			   float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n);
+void copy_init_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+				   float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n);
+void copy_state(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+				float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n);
+void copy_state_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
+				float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n);
+void allocate_arrays(float **spe, float **vel, float **acc, float **prep, float **brep,
+					 float **frc, int n);
+void add_direction_testcase(char *name, float *pos, float *speed, float *output, int n);
+void add_acceleration_testcase(char *name, float *dir, float *vel, float *spe, float *output, int n);
+void add_compute_social_force_testcase(char *name, float *acc, float *people_rep, float *border_rep, float *output, int n, int n_borders);
+void add_position_testcase(char *name, float *pos, float *dir, float *speed, float *force, float *actual_vel, float *desired_speed, float *output_pos, int n);
+void add_direction_implementation(void (*f)(float *, float *, float *, int));
+void add_acceleration_implementation(void (*f)(float *, float *, float *, float *, int));
+void add_social_implementation(void (*f)(float *, float *, float *, float *, int, int));
+void add_pos_implementation(void (*f)(float *, float *, float *, float *, float *, float *, int));
 
 /* finite-differences functions */
 
-double compute_people_repulsion_fd(double *position, double *parameters, double *desired_direction, double *actual_speed, int i, int j);
-void add_estimated_gradient_people_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *desired_direction, double *actual_speed, int i, int j);
-void test_people_repulsion_with_FD(double *people_repulsion_term, int n, double *position, double *desired_direction, double *actual_speed);
-double compute_border_repulsion_fd(double *position, double *parameters, double *borders, int i, int j);
-void add_estimated_gradient_border_repulsion(double *gradient, double *parameters, int n_parameters, double *position, double *borders, int i, int j);
-void test_border_repulsion_with_FD(double *border_repulsion_term, double *position, double *borders, int n_borders, int n);
+float compute_people_repulsion_fd(float *position, float *parameters, float *desired_direction, float *actual_speed, int i, int j);
+void add_estimated_gradient_people_repulsion(float *gradient, float *parameters, int n_parameters, float *position, float *desired_direction, float *actual_speed, int i, int j);
+void test_people_repulsion_with_FD(float *people_repulsion_term, int n, float *position, float *desired_direction, float *actual_speed);
+float compute_border_repulsion_fd(float *position, float *parameters, float *borders, int i, int j);
+void add_estimated_gradient_border_repulsion(float *gradient, float *parameters, int n_parameters, float *position, float *borders, int i, int j);
+void test_border_repulsion_with_FD(float *border_repulsion_term, float *position, float *borders, int n_borders, int n);
 
 typedef struct T
 {
 	char *name;
 	int n;
 	int n_borders;
-	double *dir;
-	double *pos;
-	double *spe;
-	double *dspe;
-	double *vel;
-	double *acc;
-	double *pre;
-	double *bre;
-	double *bor;
-	double *frc;
-	double *des;
+	float *dir;
+	float *pos;
+	float *spe;
+	float *dspe;
+	float *vel;
+	float *acc;
+	float *pre;
+	float *bre;
+	float *bor;
+	float *frc;
+	float *des;
 } testcase_t;
 
 #endif
