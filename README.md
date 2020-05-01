@@ -4,6 +4,9 @@ Social Force Model for Pedestrian Dynamics
 Google Docs Link:
 https://docs.google.com/document/d/1Pd_naY5nFvGuTWZ7cf6Ku0H6xgkG0ytWERB9O8ZGhYY/edit?usp=sharing
 
+Presentation Link for first meeting with supervisor:
+https://docs.google.com/presentation/d/1ZmCgMJ247X3icRssxIMaQTaob5e6haUbSb5RQ8D-COo/edit?usp=sharing
+
 ## compilation
 `gcc social_force.c parse_args.c utility.c testing.c social_force_model_basic.c -lm -O3 -ffast-math -g`
 
