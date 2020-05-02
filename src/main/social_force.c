@@ -41,6 +41,8 @@
 struct arguments arguments = {0};
 char filename_global[80];
 
+int seed = 0;
+
 //cost of each operation
 const int add_cost = 1;
 const int mult_cost = 1;
@@ -78,7 +80,11 @@ int main(int argc, char *argv[])
     add_implementations(sim_list, &sim_counter, test_functions_list, &test_func_counter);
     if (arguments.test || arguments.visual)
     {
-        run_tests(sim_list, sim_counter);
+        for (int j = 0; j < 1; j++)
+        {
+            seed = j;
+            run_tests(sim_list, sim_counter);
+        }
         for (int i = 0; i < test_func_counter; i++)
         {
             sim_func current = test_functions_list[i];
@@ -128,28 +134,29 @@ int main(int argc, char *argv[])
 void initialize_people(float *position, float *desired_direction, float *final_destination, float *desired_speed, int n)
 {
 
-    srand(42);
+    srand(seed);
     for (int i = 0; i < n; i++)
     {
         // initialize values independant of starting point and target point
-        position[IndexY_old(i, n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-        desired_direction[IndexY_old(i, n)] = 0.0;                                         // starting value for direct_y
-        final_destination[IndexY_old(i, n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
+        position[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
+        desired_direction[IndexY(i,n)] = 0.0;                                         // starting value for direct_y
+        final_destination[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
         desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
 
         if (i % 2) // initialize this person to walk from left to right
         {
-            position[IndexX_old(i)] = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[IndexX_old(i)] = 1.0;                                       // starting value for direct_x
-            final_destination[IndexX_old(i)] = arguments.walkway_length + 10;             // target x coordinate
+            position[IndexX(i)] = 0.0 - rand() * arguments.walkway_length / RAND_MAX;                                           // starting position x coordinate
+            desired_direction[IndexX(i)] = 1.0;                                                                                 // starting value for direct_x
+            final_destination[IndexX(i)] = arguments.walkway_length + 10 + rand() * (arguments.walkway_length - 10) / RAND_MAX; // target x coordinate
         }
         else // initialize this person to walk from right to left
         {
-            position[IndexX_old(i)] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[IndexX_old(i)] = -1.0;                                                           // starting value for direct_x
-            final_destination[IndexX_old(i)] = 0.0 - 10;                                                       // target x coordinate
+            position[IndexX(i)] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            desired_direction[IndexX(i)] = -1.0;                                                           // starting value for direct_x
+            final_destination[IndexX(i)] = -10 - rand() * (arguments.walkway_length - 10) / RAND_MAX;      // target x coordinate
         }
     }
+
 }
 /*
   This function computes the max speed value for every person.
@@ -199,14 +206,14 @@ void initialize_borders(float *borders, int n_borders)
 */
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter)
 {
-    add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
+    //add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
     add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
     //add_function(sim_list, sim_counter, simulation_basic_vectorize_1, compute_simplified_flops, "vectorize_1");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_2, compute_simplified_flops, "vectorize_2");
+    //add_function(sim_list, sim_counter, simulation_basic_vectorize_2, compute_simplified_flops, "vectorize_2");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
 
-    add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
+    //add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
 
 /*
