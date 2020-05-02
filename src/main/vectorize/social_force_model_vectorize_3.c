@@ -236,6 +236,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
   __m256 r_ab_2_x;
   __m256 r_ab_2_y;
   __m256 r_ab_norm;
+  __m256 r_ab_norm_inv;
 
   __m256 r_ab_me_x;
   __m256 r_ab_me_y;
@@ -243,6 +244,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
   __m256 r_ab_me_2_x;
   __m256 r_ab_me_2_y;
   __m256 r_ab_me_norm;
+  __m256 r_ab_me_norm_inv;
 
   __m256 norm_sum;
   __m256 repulsion_x;
@@ -299,21 +301,17 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
 
       // compute norm r_ab
       r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
-      r_ab_norm = _mm256_sqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
+      r_ab_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
 
       r_ab_me_x = _mm256_fmadd_ps(delta_b, e_b_x, r_ab_x);
       r_ab_me_y = _mm256_fmadd_ps(delta_b, e_b_y, r_ab_y);
 
       // compute norm r_ab_me
       r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
-      r_ab_me_norm = _mm256_sqrt_ps(_mm256_fmadd_ps(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
+      r_ab_me_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
 
       // sum up norms
-      norm_sum = _mm256_add_ps(r_ab_norm, r_ab_me_norm);
-
-      // invert norm to save divs
-      r_ab_norm = _mm256_div_ps(one, r_ab_norm);
-      r_ab_me_norm = _mm256_div_ps(one, r_ab_me_norm);
+      norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
 
       repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
       repulsion_x = _mm256_fmadd_ps(r_ab_me_x, r_ab_me_norm, repulsion_x);
@@ -322,7 +320,8 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
       repulsion_y = _mm256_fmadd_ps(r_ab_me_y, r_ab_me_norm, repulsion_y);
 
       delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
-      b = _mm256_sqrt_ps(_mm256_fmsub_ps(norm_sum, norm_sum, delta_b_2));
+      b = _mm256_rsqrt_ps(_mm256_fmsub_ps(norm_sum, norm_sum, delta_b_2));
+      b = _mm256_rcp_ps(b);
       b = _mm256_mul_ps(b, half_vec);
 
       exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
@@ -337,7 +336,8 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
 
       // compute norm r_ab
       repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
-      threshold = _mm256_sqrt_ps(_mm256_fmadd_ps(repulsion_x,repulsion_x, repulsion_2_y));
+      threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x,repulsion_x, repulsion_2_y));
+      threshold = _mm256_rcp_ps(threshold);
 
       check_y = _mm256_mul_ps(e_a_y, repulsion_y);
       check = _mm256_fmadd_ps(e_a_x, repulsion_x, check_y);
