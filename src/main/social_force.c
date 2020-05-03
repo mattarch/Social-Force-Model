@@ -27,6 +27,7 @@
 #include "vectorize/social_force_model_vectorize_1.h"
 #include "vectorize/social_force_model_vectorize_2.h"
 #include "vectorize/social_force_model_vectorize_3.h"
+#include "vectorize/social_force_model_vectorize_2_5_1.h"
 
 // testing
 #include "testing.h"
@@ -135,7 +136,7 @@ void initialize_people(float *position, float *desired_direction, float *final_d
 {
 
     srand(seed);
-    for (int i = 0; i < n; i++)
+    /*for (int i = 0; i < n; i++)
     {
         // initialize values independant of starting point and target point
         position[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
@@ -155,7 +156,46 @@ void initialize_people(float *position, float *desired_direction, float *final_d
             desired_direction[IndexX(i)] = -1.0;                                                           // starting value for direct_x
             final_destination[IndexX(i)] = -10 - rand() * (arguments.walkway_length - 10) / RAND_MAX;      // target x coordinate
         }
+    }*/
+
+    for (int i = 0; i < n; i++)
+    {
+        // initialize values independant of starting point and target point
+        double current_y = rand() * arguments.walkway_width / RAND_MAX; // starting position y coordinate
+        double target_y = rand() * arguments.walkway_width / RAND_MAX;  // target y coordinate
+        desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
+        double current_x, target_x;
+        if (i % 2) // initialize this person to walk from left to right
+        {
+            current_x = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            target_x = arguments.walkway_length + 10 + rand() * (arguments.walkway_length-10) / RAND_MAX;                       // target x coordinate
+        }
+        else // initialize this person to walk from right to left
+        {
+            current_x = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
+            target_x = - 10 - rand() * (arguments.walkway_length-10) / RAND_MAX;                                                                 // target x coordinate
+        }
+
+        // compute differences
+        double delta_x = target_x - current_x; // 1 add => 1 flop
+        double delta_y = target_y - current_y; // 1 add => 1 flop
+
+        // normalization constant
+        double d = delta_x * delta_x + delta_y * delta_y; // 1 add, 2 mult => 3 flops
+        double normalizer = sqrt(d);                      // 1 sqrt => 1 flop
+
+        // update desired_direction
+        desired_direction[IndexX(i)] = delta_x / normalizer;     // 1 div => 1 flop
+        desired_direction[IndexY(i,n)] = delta_y / normalizer; // 1 div => 1 flop
+
+        // write position and target to vector
+        position[IndexX(i)] = current_x;
+        position[IndexY(i,n)] = current_y;
+        final_destination[IndexX(i)] = target_x;
+        final_destination[IndexY(i,n)] = target_y;
     }
+
+
 
 }
 /*
@@ -212,6 +252,8 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
     //add_function(sim_list, sim_counter, simulation_basic_vectorize_1, compute_simplified_flops, "vectorize_1");
     //add_function(sim_list, sim_counter, simulation_basic_vectorize_2, compute_simplified_flops, "vectorize_2");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, compute_simplified_flops, "vectorize_2_5_1");
+    
 
     //add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
