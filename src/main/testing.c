@@ -302,6 +302,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
 
             for (int j = 0; j < n_test_timesteps; j++)
             {
+                error_check = 0;
                 sim_func f = sim_list[0]->f;
                 f(number_of_people, n_timesteps, oracle_position, oracle_speed, oracle_desired_direction, oracle_final_destination,
                   oracle_borders, oracle_actual_velocity, oracle_acceleration_term,
@@ -334,7 +335,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
                 }
 
                 copy_state_new(oracle_position, oracle_desired_direction, oracle_final_destination, oracle_borders, oracle_desired_speed, oracle_desired_max_speed,
-                               &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people);
+                               &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people,sim_list[i]);
             }
         }
 
@@ -701,7 +702,7 @@ void copy_state(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *
 }
 
 void copy_state_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
-                    float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n)
+                    float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n, sim_t* sim)
 {
 
     for (int i = 0; i < n; i++)
@@ -713,16 +714,21 @@ void copy_state_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, flo
         posk[IndexX(i)] = s_pos[IndexX(i)];
         posk[IndexY(i, n)] = s_pos[IndexY(i, n)];
 
-        dirk[IndexX(i)] = s_dir[IndexX(i)];
-        dirk[IndexY(i, n)] = s_dir[IndexY(i, n)];
+        if (!strstr("vectorize_2_5_1", sim->name))
+        {
+            dirk[IndexX(i)] = s_dir[IndexX(i)];
+            dirk[IndexY(i, n)] = s_dir[IndexY(i, n)];
 
-        fdesk[IndexX(i)] = s_fdes[IndexX(i)];
-        fdesk[IndexY(i, n)] = s_fdes[IndexY(i, n)];
+            fdesk[IndexX(i)] = s_fdes[IndexX(i)];
+            fdesk[IndexY(i, n)] = s_fdes[IndexY(i, n)];
+        }
     }
-
-    memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
-    memcpy(*spe, s_spe, n * sizeof(float));
-    memcpy(*mspe, s_mspe, n * sizeof(float));
+    if (!strstr("vectorize_2_5_1", sim->name))
+    {
+        memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
+        memcpy(*spe, s_spe, n * sizeof(float));
+        memcpy(*mspe, s_mspe, n * sizeof(float));
+    }
 }
 
 void allocate_arrays(float **spe, float **vel, float **acc, float **prep, float **brep,

@@ -35,7 +35,7 @@ void copy_init_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, floa
 void copy_state(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
 				float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n);
 void copy_state_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
-				float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n);
+					float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n, sim_t* sim);
 void allocate_arrays(float **spe, float **vel, float **acc, float **prep, float **brep,
 					 float **frc, int n);
 void add_direction_testcase(char *name, float *pos, float *speed, float *output, int n);
