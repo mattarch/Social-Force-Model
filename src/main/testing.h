@@ -13,8 +13,8 @@
 #define PRINT_GREEN printf("\033[0;32m");
 #define PRINT_DEF printf("\033[0m");
 
-#define EPS 1e-03
-#define EPS_NEW 1e-03
+#define EPS 1e-02
+#define EPS_NEW 1e-02
 #define N_TESTS 4
 #define TDIR 0
 #define TACC 1

@@ -86,10 +86,7 @@ void update_desired_direction_vectorize_3(float *position, float *final_destinat
 
     // compute norm
     delta_x_2 = _mm256_mul_ps(delta_x, delta_x); // square each entry
-    delta_y_2 = _mm256_mul_ps(delta_y, delta_y);
-    normalizer = _mm256_sqrt_ps(_mm256_add_ps(delta_x_2, delta_y_2));
-
-    normalizer = _mm256_div_ps(one, normalizer);
+    normalizer = _mm256_rsqrt_ps(_mm256_fmadd_ps(delta_y, delta_y, delta_x_2));
 
     result_x = _mm256_mul_ps(delta_x, normalizer);
     result_y = _mm256_mul_ps(delta_y, normalizer);
@@ -163,10 +160,8 @@ void update_acceleration_term_vectorize_3(float *desired_direction, float *accel
     desired_direction_y = _mm256_load_ps(desired_direction + n + i);
     desired_speed_value = _mm256_load_ps(desired_speed + i);
 
-    v_delta_x = _mm256_mul_ps(desired_speed_value, desired_direction_x);
-    v_delta_y = _mm256_mul_ps(desired_speed_value, desired_direction_y);
-    v_delta_x = _mm256_sub_ps(v_delta_x, actual_velocity_x);
-    v_delta_y = _mm256_sub_ps(v_delta_y, actual_velocity_y);
+    v_delta_x = _mm256_fmsub_ps(desired_speed_value, desired_direction_x, actual_velocity_x);
+    v_delta_y = _mm256_fmsub_ps(desired_speed_value, desired_direction_y, actual_velocity_y);
 
     v_delta_x = _mm256_mul_ps(v_delta_x, inv_relax_time_vec);
     v_delta_y = _mm256_mul_ps(v_delta_y, inv_relax_time_vec);
@@ -450,8 +445,10 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
 
   __m256 minus1 = _mm256_set1_ps(-1);
 
-  __m256 r_vec = _mm256_set1_ps(R);
-  __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B);
+  __m256 r_vec_inv = _mm256_set1_ps(1/R);
+  __m256 minus_r_vec_inv = _mm256_set1_ps(-1/R);
+  __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B/R);
+
 
   __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
 
@@ -470,12 +467,10 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
       mask_y = _mm256_cmp_ps(r_aB_y, zero, _CMP_GE_OQ);
       r_aB_norm = _mm256_blendv_ps(r_aB_minus_y, r_aB_y, mask_y);
 
-      exp = _mm256_div_ps(r_aB_norm, r_vec);
-      exp = _mm256_mul_ps(exp, minus1);
+      exp = _mm256_mul_ps(r_aB_norm, minus_r_vec_inv);
       exp = exp_fast_vec_3(exp, one, exp_constant);
 
-      common_factor = _mm256_div_ps(u_alpha_b_vec, r_vec);
-      common_factor = _mm256_div_ps(common_factor, r_aB_norm);
+      common_factor = _mm256_mul_ps(u_alpha_b_vec, _mm256_rcp_ps(r_aB_norm));
       common_factor = _mm256_mul_ps(exp, common_factor);
 
       common_factor = _mm256_mul_ps(r_aB_y, common_factor);
@@ -767,6 +762,7 @@ void update_position_vectorize_3(float *position, float *desired_direction, floa
   __m256 prefered_velocity_2_x;
   __m256 prefered_velocity_2_y;
 
+  __m256 prefered_velocity_norm_inv;
   __m256 prefered_velocity_norm;
   __m256 max_speed;
   __m256 control_value;
@@ -780,6 +776,7 @@ void update_position_vectorize_3(float *position, float *desired_direction, floa
   __m256 actual_speed_xy_256;
 
   __m256 control_value_prefered_velocity_xy_norm;
+  __m256 control_value_prefered_velocity_xy_norm_inv;
 
   __m256 timestep_vec = _mm256_set1_ps(TIMESTEP);
   __m256 one = _mm256_set1_ps(1);
@@ -797,14 +794,13 @@ void update_position_vectorize_3(float *position, float *desired_direction, floa
 
     // norm
     prefered_velocity_2_x = _mm256_mul_ps(prefered_velocity_x, prefered_velocity_x);
-    prefered_velocity_2_y = _mm256_mul_ps(prefered_velocity_y, prefered_velocity_y);
-
-    prefered_velocity_norm = _mm256_sqrt_ps(_mm256_add_ps(prefered_velocity_2_x, prefered_velocity_2_y));
+    prefered_velocity_norm_inv = _mm256_rsqrt_ps(_mm256_fmadd_ps(prefered_velocity_y,prefered_velocity_y, prefered_velocity_2_x));
+    prefered_velocity_norm = _mm256_rcp_ps(prefered_velocity_norm_inv);
 
     max_speed = _mm256_load_ps(desired_max_speed + i);
 
     mask = _mm256_cmp_ps(prefered_velocity_norm, max_speed, _CMP_GT_OQ);
-    control_value = _mm256_blendv_ps(one, _mm256_div_ps(max_speed, prefered_velocity_norm), mask);
+    control_value = _mm256_blendv_ps(one, _mm256_mul_ps(max_speed, prefered_velocity_norm_inv), mask);
 
     prefered_velocity_x = _mm256_mul_ps(prefered_velocity_x, control_value);
     prefered_velocity_y = _mm256_mul_ps(prefered_velocity_y, control_value);
@@ -813,11 +809,12 @@ void update_position_vectorize_3(float *position, float *desired_direction, floa
     _mm256_store_ps(actual_velocity + n + i, prefered_velocity_y);
 
     control_value_prefered_velocity_xy_norm = _mm256_mul_ps(control_value, prefered_velocity_norm);
+    control_value_prefered_velocity_xy_norm_inv = _mm256_rcp_ps(control_value_prefered_velocity_xy_norm);
 
     _mm256_store_ps(actual_speed + i, control_value_prefered_velocity_xy_norm);
 
-    _mm256_store_ps(desired_direction + i, _mm256_div_ps(prefered_velocity_x, control_value_prefered_velocity_xy_norm));
-    _mm256_store_ps(desired_direction + n + i, _mm256_div_ps(prefered_velocity_y, control_value_prefered_velocity_xy_norm));
+    _mm256_store_ps(desired_direction + i, _mm256_mul_ps(prefered_velocity_x, control_value_prefered_velocity_xy_norm_inv));
+    _mm256_store_ps(desired_direction + n + i, _mm256_mul_ps(prefered_velocity_y, control_value_prefered_velocity_xy_norm_inv));
 
     position_x = _mm256_load_ps(position + i);
     position_y = _mm256_load_ps(position + n + i);
