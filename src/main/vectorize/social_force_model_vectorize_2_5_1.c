@@ -6,11 +6,33 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <immintrin.h>
 
 #include "social_force_model_vectorize_2_5_1.h"
 //#include "../tsc_x86.h"
 #include "../social_force.h"
 #include "../utility.h"
+
+__m256 exp_fast_vec_2_5_1(__m256 x, __m256 one, __m256 exp_constant)
+{
+  x = _mm256_fmadd_ps(x, exp_constant, one);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  return x;
+}
+
 
 void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, float *position, float *speed, float *desired_direction, float *final_destination,
                                float *borders, float *actual_velocity, float *acceleration_term, float *people_repulsion_term, float *border_repulsion_term,
@@ -1359,345 +1381,157 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       sfx7 += (repxa7a11 * wa7a1) + (repxa7a21 * wa7a2) + (repxa7a31 * wa7a3) + (repxa7a41 * wa7a4) + (repxa7a51 * wa7a5) + (repxa7a61 * wa7a6) + (repxa7a01 * wa7a0);
       sfy7 += (repya7a11 * wa7a1) + (repya7a21 * wa7a2) + (repya7a31 * wa7a3) + (repya7a41 * wa7a4) + (repya7a51 * wa7a5) + (repya7a61 * wa7a6) + (repya7a01 * wa7a0);
 
+      __m256 rxa = _mm256_set_ps(rxa7, rxa6, rxa5, rxa4, rxa3, rxa2, rxa1, rxa0);
+      __m256 rya = _mm256_set_ps(rya7, rya6, rya5, rya4, rya3, rya2, rya1, rya0);
+      __m256 one = _mm256_set1_ps(1.0);
+      __m256 minus_one = _mm256_set1_ps(-1);
+      __m256 half = _mm256_set1_ps(0.5);
+      __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
+      __m256 inv_sigma_vec = _mm256_set1_ps(-inv_sigma);
+      __m256 div_factor_vec = _mm256_set1_ps(DIV_FACTOR);
+      __m256 cospsi_vec = _mm256_set1_ps(cospsi);
+      __m256 influencer_vec = _mm256_set1_ps(INFLUENCE);
+      __m256 da = _mm256_set_ps(da7, da6, da5, da4, da3, da2, da1, da0);
+      __m256 exa = _mm256_set_ps(exa7, exa6, exa5, exa4, exa3, exa2, exa1, exa0);
+      __m256 eya = _mm256_set_ps(eya7, eya6, eya5, eya4, eya3, eya2, eya1, eya0);
+      __m256 sfx = _mm256_setzero_ps();
+      __m256 sfy = _mm256_setzero_ps();
+
       //iterate over all people
       for (int j = i + 8; j < n; j++) // for (int j = i + 1; j < n; j++)
       {
-        float rxb = position[IndexX(j)];
-        float ryb = position[IndexY(j,n)];
-        float exb0 = desired_direction[IndexX(j)];
-        float eyb0 = desired_direction[IndexY(j,n)];
-        float db0 = speed[j];
+        __m256 rxb = _mm256_broadcast_ss(position + IndexX(j));
+        __m256 ryb = _mm256_broadcast_ss(position + IndexY(j,n));
+        __m256 exb0 = _mm256_broadcast_ss(desired_direction + IndexX(j));
+        __m256 eyb0 = _mm256_broadcast_ss(desired_direction + IndexY(j,n));
+        __m256 db0 = _mm256_broadcast_ss(speed + IndexX(j));
+        
+        db0 = _mm256_mul_ps(db0, minus_one);
+        da = _mm256_mul_ps(da, minus_one);
 
-        float rxab0 = rxa0 - rxb;
-        float ryab0 = rya0 - ryb;
-        float rxab1 = rxa1 - rxb;
-        float ryab1 = rya1 - ryb;
-        float rxab2 = rxa2 - rxb;
-        float ryab2 = rya2 - ryb;
-        float rxab3 = rxa3 - rxb;
-        float ryab3 = rya3 - ryb;
-        float rxab4 = rxa4 - rxb;
-        float ryab4 = rya4 - ryb;
-        float rxab5 = rxa5 - rxb;
-        float ryab5 = rya5 - ryb;
-        float rxab6 = rxa6 - rxb;
-        float ryab6 = rya6 - ryb;
-        float rxab7 = rxa7 - rxb;
-        float ryab7 = rya7 - ryb;
+        __m256 rxab = _mm256_sub_ps(rxa, rxb);
+        __m256 ryab = _mm256_sub_ps(rya, ryb);
 
-        float rab0 = rxab0 * rxab0 + ryab0 * ryab0;
-        float rab1 = rxab1 * rxab1 + ryab1 * ryab1;
-        float rab2 = rxab2 * rxab2 + ryab2 * ryab2;
-        float rab3 = rxab3 * rxab3 + ryab3 * ryab3;
-        float rab4 = rxab4 * rxab4 + ryab4 * ryab4;
-        float rab5 = rxab5 * rxab5 + ryab5 * ryab5;
-        float rab6 = rxab6 * rxab6 + ryab6 * ryab6;
-        float rab7 = rxab7 * rxab7 + ryab7 * ryab7;
-
-        float rabnorm0 = sqrt(rab0); 
-        float rabnorm1 = sqrt(rab1); 
-        float rabnorm2 = sqrt(rab2); 
-        float rabnorm3 = sqrt(rab3); 
-        float rabnorm4 = sqrt(rab4); 
-        float rabnorm5 = sqrt(rab5); 
-        float rabnorm6 = sqrt(rab6); 
-        float rabnorm7 = sqrt(rab7); 
+        __m256 rxab_2 = _mm256_mul_ps(rxab, rxab);
+        __m256 rabnorm = _mm256_fmadd_ps(ryab, ryab, rxab_2);
+        rabnorm = _mm256_sqrt_ps(rabnorm); 
 
         //float everything
+        __m256 rxabme = _mm256_fmadd_ps(db0,exb0, rxab);
+        __m256 ryabme = _mm256_fmadd_ps(db0,eyb0, ryab);
+        
+        __m256 rxbame = _mm256_fmsub_ps(da, exa, rxab);
+        __m256 rybame = _mm256_fmsub_ps(da, eya, ryab);
 
-        float rxabmex0 = rxab0 - db0 * exb0; 
-        float ryabmey0 = ryab0 - db0 * eyb0; 
-        float rxabmex1 = rxab1 - db0 * exb0; 
-        float ryabmey1 = ryab1 - db0 * eyb0; 
-        float rxabmex2 = rxab2 - db0 * exb0; 
-        float ryabmey2 = ryab2 - db0 * eyb0; 
-        float rxabmex3 = rxab3 - db0 * exb0; 
-        float ryabmey3 = ryab3 - db0 * eyb0; 
-        float rxabmex4 = rxab4 - db0 * exb0; 
-        float ryabmey4 = ryab4 - db0 * eyb0; 
-        float rxabmex5 = rxab5 - db0 * exb0; 
-        float ryabmey5 = ryab5 - db0 * eyb0; 
-        float rxabmex6 = rxab6 - db0 * exb0; 
-        float ryabmey6 = ryab6 - db0 * eyb0; 
-        float rxabmex7 = rxab7 - db0 * exb0; 
-        float ryabmey7 = ryab7 - db0 * eyb0; 
 
-        float rxbamex0 = -rxab0 - da0 * exa0; 
-        float rybamey0 = -ryab0 - da0 * eya0; 
-        float rxbamex1 = -rxab1 - da1 * exa1; 
-        float rybamey1 = -ryab1 - da1 * eya1; 
-        float rxbamex2 = -rxab2 - da2 * exa2; 
-        float rybamey2 = -ryab2 - da2 * eya2; 
-        float rxbamex3 = -rxab3 - da3 * exa3; 
-        float rybamey3 = -ryab3 - da3 * eya3; 
-        float rxbamex4 = -rxab4 - da4 * exa4; 
-        float rybamey4 = -ryab4 - da4 * eya4; 
-        float rxbamex5 = -rxab5 - da5 * exa5; 
-        float rybamey5 = -ryab5 - da5 * eya5; 
-        float rxbamex6 = -rxab6 - da6 * exa6; 
-        float rybamey6 = -ryab6 - da6 * eya6; 
-        float rxbamex7 = -rxab7 - da7 * exa7; 
-        float rybamey7 = -ryab7 - da7 * eya7; 
+        __m256 rxabme_2 = _mm256_mul_ps(rxabme, rxabme);
+        __m256 rabmenorm = _mm256_fmadd_ps(ryabme, ryabme, rxabme_2);
+        rabmenorm = _mm256_sqrt_ps(rabmenorm);
 
-        float rabme0 = rxabmex0 * rxabmex0 + ryabmey0 * ryabmey0;
-        float rabme1 = rxabmex1 * rxabmex1 + ryabmey1 * ryabmey1;
-        float rabme2 = rxabmex2 * rxabmex2 + ryabmey2 * ryabmey2;
-        float rabme3 = rxabmex3 * rxabmex3 + ryabmey3 * ryabmey3;
-        float rabme4 = rxabmex4 * rxabmex4 + ryabmey4 * ryabmey4;
-        float rabme5 = rxabmex5 * rxabmex5 + ryabmey5 * ryabmey5;
-        float rabme6 = rxabmex6 * rxabmex6 + ryabmey6 * ryabmey6;
-        float rabme7 = rxabmex7 * rxabmex7 + ryabmey7 * ryabmey7;
+        __m256 rxbame_2 = _mm256_mul_ps(rxbame, rxbame);
+        __m256 rbamenorm = _mm256_fmadd_ps(rybame, rybame, rxbame_2);
+        rbamenorm = _mm256_sqrt_ps(rbamenorm);
 
-        float rbame0 = rxbamex0 * rxbamex0 + rybamey0 * rybamey0;
-        float rbame1 = rxbamex1 * rxbamex1 + rybamey1 * rybamey1;
-        float rbame2 = rxbamex2 * rxbamex2 + rybamey2 * rybamey2;
-        float rbame3 = rxbamex3 * rxbamex3 + rybamey3 * rybamey3;
-        float rbame4 = rxbamex4 * rxbamex4 + rybamey4 * rybamey4;
-        float rbame5 = rxbamex5 * rxbamex5 + rybamey5 * rybamey5;
-        float rbame6 = rxbamex6 * rxbamex6 + rybamey6 * rybamey6;
-        float rbame7 = rxbamex7 * rxbamex7 + rybamey7 * rybamey7;
 
-        float rabmenorm0 = sqrt(rabme0); 
-        float rabmenorm1 = sqrt(rabme1); 
-        float rabmenorm2 = sqrt(rabme2); 
-        float rabmenorm3 = sqrt(rabme3); 
-        float rabmenorm4 = sqrt(rabme4); 
-        float rabmenorm5 = sqrt(rabme5); 
-        float rabmenorm6 = sqrt(rabme6); 
-        float rabmenorm7 = sqrt(rabme7); 
+        __m256 normsumab = _mm256_add_ps(rabnorm,rabmenorm);
+        __m256 normsumba = _mm256_add_ps(rabnorm,rbamenorm); // maybe wrong use rbanorm
 
-        float rbamenorm0 = sqrt(rbame0); 
-        float rbamenorm1 = sqrt(rbame1); 
-        float rbamenorm2 = sqrt(rbame2); 
-        float rbamenorm3 = sqrt(rbame3); 
-        float rbamenorm4 = sqrt(rbame4); 
-        float rbamenorm5 = sqrt(rbame5); 
-        float rbamenorm6 = sqrt(rbame6); 
-        float rbamenorm7 = sqrt(rbame7); 
+        __m256 div_1x = _mm256_div_ps(rxab, rabnorm);
+        __m256 div_1y = _mm256_div_ps(ryab, rabnorm);
+        __m256 div_2x = _mm256_div_ps(rxab, rabmenorm);
+        __m256 div_2y = _mm256_div_ps(ryab, rabmenorm);
 
-        float normsumab0 = rabnorm0 + rabmenorm0; 
-        float normsumab1 = rabnorm1 + rabmenorm1; 
-        float normsumab2 = rabnorm2 + rabmenorm2; 
-        float normsumab3 = rabnorm3 + rabmenorm3; 
-        float normsumab4 = rabnorm4 + rabmenorm4; 
-        float normsumab5 = rabnorm5 + rabmenorm5; 
-        float normsumab6 = rabnorm6 + rabmenorm6; 
-        float normsumab7 = rabnorm7 + rabmenorm7; 
+        __m256 repxab = _mm256_add_ps(div_1x, div_2x);
+        __m256 repyab = _mm256_add_ps(div_1y, div_2y);
 
-        float normsumba0 = rabnorm0 + rbamenorm0; 
-        float normsumba1 = rabnorm1 + rbamenorm1; 
-        float normsumba2 = rabnorm2 + rbamenorm2; 
-        float normsumba3 = rabnorm3 + rbamenorm3; 
-        float normsumba4 = rabnorm4 + rbamenorm4; 
-        float normsumba5 = rabnorm5 + rbamenorm5; 
-        float normsumba6 = rabnorm6 + rbamenorm6; 
-        float normsumba7 = rabnorm7 + rbamenorm7; 
+        __m256 div_2x_me = _mm256_div_ps(rxbame, rbamenorm);
+        __m256 div_2y_me = _mm256_div_ps(rybame, rbamenorm);
 
-        float repxab00 = rxab0 / rabnorm0 + rxabmex0 / rabmenorm0; 
-        float repyab00 = ryab0 / rabnorm0 + ryabmey0 / rabmenorm0; 
-        float repxab01 = rxab1 / rabnorm1 + rxabmex1 / rabmenorm1; 
-        float repyab01 = ryab1 / rabnorm1 + ryabmey1 / rabmenorm1; 
-        float repxab02 = rxab2 / rabnorm2 + rxabmex2 / rabmenorm2; 
-        float repyab02 = ryab2 / rabnorm2 + ryabmey2 / rabmenorm2; 
-        float repxab03 = rxab3 / rabnorm3 + rxabmex3 / rabmenorm3; 
-        float repyab03 = ryab3 / rabnorm3 + ryabmey3 / rabmenorm3; 
-        float repxab04 = rxab4 / rabnorm4 + rxabmex4 / rabmenorm4; 
-        float repyab04 = ryab4 / rabnorm4 + ryabmey4 / rabmenorm4; 
-        float repxab05 = rxab5 / rabnorm5 + rxabmex5 / rabmenorm5; 
-        float repyab05 = ryab5 / rabnorm5 + ryabmey5 / rabmenorm5; 
-        float repxab06 = rxab6 / rabnorm6 + rxabmex6 / rabmenorm6; 
-        float repyab06 = ryab6 / rabnorm6 + ryabmey6 / rabmenorm6; 
-        float repxab07 = rxab7 / rabnorm7 + rxabmex7 / rabmenorm7; 
-        float repyab07 = ryab7 / rabnorm7 + ryabmey7 / rabmenorm7; 
+        __m256 repxba = _mm256_sub_ps(div_2x_me, div_1x);
+        __m256 repyba = _mm256_sub_ps(div_2y_me, div_1y);
 
-        float repxba00 = -rxab0 / rabnorm0 + rxbamex0 / rbamenorm0; 
-        float repyba00 = -ryab0 / rabnorm0 + rybamey0 / rbamenorm0; 
-        float repxba01 = -rxab1 / rabnorm1 + rxbamex1 / rbamenorm1; 
-        float repyba01 = -ryab1 / rabnorm1 + rybamey1 / rbamenorm1; 
-        float repxba02 = -rxab2 / rabnorm2 + rxbamex2 / rbamenorm2; 
-        float repyba02 = -ryab2 / rabnorm2 + rybamey2 / rbamenorm2; 
-        float repxba03 = -rxab3 / rabnorm3 + rxbamex3 / rbamenorm3; 
-        float repyba03 = -ryab3 / rabnorm3 + rybamey3 / rbamenorm3; 
-        float repxba04 = -rxab4 / rabnorm4 + rxbamex4 / rbamenorm4; 
-        float repyba04 = -ryab4 / rabnorm4 + rybamey4 / rbamenorm4; 
-        float repxba05 = -rxab5 / rabnorm5 + rxbamex5 / rbamenorm5; 
-        float repyba05 = -ryab5 / rabnorm5 + rybamey5 / rbamenorm5; 
-        float repxba06 = -rxab6 / rabnorm6 + rxbamex6 / rbamenorm6; 
-        float repyba06 = -ryab6 / rabnorm6 + rybamey6 / rbamenorm6; 
-        float repxba07 = -rxab7 / rabnorm7 + rxbamex7 / rbamenorm7; 
-        float repyba07 = -ryab7 / rabnorm7 + rybamey7 / rbamenorm7; 
+        __m256 db_2 = _mm256_mul_ps(db0, db0);
+        __m256 da_2 = _mm256_mul_ps(da,da);
+        __m256 bab = _mm256_fmsub_ps(normsumab,normsumab, db_2);
+        __m256 bba = _mm256_fmsub_ps(normsumba,normsumba, da_2);
 
-        float bab0 = normsumab0 * normsumab0 - db0 * db0; 
-        float bab1 = normsumab1 * normsumab1 - db0 * db0; 
-        float bab2 = normsumab2 * normsumab2 - db0 * db0; 
-        float bab3 = normsumab3 * normsumab3 - db0 * db0; 
-        float bab4 = normsumab4 * normsumab4 - db0 * db0; 
-        float bab5 = normsumab5 * normsumab5 - db0 * db0; 
-        float bab6 = normsumab6 * normsumab6 - db0 * db0; 
-        float bab7 = normsumab7 * normsumab7 - db0 * db0; 
+        __m256 babnorm = _mm256_sqrt_ps(bab);
+        __m256 bbanorm = _mm256_sqrt_ps(bba);
+        babnorm = _mm256_mul_ps(babnorm, half);
+        bbanorm = _mm256_mul_ps(bbanorm, half);
 
-        float bba0 = normsumba0 * normsumba0 - da0 * da0; 
-        float bba1 = normsumba1 * normsumba1 - da1 * da1; 
-        float bba2 = normsumba2 * normsumba2 - da2 * da2; 
-        float bba3 = normsumba3 * normsumba3 - da3 * da3; 
-        float bba4 = normsumba4 * normsumba4 - da4 * da4; 
-        float bba5 = normsumba5 * normsumba5 - da5 * da5; 
-        float bba6 = normsumba6 * normsumba6 - da6 * da6; 
-        float bba7 = normsumba7 * normsumba7 - da7 * da7; 
+        __m256 cfab = exp_fast_vec_2_5_1(_mm256_mul_ps(babnorm,inv_sigma_vec), one, exp_constant);
+        cfab = _mm256_mul_ps(cfab, div_factor_vec);
+        cfab = _mm256_mul_ps(cfab, normsumab);
+        cfab = _mm256_div_ps(cfab,babnorm);
 
-        float babnorm0 = sqrt(bab0) * 0.5; 
-        float babnorm1 = sqrt(bab1) * 0.5; 
-        float babnorm2 = sqrt(bab2) * 0.5; 
-        float babnorm3 = sqrt(bab3) * 0.5; 
-        float babnorm4 = sqrt(bab4) * 0.5; 
-        float babnorm5 = sqrt(bab5) * 0.5; 
-        float babnorm6 = sqrt(bab6) * 0.5; 
-        float babnorm7 = sqrt(bab7) * 0.5; 
+        __m256 cfba = exp_fast_vec_2_5_1(_mm256_mul_ps(bbanorm,inv_sigma_vec), one, exp_constant);
+        cfba = _mm256_mul_ps(cfba, div_factor_vec);
+        cfba = _mm256_mul_ps(cfba, normsumba);
+        cfba = _mm256_div_ps(cfba,bbanorm);
 
-        float bbanorm0 = sqrt(bba0) * 0.5; 
-        float bbanorm1 = sqrt(bba1) * 0.5; 
-        float bbanorm2 = sqrt(bba2) * 0.5; 
-        float bbanorm3 = sqrt(bba3) * 0.5; 
-        float bbanorm4 = sqrt(bba4) * 0.5; 
-        float bbanorm5 = sqrt(bba5) * 0.5; 
-        float bbanorm6 = sqrt(bba6) * 0.5; 
-        float bbanorm7 = sqrt(bba7) * 0.5; 
+        repxab = _mm256_mul_ps(repxab, cfab);
+        repyab = _mm256_mul_ps(repyab, cfab);
+        repxba = _mm256_mul_ps(repxba, cfba);
+        repyba = _mm256_mul_ps(repyba, cfba);
 
-        float cfab0 = exp_fast(-babnorm0 * inv_sigma) * normsumab0 * DIV_FACTOR / babnorm0;
-        float cfab1 = exp_fast(-babnorm1 * inv_sigma) * normsumab1 * DIV_FACTOR / babnorm1;
-        float cfab2 = exp_fast(-babnorm2 * inv_sigma) * normsumab2 * DIV_FACTOR / babnorm2;
-        float cfab3 = exp_fast(-babnorm3 * inv_sigma) * normsumab3 * DIV_FACTOR / babnorm3;
-        float cfab4 = exp_fast(-babnorm4 * inv_sigma) * normsumab4 * DIV_FACTOR / babnorm4;
-        float cfab5 = exp_fast(-babnorm5 * inv_sigma) * normsumab5 * DIV_FACTOR / babnorm5;
-        float cfab6 = exp_fast(-babnorm6 * inv_sigma) * normsumab6 * DIV_FACTOR / babnorm6;
-        float cfab7 = exp_fast(-babnorm7 * inv_sigma) * normsumab7 * DIV_FACTOR / babnorm7;
+        __m256 cab = _mm256_mul_ps(exa, repxab);
+        cab = _mm256_fmadd_ps(eya, repyab, cab);
 
-        float cfba0 = exp_fast(-bbanorm0 * inv_sigma) * normsumba0 * DIV_FACTOR / bbanorm0; //2 mult, 2 div, 1 exp
-        float cfba1 = exp_fast(-bbanorm1 * inv_sigma) * normsumba1 * DIV_FACTOR / bbanorm1; //2 mult, 2 div, 1 exp
-        float cfba2 = exp_fast(-bbanorm2 * inv_sigma) * normsumba2 * DIV_FACTOR / bbanorm2; //2 mult, 2 div, 1 exp
-        float cfba3 = exp_fast(-bbanorm3 * inv_sigma) * normsumba3 * DIV_FACTOR / bbanorm3; //2 mult, 2 div, 1 exp
-        float cfba4 = exp_fast(-bbanorm4 * inv_sigma) * normsumba4 * DIV_FACTOR / bbanorm4; //2 mult, 2 div, 1 exp
-        float cfba5 = exp_fast(-bbanorm5 * inv_sigma) * normsumba5 * DIV_FACTOR / bbanorm5; //2 mult, 2 div, 1 exp
-        float cfba6 = exp_fast(-bbanorm6 * inv_sigma) * normsumba6 * DIV_FACTOR / bbanorm6; //2 mult, 2 div, 1 exp
-        float cfba7 = exp_fast(-bbanorm7 * inv_sigma) * normsumba7 * DIV_FACTOR / bbanorm7; //2 mult, 2 div, 1 exp
+        __m256 cba = _mm256_mul_ps(exa, repxba);
+        cba = _mm256_fmadd_ps(eya, repyba, cba);
 
-        float repxab10 = repxab00 * cfab0; //1 mult
-        float repyab10 = repyab00 * cfab0; //1 mult
-        float repxab11 = repxab01 * cfab1; //1 mult
-        float repyab11 = repyab01 * cfab1; //1 mult
-        float repxab12 = repxab02 * cfab2; //1 mult
-        float repyab12 = repyab02 * cfab2; //1 mult
-        float repxab13 = repxab03 * cfab3; //1 mult
-        float repyab13 = repyab03 * cfab3; //1 mult
-        float repxab14 = repxab04 * cfab4; //1 mult
-        float repyab14 = repyab04 * cfab4; //1 mult
-        float repxab15 = repxab05 * cfab5; //1 mult
-        float repyab15 = repyab05 * cfab5; //1 mult
-        float repxab16 = repxab06 * cfab6; //1 mult
-        float repyab16 = repyab06 * cfab6; //1 mult
-        float repxab17 = repxab07 * cfab7; //1 mult
-        float repyab17 = repyab07 * cfab7; //1 mult
+        __m256 repxab_2 = _mm256_mul_ps(repxab,repxab);
+        __m256 thab = _mm256_sqrt_ps(_mm256_fmadd_ps(repyab,repyab, repxab_2));
+        thab = _mm256_mul_ps(thab, cospsi_vec);
 
-        float repxba10 = repxba00 * cfba0; //1 mult
-        float repyba10 = repyba00 * cfba0; //1 mult
-        float repxba11 = repxba01 * cfba1; //1 mult
-        float repyba11 = repyba01 * cfba1; //1 mult
-        float repxba12 = repxba02 * cfba2; //1 mult
-        float repyba12 = repyba02 * cfba2; //1 mult
-        float repxba13 = repxba03 * cfba3; //1 mult
-        float repyba13 = repyba03 * cfba3; //1 mult
-        float repxba14 = repxba04 * cfba4; //1 mult
-        float repyba14 = repyba04 * cfba4; //1 mult
-        float repxba15 = repxba05 * cfba5; //1 mult
-        float repyba15 = repyba05 * cfba5; //1 mult
-        float repxba16 = repxba06 * cfba6; //1 mult
-        float repyba16 = repyba06 * cfba6; //1 mult
-        float repxba17 = repxba07 * cfba7; //1 mult
-        float repyba17 = repyba07 * cfba7; //1 mult
+        __m256 repxba_2 = _mm256_mul_ps(repxba,repxba);
+        __m256 thba = _mm256_sqrt_ps(_mm256_fmadd_ps(repyba,repyba, repxba_2));
+        thba = _mm256_mul_ps(thba, cospsi_vec);
 
-        float cab0 = exa0 * repxab10 + eya0 * repyab10; //1 add, 2 mult
-        float cab1 = exa1 * repxab11 + eya1 * repyab11; //1 add, 2 mult
-        float cab2 = exa2 * repxab12 + eya2 * repyab12; //1 add, 2 mult
-        float cab3 = exa3 * repxab13 + eya3 * repyab13; //1 add, 2 mult
-        float cab4 = exa4 * repxab14 + eya4 * repyab14; //1 add, 2 mult
-        float cab5 = exa5 * repxab15 + eya5 * repyab15; //1 add, 2 mult
-        float cab6 = exa6 * repxab16 + eya6 * repyab16; //1 add, 2 mult
-        float cab7 = exa7 * repxab17 + eya7 * repyab17; //1 add, 2 mult
+        __m256 maskab = _mm256_cmp_ps(_mm256_mul_ps(cab, minus_one), thab, _CMP_GE_OQ);
+        __m256 wab = _mm256_blendv_ps(influencer_vec, one, maskab);
 
-        float cba0 = exb0 * repxba10 + eyb0 * repyba10; //1 add, 2 mult
-        float cba1 = exb0 * repxba11 + eyb0 * repyba11; //1 add, 2 mult
-        float cba2 = exb0 * repxba12 + eyb0 * repyba12; //1 add, 2 mult
-        float cba3 = exb0 * repxba13 + eyb0 * repyba13; //1 add, 2 mult
-        float cba4 = exb0 * repxba14 + eyb0 * repyba14; //1 add, 2 mult
-        float cba5 = exb0 * repxba15 + eyb0 * repyba15; //1 add, 2 mult
-        float cba6 = exb0 * repxba16 + eyb0 * repyba16; //1 add, 2 mult
-        float cba7 = exb0 * repxba17 + eyb0 * repyba17; //1 add, 2 mult
+        __m256 maskba = _mm256_cmp_ps(_mm256_mul_ps(cba, minus_one), thba, _CMP_GE_OQ);
+        __m256 wba = _mm256_blendv_ps(influencer_vec, one, maskba);
 
-        float thab0 = sqrt(repxab10 * repxab10 + repyab10 * repyab10) * cospsi;
-        float thab1 = sqrt(repxab11 * repxab11 + repyab11 * repyab11) * cospsi;
-        float thab2 = sqrt(repxab12 * repxab12 + repyab12 * repyab12) * cospsi;
-        float thab3 = sqrt(repxab13 * repxab13 + repyab13 * repyab13) * cospsi;
-        float thab4 = sqrt(repxab14 * repxab14 + repyab14 * repyab14) * cospsi;
-        float thab5 = sqrt(repxab15 * repxab15 + repyab15 * repyab15) * cospsi;
-        float thab6 = sqrt(repxab16 * repxab16 + repyab16 * repyab16) * cospsi;
-        float thab7 = sqrt(repxab17 * repxab17 + repyab17 * repyab17) * cospsi;
+        sfx = _mm256_fmadd_ps(repxab,wab, sfx);
+        sfy = _mm256_fmadd_ps(repyab,wab, sfy);
 
-        float thba0 = sqrt(repxba10 * repxba10 + repyba10 * repyba10) * cospsi;
-        float thba1 = sqrt(repxba11 * repxba11 + repyba11 * repyba11) * cospsi;
-        float thba2 = sqrt(repxba12 * repxba12 + repyba12 * repyba12) * cospsi;
-        float thba3 = sqrt(repxba13 * repxba13 + repyba13 * repyba13) * cospsi;
-        float thba4 = sqrt(repxba14 * repxba14 + repyba14 * repyba14) * cospsi;
-        float thba5 = sqrt(repxba15 * repxba15 + repyba15 * repyba15) * cospsi;
-        float thba6 = sqrt(repxba16 * repxba16 + repyba16 * repyba16) * cospsi;
-        float thba7 = sqrt(repxba17 * repxba17 + repyba17 * repyba17) * cospsi;
+        __m256 temp_x = _mm256_mul_ps(repxba, wba);
+        __m256 temp_y = _mm256_mul_ps(repyba, wba);
 
-        float wab0 = -cab0 >= thab0 ? 1 : INFLUENCE;
-        float wab1 = -cab1 >= thab1 ? 1 : INFLUENCE;
-        float wab2 = -cab2 >= thab2 ? 1 : INFLUENCE;
-        float wab3 = -cab3 >= thab3 ? 1 : INFLUENCE;
-        float wab4 = -cab4 >= thab4 ? 1 : INFLUENCE;
-        float wab5 = -cab5 >= thab5 ? 1 : INFLUENCE;
-        float wab6 = -cab6 >= thab6 ? 1 : INFLUENCE;
-        float wab7 = -cab7 >= thab7 ? 1 : INFLUENCE;
+        temp_x = _mm256_hadd_ps(temp_x, _mm256_permute2f128_ps(temp_x, temp_x, 3));
+        temp_x = _mm256_hadd_ps(temp_x, temp_x);
+        temp_x = _mm256_hadd_ps(temp_x, temp_x);
 
-        float wba0 = -cba0 >= thba0 ? 1 : INFLUENCE;
-        float wba1 = -cba1 >= thba1 ? 1 : INFLUENCE;
-        float wba2 = -cba2 >= thba2 ? 1 : INFLUENCE;
-        float wba3 = -cba3 >= thba3 ? 1 : INFLUENCE;
-        float wba4 = -cba4 >= thba4 ? 1 : INFLUENCE;
-        float wba5 = -cba5 >= thba5 ? 1 : INFLUENCE;
-        float wba6 = -cba6 >= thba6 ? 1 : INFLUENCE;
-        float wba7 = -cba7 >= thba7 ? 1 : INFLUENCE;
-
-        sfx0 += repxab10 * wab0;
-        sfy0 += repyab10 * wab0;
-        sfx1 += repxab11 * wab1;
-        sfy1 += repyab11 * wab1;
-        sfx2 += repxab12 * wab2;
-        sfy2 += repyab12 * wab2;
-        sfx3 += repxab13 * wab3;
-        sfy3 += repyab13 * wab3;
-        sfx4 += repxab14 * wab4;
-        sfy4 += repyab14 * wab4;
-        sfx5 += repxab15 * wab5;
-        sfy5 += repyab15 * wab5;
-        sfx6 += repxab16 * wab6;
-        sfy6 += repyab16 * wab6;
-        sfx7 += repxab17 * wab7;
-        sfy7 += repyab17 * wab7;
-
-        float sfxbeta0 = (repxba10 * wba0) + (repxba11 * wba1);
-        float sfybeta0 = (repyba10 * wba0) + (repyba11 * wba1);
-        float sfxbeta1 = (repxba12 * wba2) + (repxba13 * wba3);
-        float sfybeta1 = (repyba12 * wba2) + (repyba13 * wba3);
-        float sfxbeta2 = (repxba14 * wba4) + (repxba15 * wba5);
-        float sfybeta2 = (repyba14 * wba4) + (repyba15 * wba5);
-        float sfxbeta3 = (repxba16 * wba6) + (repxba17 * wba7);
-        float sfybeta3 = (repyba16 * wba6) + (repyba17 * wba7);
-
-        social_force[IndexX(j)] += (sfxbeta0 + sfxbeta1) + (sfxbeta2 + sfxbeta3);
-        social_force[IndexY(j,n)] += (sfybeta0 + sfybeta1) + (sfybeta2 + sfybeta3);
+        temp_y = _mm256_hadd_ps(temp_y, _mm256_permute2f128_ps(temp_y, temp_y, 3));
+        temp_y = _mm256_hadd_ps(temp_y, temp_y);
+        temp_y = _mm256_hadd_ps(temp_y, temp_y);
+    
+        social_force[IndexX(j)] += temp_x[0];
+        social_force[IndexY(j,n)] += temp_y[0];
       } // n-1 * (12 adds, 18 mults, 6 divs, 1 exp, 4 sqrts)
+
+
+      // add stuff to sfx
+      sfx0 += sfx[0];
+      sfy0 += sfy[0];
+      sfx1 += sfx[1];
+      sfy1 += sfy[1];
+      sfx2 += sfx[2];
+      sfy2 += sfy[2];
+      sfx3 += sfx[3];
+      sfy3 += sfy[3];
+      sfx4 += sfx[4];
+      sfy4 += sfy[4];
+      sfx5 += sfx[5];
+      sfy5 += sfy[5];
+      sfx6 += sfx[6];
+      sfy6 += sfy[6];
+      sfx7 += sfx[7];
+      sfy7 += sfy[7];
+
 
       /************************************************/
       //UPDATE ACCELERATION TERM
