@@ -3,7 +3,7 @@
 # set variables
 options="Benchmark Test Visualization/Test"
 timesteps=(25) # talk about number of iterations
-persons=(8 16 32 64 128 256 512 1024 2048 4096) # 1024 2048)
+persons=(8 16 32 64 128 256 512 1024) #2048)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
@@ -18,7 +18,7 @@ firstarg=basic
 if [ $os == "Darwin" ]; then
   gcc-9 *.c  vectorize/*.c  -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 else
-  gcc *.c vectorize/*.c  -lm -O3 -mavx2 -mfma -g -o $prog
+  gcc *.c vectorize/*.c  -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 fi
 
 # perform benchmark or test
