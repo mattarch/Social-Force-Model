@@ -199,7 +199,7 @@ void run_finite_differences(sim_func f, struct arguments arguments)
 int compare_simulations(sim_t **sim_list, int sim_counter)
 {
     int error_check = 0;
-    int number_of_people = 320;
+    int number_of_people = 40;
     int n_timesteps = 1;
     int n_test_timesteps = 300;
     float *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,

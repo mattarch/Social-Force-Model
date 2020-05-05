@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <immintrin.h>
+#include <assert.h>
 
 #include "social_force_model_vectorize_2_5_1.h"
 //#include "../tsc_x86.h"
@@ -33,10 +34,9 @@ __m256 exp_fast_vec_2_5_1(__m256 x, __m256 one, __m256 exp_constant)
   return x;
 }
 
-
 void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, float *position, float *speed, float *desired_direction, float *final_destination,
-                               float *borders, float *actual_velocity, float *acceleration_term, float *people_repulsion_term, float *border_repulsion_term,
-                               float *social_force, float *desired_speed, float *desired_max_speed)
+                                      float *borders, float *actual_velocity, float *acceleration_term, float *people_repulsion_term, float *border_repulsion_term,
+                                      float *social_force, float *desired_speed, float *desired_max_speed)
 {
   const float inv_sigma = 1 / SIGMA; // 1 div -> 1 flop
   const float cospsi = PROJECTION_FACTOR;
@@ -63,72 +63,72 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       // LOADS
       /************************************************/
       float sfx0 = social_force[IndexX(i)]; //social force x
-      float sfy0 = social_force[IndexY(i,n)];
-      float sfx1 = social_force[IndexX(i+1)];
-      float sfy1 = social_force[IndexY(i+1,n)];
-      float sfx2 = social_force[IndexX(i+2)];
-      float sfy2 = social_force[IndexY(i+2,n)];
-      float sfx3 = social_force[IndexX(i+3)];
-      float sfy3 = social_force[IndexY(i+3,n)];
-      float sfx4 = social_force[IndexX(i+4)];
-      float sfy4 = social_force[IndexY(i+4,n)];
-      float sfx5 = social_force[IndexX(i+5)];
-      float sfy5 = social_force[IndexY(i+5,n)];
-      float sfx6 = social_force[IndexX(i+6)];
-      float sfy6 = social_force[IndexY(i+6,n)];
-      float sfx7 = social_force[IndexX(i+7)];
-      float sfy7 = social_force[IndexY(i+7,n)];
+      float sfy0 = social_force[IndexY(i, n)];
+      float sfx1 = social_force[IndexX(i + 1)];
+      float sfy1 = social_force[IndexY(i + 1, n)];
+      float sfx2 = social_force[IndexX(i + 2)];
+      float sfy2 = social_force[IndexY(i + 2, n)];
+      float sfx3 = social_force[IndexX(i + 3)];
+      float sfy3 = social_force[IndexY(i + 3, n)];
+      float sfx4 = social_force[IndexX(i + 4)];
+      float sfy4 = social_force[IndexY(i + 4, n)];
+      float sfx5 = social_force[IndexX(i + 5)];
+      float sfy5 = social_force[IndexY(i + 5, n)];
+      float sfx6 = social_force[IndexX(i + 6)];
+      float sfy6 = social_force[IndexY(i + 6, n)];
+      float sfx7 = social_force[IndexX(i + 7)];
+      float sfy7 = social_force[IndexY(i + 7, n)];
 
       float rxa0 = position[IndexX(i)];
-      float rya0 = position[IndexY(i,n)];
-      float rxa1 = position[IndexX(i+1)];
-      float rya1 = position[IndexY(i+1,n)];
-      float rxa2 = position[IndexX(i+2)];
-      float rya2 = position[IndexY(i+2,n)];
-      float rxa3 = position[IndexX(i+3)];
-      float rya3 = position[IndexY(i+3,n)];
-      float rxa4 = position[IndexX(i+4)];
-      float rya4 = position[IndexY(i+4,n)];
-      float rxa5 = position[IndexX(i+5)];
-      float rya5 = position[IndexY(i+5,n)];
-      float rxa6 = position[IndexX(i+6)];
-      float rya6 = position[IndexY(i+6,n)];
-      float rxa7 = position[IndexX(i+7)];
-      float rya7 = position[IndexY(i+7,n)];
+      float rya0 = position[IndexY(i, n)];
+      float rxa1 = position[IndexX(i + 1)];
+      float rya1 = position[IndexY(i + 1, n)];
+      float rxa2 = position[IndexX(i + 2)];
+      float rya2 = position[IndexY(i + 2, n)];
+      float rxa3 = position[IndexX(i + 3)];
+      float rya3 = position[IndexY(i + 3, n)];
+      float rxa4 = position[IndexX(i + 4)];
+      float rya4 = position[IndexY(i + 4, n)];
+      float rxa5 = position[IndexX(i + 5)];
+      float rya5 = position[IndexY(i + 5, n)];
+      float rxa6 = position[IndexX(i + 6)];
+      float rya6 = position[IndexY(i + 6, n)];
+      float rxa7 = position[IndexX(i + 7)];
+      float rya7 = position[IndexY(i + 7, n)];
 
       float exa0 = desired_direction[IndexX(i)];
-      float eya0 = desired_direction[IndexY(i,n)];
-      float exa1 = desired_direction[IndexX(i+1)];
-      float eya1 = desired_direction[IndexY(i+1,n)];
-      float exa2 = desired_direction[IndexX(i+2)];
-      float eya2 = desired_direction[IndexY(i+2,n)];
-      float exa3 = desired_direction[IndexX(i+3)];
-      float eya3 = desired_direction[IndexY(i+3,n)];
-      float exa4 = desired_direction[IndexX(i+4)];
-      float eya4 = desired_direction[IndexY(i+4,n)];
-      float exa5 = desired_direction[IndexX(i+5)];
-      float eya5 = desired_direction[IndexY(i+5,n)];
-      float exa6 = desired_direction[IndexX(i+6)];
-      float eya6 = desired_direction[IndexY(i+6,n)];
-      float exa7 = desired_direction[IndexX(i+7)];
-      float eya7 = desired_direction[IndexY(i+7,n)];
+      float eya0 = desired_direction[IndexY(i, n)];
+      float exa1 = desired_direction[IndexX(i + 1)];
+      float eya1 = desired_direction[IndexY(i + 1, n)];
+      float exa2 = desired_direction[IndexX(i + 2)];
+      float eya2 = desired_direction[IndexY(i + 2, n)];
+      float exa3 = desired_direction[IndexX(i + 3)];
+      float eya3 = desired_direction[IndexY(i + 3, n)];
+      float exa4 = desired_direction[IndexX(i + 4)];
+      float eya4 = desired_direction[IndexY(i + 4, n)];
+      float exa5 = desired_direction[IndexX(i + 5)];
+      float eya5 = desired_direction[IndexY(i + 5, n)];
+      float exa6 = desired_direction[IndexX(i + 6)];
+      float eya6 = desired_direction[IndexY(i + 6, n)];
+      float exa7 = desired_direction[IndexX(i + 7)];
+      float eya7 = desired_direction[IndexY(i + 7, n)];
 
       float avx0 = actual_velocity[IndexX(i)];
-      float avy0 = actual_velocity[IndexY(i,n)];
-      float avx1 = actual_velocity[IndexX(i+1)];
-      float avy1 = actual_velocity[IndexY(i+1,n)];
-      float avx2 = actual_velocity[IndexX(i+2)];
-      float avy2 = actual_velocity[IndexY(i+2,n)];
-      float avx3 = actual_velocity[IndexX(i+3)];
-      float avy3 = actual_velocity[IndexY(i+3,n)];
-      float avx4 = actual_velocity[IndexX(i+4)];
-      float avy4 = actual_velocity[IndexY(i+4,n)];
-      float avx5 = actual_velocity[IndexX(i+5)];
-      float avy5 = actual_velocity[IndexY(i+5,n)];
-      float avx6 = actual_velocity[IndexX(i+6)];
-      float avy6 = actual_velocity[IndexY(i+6,n)];
-      float avx7 = actual_velocity[IndexX(i+7)];
-      float avy7 = actual_velocity[IndexY(i+7,n)];
+      float avy0 = actual_velocity[IndexY(i, n)];
+      float avx1 = actual_velocity[IndexX(i + 1)];
+      float avy1 = actual_velocity[IndexY(i + 1, n)];
+      float avx2 = actual_velocity[IndexX(i + 2)];
+      float avy2 = actual_velocity[IndexY(i + 2, n)];
+      float avx3 = actual_velocity[IndexX(i + 3)];
+      float avy3 = actual_velocity[IndexY(i + 3, n)];
+      float avx4 = actual_velocity[IndexX(i + 4)];
+      float avy4 = actual_velocity[IndexY(i + 4, n)];
+      float avx5 = actual_velocity[IndexX(i + 5)];
+      float avy5 = actual_velocity[IndexY(i + 5, n)];
+      float avx6 = actual_velocity[IndexX(i + 6)];
+      float avy6 = actual_velocity[IndexY(i + 6, n)];
+      float avx7 = actual_velocity[IndexX(i + 7)];
+      float avy7 = actual_velocity[IndexY(i + 7, n)];
 
       float dsv0 = desired_speed[i];     //desired speed value
       float dsv1 = desired_speed[i + 1]; //desired speed value
@@ -1384,7 +1384,7 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       __m256 rxa = _mm256_set_ps(rxa7, rxa6, rxa5, rxa4, rxa3, rxa2, rxa1, rxa0);
       __m256 rya = _mm256_set_ps(rya7, rya6, rya5, rya4, rya3, rya2, rya1, rya0);
       __m256 one = _mm256_set1_ps(1.0);
-      __m256 minus_one = _mm256_set1_ps(-1);
+      __m256 minus_one = _mm256_set1_ps(-1.0);
       __m256 half = _mm256_set1_ps(0.5);
       __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
       __m256 inv_sigma_vec = _mm256_set1_ps(-inv_sigma);
@@ -1400,29 +1400,40 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       //iterate over all people
       for (int j = i + 8; j < n; j++) // for (int j = i + 1; j < n; j++)
       {
-        __m256 rxb = _mm256_broadcast_ss(position + IndexX(j));
-        __m256 ryb = _mm256_broadcast_ss(position + IndexY(j,n));
-        __m256 exb0 = _mm256_broadcast_ss(desired_direction + IndexX(j));
-        __m256 eyb0 = _mm256_broadcast_ss(desired_direction + IndexY(j,n));
-        __m256 db0 = _mm256_broadcast_ss(speed + IndexX(j));
-        
-        db0 = _mm256_mul_ps(db0, minus_one);
-        da = _mm256_mul_ps(da, minus_one);
 
-        __m256 rxab = _mm256_sub_ps(rxa, rxb);
-        __m256 ryab = _mm256_sub_ps(rya, ryb);
+        __m256 rxb_vec = _mm256_broadcast_ss(position + IndexX(j));
+        __m256 ryb_vec = _mm256_broadcast_ss(position + IndexY(j, n));
+        __m256 exb0_vec = _mm256_broadcast_ss(desired_direction + IndexX(j));
+        __m256 eyb0_vec = _mm256_broadcast_ss(desired_direction + IndexY(j, n));
+        __m256 db0_vec = _mm256_broadcast_ss(speed + IndexX(j));
+
+        db0_vec = _mm256_mul_ps(db0_vec, minus_one);
+        __m256 da_vec = _mm256_sub_ps(_mm256_setzero_ps(), da);
+
+        __m256 rxab = _mm256_sub_ps(rxa, rxb_vec);
+        __m256 ryab = _mm256_sub_ps(rya, ryb_vec);
 
         __m256 rxab_2 = _mm256_mul_ps(rxab, rxab);
         __m256 rabnorm = _mm256_fmadd_ps(ryab, ryab, rxab_2);
-        rabnorm = _mm256_sqrt_ps(rabnorm); 
+        rabnorm = _mm256_sqrt_ps(rabnorm);
 
         //float everything
-        __m256 rxabme = _mm256_fmadd_ps(db0,exb0, rxab);
-        __m256 ryabme = _mm256_fmadd_ps(db0,eyb0, ryab);
-        
-        __m256 rxbame = _mm256_fmsub_ps(da, exa, rxab);
-        __m256 rybame = _mm256_fmsub_ps(da, eya, ryab);
+        __m256 rxabme = _mm256_fmadd_ps(db0_vec, exb0_vec, rxab);
+        __m256 ryabme = _mm256_fmadd_ps(db0_vec, eyb0_vec, ryab);
 
+        __m256 rxbame = _mm256_fmsub_ps(da_vec, exa, rxab);
+        __m256 rybame = _mm256_fmsub_ps(da_vec, eya, ryab);
+
+        // printf("da %f %f\n", da0, da_vec[0]);
+
+        // printf("rxab %f %f\n", rxab0, rxab[0]);
+        // printf("ryab %f %f\n", ryab0, ryab[0]);
+
+        // printf("rxabme %f %f\n", rxabmex0, rxabme[0]);
+        // printf("ryabme %f %f\n", ryabmey0, ryabme[0]);
+
+        // printf("rxbame %f %f\n", rxbamex0, rxbame[0]);
+        // printf("rybame %f %f\n", rybamey0, rybame[0]);
 
         __m256 rxabme_2 = _mm256_mul_ps(rxabme, rxabme);
         __m256 rabmenorm = _mm256_fmadd_ps(ryabme, ryabme, rxabme_2);
@@ -1432,14 +1443,16 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         __m256 rbamenorm = _mm256_fmadd_ps(rybame, rybame, rxbame_2);
         rbamenorm = _mm256_sqrt_ps(rbamenorm);
 
+        __m256 normsumab = _mm256_add_ps(rabnorm, rabmenorm);
+        __m256 normsumba = _mm256_add_ps(rabnorm, rbamenorm); // maybe wrong use rbanorm
 
-        __m256 normsumab = _mm256_add_ps(rabnorm,rabmenorm);
-        __m256 normsumba = _mm256_add_ps(rabnorm,rbamenorm); // maybe wrong use rbanorm
+        // printf("rabmenorm %f %f\n", rabmenorm0, rabmenorm[0]);
+        // printf("rbamenorm %f %f\n", rbamenorm0, rbamenorm[0]);
 
         __m256 div_1x = _mm256_div_ps(rxab, rabnorm);
         __m256 div_1y = _mm256_div_ps(ryab, rabnorm);
-        __m256 div_2x = _mm256_div_ps(rxab, rabmenorm);
-        __m256 div_2y = _mm256_div_ps(ryab, rabmenorm);
+        __m256 div_2x = _mm256_div_ps(rxabme, rabmenorm);
+        __m256 div_2y = _mm256_div_ps(ryabme, rabmenorm);
 
         __m256 repxab = _mm256_add_ps(div_1x, div_2x);
         __m256 repyab = _mm256_add_ps(div_1y, div_2y);
@@ -1450,44 +1463,65 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         __m256 repxba = _mm256_sub_ps(div_2x_me, div_1x);
         __m256 repyba = _mm256_sub_ps(div_2y_me, div_1y);
 
-        __m256 db_2 = _mm256_mul_ps(db0, db0);
-        __m256 da_2 = _mm256_mul_ps(da,da);
-        __m256 bab = _mm256_fmsub_ps(normsumab,normsumab, db_2);
-        __m256 bba = _mm256_fmsub_ps(normsumba,normsumba, da_2);
+        // printf("repxab00 %f %f\n", repxab00, repxab[0]);
+
+        __m256 db_2 = _mm256_mul_ps(db0_vec, db0_vec);
+        __m256 da_2 = _mm256_mul_ps(da_vec, da_vec);
+        __m256 bab = _mm256_fmsub_ps(normsumab, normsumab, db_2);
+        __m256 bba = _mm256_fmsub_ps(normsumba, normsumba, da_2);
+
+        // printf("da2 %f %f\n", da0 * da0, da_2[0]);
+        // printf("normsumab %f %f\n", normsumab0, normsumab[0]);
+        // printf("normsumba %f %f\n", normsumba0, normsumba[0]);
+
+        // printf("bab %f %f\n", bab0, bab[0]);
+        // printf("bba %f %f\n", bba0, bba[0]);
 
         __m256 babnorm = _mm256_sqrt_ps(bab);
         __m256 bbanorm = _mm256_sqrt_ps(bba);
         babnorm = _mm256_mul_ps(babnorm, half);
         bbanorm = _mm256_mul_ps(bbanorm, half);
 
-        __m256 cfab = exp_fast_vec_2_5_1(_mm256_mul_ps(babnorm,inv_sigma_vec), one, exp_constant);
+        __m256 cfab = exp_fast_vec_2_5_1(_mm256_mul_ps(babnorm, inv_sigma_vec), one, exp_constant);
         cfab = _mm256_mul_ps(cfab, div_factor_vec);
         cfab = _mm256_mul_ps(cfab, normsumab);
-        cfab = _mm256_div_ps(cfab,babnorm);
+        cfab = _mm256_div_ps(cfab, babnorm);
 
-        __m256 cfba = exp_fast_vec_2_5_1(_mm256_mul_ps(bbanorm,inv_sigma_vec), one, exp_constant);
+        __m256 cfba = exp_fast_vec_2_5_1(_mm256_mul_ps(bbanorm, inv_sigma_vec), one, exp_constant);
         cfba = _mm256_mul_ps(cfba, div_factor_vec);
         cfba = _mm256_mul_ps(cfba, normsumba);
-        cfba = _mm256_div_ps(cfba,bbanorm);
+        cfba = _mm256_div_ps(cfba, bbanorm);
 
         repxab = _mm256_mul_ps(repxab, cfab);
         repyab = _mm256_mul_ps(repyab, cfab);
         repxba = _mm256_mul_ps(repxba, cfba);
         repyba = _mm256_mul_ps(repyba, cfba);
 
+        // printf("cfab %f %f\n", cfab0, cfab[0]);
+        // printf("cfba %f %f\n", cfba0, cfba[0]);
+
+        // printf("babnorm %f %f\n", babnorm0, babnorm[0]);
+        // printf("bbanorm %f %f\n", bbanorm0, bbanorm[0]);
+
         __m256 cab = _mm256_mul_ps(exa, repxab);
         cab = _mm256_fmadd_ps(eya, repyab, cab);
 
-        __m256 cba = _mm256_mul_ps(exa, repxba);
-        cba = _mm256_fmadd_ps(eya, repyba, cba);
+        __m256 cba = _mm256_mul_ps(exb0_vec, repxba);
+        cba = _mm256_fmadd_ps(eyb0_vec, repyba, cba);
 
-        __m256 repxab_2 = _mm256_mul_ps(repxab,repxab);
-        __m256 thab = _mm256_sqrt_ps(_mm256_fmadd_ps(repyab,repyab, repxab_2));
+        // printf("cab %f %f\n", cab0, cab[0]);
+        // printf("cba %f %f\n", cba0, cba[0]);
+
+        __m256 repxab_2 = _mm256_mul_ps(repxab, repxab);
+        __m256 thab = _mm256_sqrt_ps(_mm256_fmadd_ps(repyab, repyab, repxab_2));
         thab = _mm256_mul_ps(thab, cospsi_vec);
 
-        __m256 repxba_2 = _mm256_mul_ps(repxba,repxba);
-        __m256 thba = _mm256_sqrt_ps(_mm256_fmadd_ps(repyba,repyba, repxba_2));
+        __m256 repxba_2 = _mm256_mul_ps(repxba, repxba);
+        __m256 thba = _mm256_sqrt_ps(_mm256_fmadd_ps(repyba, repyba, repxba_2));
         thba = _mm256_mul_ps(thba, cospsi_vec);
+
+        // printf("thab %f %f\n", thab0, thab[0]);
+        // printf("thba %f %f\n", thba0, thba[0]);
 
         __m256 maskab = _mm256_cmp_ps(_mm256_mul_ps(cab, minus_one), thab, _CMP_GE_OQ);
         __m256 wab = _mm256_blendv_ps(influencer_vec, one, maskab);
@@ -1495,8 +1529,8 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         __m256 maskba = _mm256_cmp_ps(_mm256_mul_ps(cba, minus_one), thba, _CMP_GE_OQ);
         __m256 wba = _mm256_blendv_ps(influencer_vec, one, maskba);
 
-        sfx = _mm256_fmadd_ps(repxab,wab, sfx);
-        sfy = _mm256_fmadd_ps(repyab,wab, sfy);
+        sfx = _mm256_fmadd_ps(repxab, wab, sfx);
+        sfy = _mm256_fmadd_ps(repyab, wab, sfy);
 
         __m256 temp_x = _mm256_mul_ps(repxba, wba);
         __m256 temp_y = _mm256_mul_ps(repyba, wba);
@@ -1508,11 +1542,10 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         temp_y = _mm256_hadd_ps(temp_y, _mm256_permute2f128_ps(temp_y, temp_y, 3));
         temp_y = _mm256_hadd_ps(temp_y, temp_y);
         temp_y = _mm256_hadd_ps(temp_y, temp_y);
-    
-        social_force[IndexX(j)] += temp_x[0];
-        social_force[IndexY(j,n)] += temp_y[0];
-      } // n-1 * (12 adds, 18 mults, 6 divs, 1 exp, 4 sqrts)
 
+        social_force[IndexX(j)] += temp_x[0];
+        social_force[IndexY(j, n)] += temp_y[0];
+      } // n-1 * (12 adds, 18 mults, 6 divs, 1 exp, 4 sqrts)
 
       // add stuff to sfx
       sfx0 += sfx[0];
@@ -1531,7 +1564,6 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       sfy6 += sfy[6];
       sfx7 += sfx[7];
       sfy7 += sfy[7];
-
 
       /************************************************/
       //UPDATE ACCELERATION TERM
@@ -1592,21 +1624,21 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       sfy7 += INV_RELAX_TIME * vdy17; // 1 mul => 1 flops
 
       social_force[IndexX(i)] = sfx0;
-      social_force[IndexY(i,n)] = sfy0;
-      social_force[IndexX(i+1)] = sfx1;
-      social_force[IndexY(i+1,n)] = sfy1;
-      social_force[IndexX(i+2)] = sfx2;
-      social_force[IndexY(i+2,n)] = sfy2;
-      social_force[IndexX(i+3)] = sfx3;
-      social_force[IndexY(i+3,n)] = sfy3;
-      social_force[IndexX(i+4)] = sfx4;
-      social_force[IndexY(i+4,n)] = sfy4;
-      social_force[IndexX(i+5)] = sfx5;
-      social_force[IndexY(i+5,n)] = sfy5;
-      social_force[IndexX(i+6)] = sfx6;
-      social_force[IndexY(i+6,n)] = sfy6;
-      social_force[IndexX(i+7)] = sfx7;
-      social_force[IndexY(i+7,n)] = sfy7;
+      social_force[IndexY(i, n)] = sfy0;
+      social_force[IndexX(i + 1)] = sfx1;
+      social_force[IndexY(i + 1, n)] = sfy1;
+      social_force[IndexX(i + 2)] = sfx2;
+      social_force[IndexY(i + 2, n)] = sfy2;
+      social_force[IndexX(i + 3)] = sfx3;
+      social_force[IndexY(i + 3, n)] = sfy3;
+      social_force[IndexX(i + 4)] = sfx4;
+      social_force[IndexY(i + 4, n)] = sfy4;
+      social_force[IndexX(i + 5)] = sfx5;
+      social_force[IndexY(i + 5, n)] = sfy5;
+      social_force[IndexX(i + 6)] = sfx6;
+      social_force[IndexY(i + 6, n)] = sfy6;
+      social_force[IndexX(i + 7)] = sfx7;
+      social_force[IndexY(i + 7, n)] = sfy7;
     } //n * (12*(n-1) + 3*(n_borders) + 2) ADDS
     //n * (18*(n-1) + 8*(n_borders) + 4) MULTS
     //n * (6*(n-1) + n_borders )         DIVS
@@ -1614,25 +1646,25 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
     //n * (4*(n-1))                      SQRTS
     for (int i = 0; i < n - 3; i += 8)
     {
-    /************************************************/
+      /************************************************/
       // LOADS
       /************************************************/
       float cx0 = position[IndexX(i)];
-      float cy0 = position[IndexY(i,n)];
-      float cx1 = position[IndexX(i+1)];
-      float cy1 = position[IndexY(i+1,n)];
-      float cx2 = position[IndexX(i+2)];
-      float cy2 = position[IndexY(i+2,n)];
-      float cx3 = position[IndexX(i+3)];
-      float cy3 = position[IndexY(i+3,n)];
-      float cx4 = position[IndexX(i+4)];
-      float cy4 = position[IndexY(i+4,n)];
-      float cx5 = position[IndexX(i+5)];
-      float cy5 = position[IndexY(i+5,n)];
-      float cx6 = position[IndexX(i+6)];
-      float cy6 = position[IndexY(i+6,n)];
-      float cx7 = position[IndexX(i+7)];
-      float cy7 = position[IndexY(i+7,n)];
+      float cy0 = position[IndexY(i, n)];
+      float cx1 = position[IndexX(i + 1)];
+      float cy1 = position[IndexY(i + 1, n)];
+      float cx2 = position[IndexX(i + 2)];
+      float cy2 = position[IndexY(i + 2, n)];
+      float cx3 = position[IndexX(i + 3)];
+      float cy3 = position[IndexY(i + 3, n)];
+      float cx4 = position[IndexX(i + 4)];
+      float cy4 = position[IndexY(i + 4, n)];
+      float cx5 = position[IndexX(i + 5)];
+      float cy5 = position[IndexY(i + 5, n)];
+      float cx6 = position[IndexX(i + 6)];
+      float cy6 = position[IndexY(i + 6, n)];
+      float cx7 = position[IndexX(i + 7)];
+      float cy7 = position[IndexY(i + 7, n)];
 
       float max0 = desired_max_speed[i];
       float max1 = desired_max_speed[i + 1];
@@ -1644,22 +1676,22 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       float max7 = desired_max_speed[i + 7];
 
       //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-      float pvx0 = actual_velocity[IndexX(i)] + social_force[IndexX(i)] * TIMESTEP;           // 1 add, 1 mult => 2 flops
-      float pvy0 = actual_velocity[IndexY(i,n)] + social_force[IndexY(i,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvx1 = actual_velocity[IndexX(i+1)] + social_force[IndexX(i+1)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvy1 = actual_velocity[IndexY(i+1,n)] + social_force[IndexY(i+1,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvx2 = actual_velocity[IndexX(i+2)] + social_force[IndexX(i+2)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvy2 = actual_velocity[IndexY(i+2,n)] + social_force[IndexY(i+2,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvx3 = actual_velocity[IndexX(i+3)] + social_force[IndexX(i+3)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvy3 = actual_velocity[IndexY(i+3,n)] + social_force[IndexY(i+3,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvx4 = actual_velocity[IndexX(i+4)] + social_force[IndexX(i+4)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvy4 = actual_velocity[IndexY(i+4,n)] + social_force[IndexY(i+4,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      float pvx5 = actual_velocity[IndexX(i+5)] + social_force[IndexX(i+5)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      float pvy5 = actual_velocity[IndexY(i+5,n)] + social_force[IndexY(i+5,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      float pvx6 = actual_velocity[IndexX(i+6)] + social_force[IndexX(i+6)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      float pvy6 = actual_velocity[IndexY(i+6,n)] + social_force[IndexY(i+6,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      float pvx7 = actual_velocity[IndexX(i+7)] + social_force[IndexX(i+7)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      float pvy7 = actual_velocity[IndexY(i+7,n)] + social_force[IndexY(i+7,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx0 = actual_velocity[IndexX(i)] + social_force[IndexX(i)] * TIMESTEP;               // 1 add, 1 mult => 2 flops
+      float pvy0 = actual_velocity[IndexY(i, n)] + social_force[IndexY(i, n)] * TIMESTEP;         // 1 add, 1 mult => 2 flops
+      float pvx1 = actual_velocity[IndexX(i + 1)] + social_force[IndexX(i + 1)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy1 = actual_velocity[IndexY(i + 1, n)] + social_force[IndexY(i + 1, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx2 = actual_velocity[IndexX(i + 2)] + social_force[IndexX(i + 2)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy2 = actual_velocity[IndexY(i + 2, n)] + social_force[IndexY(i + 2, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx3 = actual_velocity[IndexX(i + 3)] + social_force[IndexX(i + 3)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy3 = actual_velocity[IndexY(i + 3, n)] + social_force[IndexY(i + 3, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx4 = actual_velocity[IndexX(i + 4)] + social_force[IndexX(i + 4)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy4 = actual_velocity[IndexY(i + 4, n)] + social_force[IndexY(i + 4, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx5 = actual_velocity[IndexX(i + 5)] + social_force[IndexX(i + 5)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy5 = actual_velocity[IndexY(i + 5, n)] + social_force[IndexY(i + 5, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx6 = actual_velocity[IndexX(i + 6)] + social_force[IndexX(i + 6)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy6 = actual_velocity[IndexY(i + 6, n)] + social_force[IndexY(i + 6, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      float pvx7 = actual_velocity[IndexX(i + 7)] + social_force[IndexX(i + 7)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      float pvy7 = actual_velocity[IndexY(i + 7, n)] + social_force[IndexY(i + 7, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
 
       /************************************************/
       // UPDATE POSITION
@@ -1743,22 +1775,22 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       // get current position and target
 
       // compute differences
-      float dx0 = final_destination[IndexX(i)] - cx0;      // 1 add => 1 flop
-      float dy0 = final_destination[IndexY(i,n)] - cy0;  // 1 add => 1 flop
-      float dx1 = final_destination[IndexX(i+1)] - cx1;  // 1 add => 1 flop
-      float dy1 = final_destination[IndexY(i+1,n)] - cy1;  // 1 add => 1 flop
-      float dx2 = final_destination[IndexX(i+2)] - cx2;  // 1 add => 1 flop
-      float dy2 = final_destination[IndexY(i+2,n)] - cy2;  // 1 add => 1 flop
-      float dx3 = final_destination[IndexX(i+3)] - cx3;  // 1 add => 1 flop
-      float dy3 = final_destination[IndexY(i+3,n)] - cy3;  // 1 add => 1 flop
-      float dx4 = final_destination[IndexX(i+4)] - cx4;  // 1 add => 1 flop
-      float dy4 = final_destination[IndexY(i+4,n)] - cy4;  // 1 add => 1 flop
-      float dx5 = final_destination[IndexX(i+5)] - cx5; // 1 add => 1 flop
-      float dy5 = final_destination[IndexY(i+5,n)] - cy5; // 1 add => 1 flop
-      float dx6 = final_destination[IndexX(i+6)] - cx6; // 1 add => 1 flop
-      float dy6 = final_destination[IndexY(i+6,n)] - cy6; // 1 add => 1 flop
-      float dx7 = final_destination[IndexX(i+7)] - cx7; // 1 add => 1 flop
-      float dy7 = final_destination[IndexY(i+7,n)] - cy7; // 1 add => 1 flop
+      float dx0 = final_destination[IndexX(i)] - cx0;        // 1 add => 1 flop
+      float dy0 = final_destination[IndexY(i, n)] - cy0;     // 1 add => 1 flop
+      float dx1 = final_destination[IndexX(i + 1)] - cx1;    // 1 add => 1 flop
+      float dy1 = final_destination[IndexY(i + 1, n)] - cy1; // 1 add => 1 flop
+      float dx2 = final_destination[IndexX(i + 2)] - cx2;    // 1 add => 1 flop
+      float dy2 = final_destination[IndexY(i + 2, n)] - cy2; // 1 add => 1 flop
+      float dx3 = final_destination[IndexX(i + 3)] - cx3;    // 1 add => 1 flop
+      float dy3 = final_destination[IndexY(i + 3, n)] - cy3; // 1 add => 1 flop
+      float dx4 = final_destination[IndexX(i + 4)] - cx4;    // 1 add => 1 flop
+      float dy4 = final_destination[IndexY(i + 4, n)] - cy4; // 1 add => 1 flop
+      float dx5 = final_destination[IndexX(i + 5)] - cx5;    // 1 add => 1 flop
+      float dy5 = final_destination[IndexY(i + 5, n)] - cy5; // 1 add => 1 flop
+      float dx6 = final_destination[IndexX(i + 6)] - cx6;    // 1 add => 1 flop
+      float dy6 = final_destination[IndexY(i + 6, n)] - cy6; // 1 add => 1 flop
+      float dx7 = final_destination[IndexX(i + 7)] - cx7;    // 1 add => 1 flop
+      float dy7 = final_destination[IndexY(i + 7, n)] - cy7; // 1 add => 1 flop
 
       float d0_0 = dx0 * dx0; // 1 add, 2 mult => 3 flops
       float d1_0 = dx1 * dx1; // 1 add, 2 mult => 3 flops
@@ -1787,42 +1819,40 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       float n6 = sqrt(d6_1); // 1 sqrt => 1 flop
       float n7 = sqrt(d7_1); // 1 sqrt => 1 flop
 
-      social_force[IndexX(i)] = 0.0;     
-      social_force[IndexY(i,n)] = 0.0; 
-      social_force[IndexX(i+1)] = 0.0; 
-      social_force[IndexY(i+1,n)] = 0.0; 
-      social_force[IndexX(i+2)] = 0.0; 
-      social_force[IndexY(i+2,n)] = 0.0; 
-      social_force[IndexX(i+3)] = 0.0; 
-      social_force[IndexY(i+3,n)] = 0.0; 
-      social_force[IndexX(i+4)] = 0.0; 
-      social_force[IndexY(i+4,n)] = 0.0; 
-      social_force[IndexX(i+5)] = 0.0;
-      social_force[IndexY(i+5,n)] = 0.0;
-      social_force[IndexX(i+6)] = 0.0;
-      social_force[IndexY(i+6,n)] = 0.0;
-      social_force[IndexX(i+7)] = 0.0;
-      social_force[IndexY(i+7,n)] = 0.0;
+      social_force[IndexX(i)] = 0.0;
+      social_force[IndexY(i, n)] = 0.0;
+      social_force[IndexX(i + 1)] = 0.0;
+      social_force[IndexY(i + 1, n)] = 0.0;
+      social_force[IndexX(i + 2)] = 0.0;
+      social_force[IndexY(i + 2, n)] = 0.0;
+      social_force[IndexX(i + 3)] = 0.0;
+      social_force[IndexY(i + 3, n)] = 0.0;
+      social_force[IndexX(i + 4)] = 0.0;
+      social_force[IndexY(i + 4, n)] = 0.0;
+      social_force[IndexX(i + 5)] = 0.0;
+      social_force[IndexY(i + 5, n)] = 0.0;
+      social_force[IndexX(i + 6)] = 0.0;
+      social_force[IndexY(i + 6, n)] = 0.0;
+      social_force[IndexX(i + 7)] = 0.0;
+      social_force[IndexY(i + 7, n)] = 0.0;
 
       //update position
-      position[IndexX(i)] = cx0;     
-      position[IndexY(i,n)] = cy0; 
-      position[IndexX(i+1)] = cx1; 
-      position[IndexY(i+1,n)] = cy1; 
-      position[IndexX(i+2)] = cx2; 
-      position[IndexY(i+2,n)] = cy2; 
-      position[IndexX(i+3)] = cx3; 
-      position[IndexY(i+3,n)] = cy3; 
-      position[IndexX(i+4)] = cx4; 
-      position[IndexY(i+4,n)] = cy4; 
-      position[IndexX(i+5)] = cx5;
-      position[IndexY(i+5,n)] = cy5;
-      position[IndexX(i+6)] = cx6;
-      position[IndexY(i+6,n)] = cy6;
-      position[IndexX(i+7)] = cx7;
-      position[IndexY(i+7,n)] = cy7;
-
-      
+      position[IndexX(i)] = cx0;
+      position[IndexY(i, n)] = cy0;
+      position[IndexX(i + 1)] = cx1;
+      position[IndexY(i + 1, n)] = cy1;
+      position[IndexX(i + 2)] = cx2;
+      position[IndexY(i + 2, n)] = cy2;
+      position[IndexX(i + 3)] = cx3;
+      position[IndexY(i + 3, n)] = cy3;
+      position[IndexX(i + 4)] = cx4;
+      position[IndexY(i + 4, n)] = cy4;
+      position[IndexX(i + 5)] = cx5;
+      position[IndexY(i + 5, n)] = cy5;
+      position[IndexX(i + 6)] = cx6;
+      position[IndexY(i + 6, n)] = cy6;
+      position[IndexX(i + 7)] = cx7;
+      position[IndexY(i + 7, n)] = cy7;
 
       //update speed value, desire direction, actual_velocity
       speed[i] = cv0 * nv0;     // 1 mul, 1 flop
@@ -1833,49 +1863,49 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       speed[i + 5] = cv5 * nv5; // 1 mul, 1 flop
       speed[i + 6] = cv6 * nv6; // 1 mul, 1 flop
       speed[i + 7] = cv7 * nv7; // 1 mul, 1 flop
-      actual_velocity[IndexX(i)] = pvx0;     
-      actual_velocity[IndexY(i,n)] = pvy0; 
-      actual_velocity[IndexX(i+1)] = pvx1; 
-      actual_velocity[IndexY(i+1,n)] = pvy1; 
-      actual_velocity[IndexX(i+2)] = pvx2; 
-      actual_velocity[IndexY(i+2,n)] = pvy2; 
-      actual_velocity[IndexX(i+3)] = pvx3; 
-      actual_velocity[IndexY(i+3,n)] = pvy3; 
-      actual_velocity[IndexX(i+4)] = pvx4; 
-      actual_velocity[IndexY(i+4,n)] = pvy4; 
-      actual_velocity[IndexX(i+5)] = pvx5;
-      actual_velocity[IndexY(i+5,n)] = pvy5;
-      actual_velocity[IndexX(i+6)] = pvx6;
-      actual_velocity[IndexY(i+6,n)] = pvy6;
-      actual_velocity[IndexX(i+7)] = pvx7;
-      actual_velocity[IndexY(i+7,n)] = pvy7;
+      actual_velocity[IndexX(i)] = pvx0;
+      actual_velocity[IndexY(i, n)] = pvy0;
+      actual_velocity[IndexX(i + 1)] = pvx1;
+      actual_velocity[IndexY(i + 1, n)] = pvy1;
+      actual_velocity[IndexX(i + 2)] = pvx2;
+      actual_velocity[IndexY(i + 2, n)] = pvy2;
+      actual_velocity[IndexX(i + 3)] = pvx3;
+      actual_velocity[IndexY(i + 3, n)] = pvy3;
+      actual_velocity[IndexX(i + 4)] = pvx4;
+      actual_velocity[IndexY(i + 4, n)] = pvy4;
+      actual_velocity[IndexX(i + 5)] = pvx5;
+      actual_velocity[IndexY(i + 5, n)] = pvy5;
+      actual_velocity[IndexX(i + 6)] = pvx6;
+      actual_velocity[IndexY(i + 6, n)] = pvy6;
+      actual_velocity[IndexX(i + 7)] = pvx7;
+      actual_velocity[IndexY(i + 7, n)] = pvy7;
 
       // update desired_direction
-      desired_direction[IndexX(i)] = dx0 / n0;      // 1 div => 1 flop
-      desired_direction[IndexY(i,n)] = dy0 / n0;  // 1 div => 1 flop
-      desired_direction[IndexX(i+1)] = dx1 / n1;  // 1 div => 1 flop
-      desired_direction[IndexY(i+1,n)] = dy1 / n1;  // 1 div => 1 flop
-      desired_direction[IndexX(i+2)] = dx2 / n2;  // 1 div => 1 flop
-      desired_direction[IndexY(i+2,n)] = dy2 / n2;  // 1 div => 1 flop
-      desired_direction[IndexX(i+3)] = dx3 / n3;  // 1 div => 1 flop
-      desired_direction[IndexY(i+3,n)] = dy3 / n3;  // 1 div => 1 flop
-      desired_direction[IndexX(i+4)] = dx4 / n4;  // 1 div => 1 flop
-      desired_direction[IndexY(i+4,n)] = dy4 / n4;  // 1 div => 1 flop
-      desired_direction[IndexX(i+5)] = dx5 / n5; // 1 div => 1 flop
-      desired_direction[IndexY(i+5,n)] = dy5 / n5; // 1 div => 1 flop
-      desired_direction[IndexX(i+6)] = dx6 / n6; // 1 div => 1 flop
-      desired_direction[IndexY(i+6,n)] = dy6 / n6; // 1 div => 1 flop
-      desired_direction[IndexX(i+7)] = dx7 / n7; // 1 div => 1 flop
-      desired_direction[IndexY(i+7,n)] = dy7 / n7; // 1 div => 1 flop
-    }                                           // n * 8    ADDS
-                                                // n * 11   MULTS
-                                                // n * 3    DIVS
-                                                // n * 2    SQRTS
-  }                                             // n_timesteps * [n * (12*(n-1) + 3*(n_borders) + 2) + n * 8]         ADDS
-                                                // n_timesteps * [n * (18*(n-1) + 8*(n_borders) + 4) + n + n * 11]    MULTS
-                                                // n_timesteps * [n * (6*(n-1) + n_borders) + n * 3]                  DIVS
-                                                // n_timesteps * [n * (n-1 + n_borders)]                              EXPS
-                                                // n_timesteps * [n * (4*(n-1)) + (n * 2)]                            SQRTD
-  // printf("fma cycles 1: %llu  -  sqrt cycles 1: %llu\n",fma_cycles_1, sqrt_cycles_1);
+      desired_direction[IndexX(i)] = dx0 / n0;        // 1 div => 1 flop
+      desired_direction[IndexY(i, n)] = dy0 / n0;     // 1 div => 1 flop
+      desired_direction[IndexX(i + 1)] = dx1 / n1;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 1, n)] = dy1 / n1; // 1 div => 1 flop
+      desired_direction[IndexX(i + 2)] = dx2 / n2;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 2, n)] = dy2 / n2; // 1 div => 1 flop
+      desired_direction[IndexX(i + 3)] = dx3 / n3;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 3, n)] = dy3 / n3; // 1 div => 1 flop
+      desired_direction[IndexX(i + 4)] = dx4 / n4;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 4, n)] = dy4 / n4; // 1 div => 1 flop
+      desired_direction[IndexX(i + 5)] = dx5 / n5;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 5, n)] = dy5 / n5; // 1 div => 1 flop
+      desired_direction[IndexX(i + 6)] = dx6 / n6;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 6, n)] = dy6 / n6; // 1 div => 1 flop
+      desired_direction[IndexX(i + 7)] = dx7 / n7;    // 1 div => 1 flop
+      desired_direction[IndexY(i + 7, n)] = dy7 / n7; // 1 div => 1 flop
+    }                                                 // n * 8    ADDS
+                                                      // n * 11   MULTS
+                                                      // n * 3    DIVS
+                                                      // n * 2    SQRTS
+  }                                                   // n_timesteps * [n * (12*(n-1) + 3*(n_borders) + 2) + n * 8]         ADDS
+                                                      // n_timesteps * [n * (18*(n-1) + 8*(n_borders) + 4) + n + n * 11]    MULTS
+                                                      // n_timesteps * [n * (6*(n-1) + n_borders) + n * 3]                  DIVS
+                                                      // n_timesteps * [n * (n-1 + n_borders)]                              EXPS
+                                                      // n_timesteps * [n * (4*(n-1)) + (n * 2)]                            SQRTD
+  //printf("fma cycles 1: %llu  -  sqrt cycles 1: %llu\n",fma_cycles_1, sqrt_cycles_1);
   // printf("fma cycles 2: %llu  -  sqrt cycles 2: %llu\n",fma_cycles_2, sqrt_cycles_2);
 }
