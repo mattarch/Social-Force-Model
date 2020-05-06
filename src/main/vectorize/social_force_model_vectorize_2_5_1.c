@@ -504,10 +504,10 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
       __m256 pvx_2 = _mm256_mul_ps(pvx, pvx);
       __m256 nv_2 = _mm256_fmadd_ps(pvy, pvy, pvx_2);
-      __m256 nv = _mm256_sqrt_ps(nv_2);
+      __m256 nv = _mm256_rsqrt_ps(nv_2);
 
-      __m256 mask = _mm256_cmp_ps(nv, max, _CMP_GT_OQ);
-      __m256 cv = _mm256_blendv_ps(one, _mm256_div_ps(max, nv), mask);
+      __m256 mask = _mm256_cmp_ps(_mm256_rcp_ps(nv), max, _CMP_GT_OQ);
+      __m256 cv = _mm256_blendv_ps(one, _mm256_mul_ps(max, nv), mask);
 
       pvx = _mm256_mul_ps(pvx, cv);
       pvy = _mm256_mul_ps(pvy, cv);
@@ -529,7 +529,7 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
       __m256 dx_2 = _mm256_mul_ps(dx, dx);
       __m256 d_2 = _mm256_fmadd_ps(dy, dy, dx_2);
-      __m256 d = _mm256_sqrt_ps(d_2);
+      __m256 d = _mm256_rsqrt_ps(d_2);
 
       _mm256_store_ps(social_force + IndexX(i), _mm256_setzero_ps());
       _mm256_store_ps(social_force + IndexY(i, n), _mm256_setzero_ps());
@@ -537,9 +537,9 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       _mm256_store_ps(position + IndexY(i, n), cy);
       _mm256_store_ps(actual_velocity + IndexX(i), pvx);
       _mm256_store_ps(actual_velocity + IndexY(i, n), pvy);
-      _mm256_store_ps(desired_direction + IndexX(i), _mm256_div_ps(dx, d));
-      _mm256_store_ps(desired_direction + IndexY(i, n), _mm256_div_ps(dy, d));
-      _mm256_store_ps(speed + IndexX(i), _mm256_mul_ps(cv, nv));
+      _mm256_store_ps(desired_direction + IndexX(i), _mm256_mul_ps(dx, d));
+      _mm256_store_ps(desired_direction + IndexY(i, n), _mm256_mul_ps(dy, d));
+      _mm256_store_ps(speed + IndexX(i), _mm256_mul_ps(cv, _mm256_rcp_ps(nv)));
     } // n * 8    ADDS
       // n * 11   MULTS
       // n * 3    DIVS
