@@ -267,7 +267,7 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       __m256 rya = _mm256_load_ps(position + IndexY(i, n));
       __m256 one = _mm256_set1_ps(1.0);
       __m256 minus_one = _mm256_set1_ps(-1.0);
-      __m256 half = _mm256_set1_ps(0.5);
+      __m256 two = _mm256_set1_ps(2.0);
       __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
       __m256 inv_sigma_vec = _mm256_set1_ps(-inv_sigma);
       __m256 div_factor_vec = _mm256_set1_ps(DIV_FACTOR);
@@ -320,7 +320,7 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
         __m256 rxab_2 = _mm256_mul_ps(rxab, rxab);
         __m256 rabnorm = _mm256_fmadd_ps(ryab, ryab, rxab_2);
-        rabnorm = _mm256_sqrt_ps(rabnorm);
+        rabnorm = _mm256_rsqrt_ps(rabnorm);
 
         //float everything
         __m256 rxabme = _mm256_fmadd_ps(db0_vec, exb0_vec, rxab);
@@ -342,28 +342,28 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
         __m256 rxabme_2 = _mm256_mul_ps(rxabme, rxabme);
         __m256 rabmenorm = _mm256_fmadd_ps(ryabme, ryabme, rxabme_2);
-        rabmenorm = _mm256_sqrt_ps(rabmenorm);
+        rabmenorm = _mm256_rsqrt_ps(rabmenorm);
 
         __m256 rxbame_2 = _mm256_mul_ps(rxbame, rxbame);
         __m256 rbamenorm = _mm256_fmadd_ps(rybame, rybame, rxbame_2);
-        rbamenorm = _mm256_sqrt_ps(rbamenorm);
+        rbamenorm = _mm256_rsqrt_ps(rbamenorm);
 
-        __m256 normsumab = _mm256_add_ps(rabnorm, rabmenorm);
-        __m256 normsumba = _mm256_add_ps(rabnorm, rbamenorm); // maybe wrong use rbanorm
+        __m256 normsumab = _mm256_add_ps(_mm256_rcp_ps(rabnorm), _mm256_rcp_ps(rabmenorm));
+        __m256 normsumba = _mm256_add_ps(_mm256_rcp_ps(rabnorm), _mm256_rcp_ps(rbamenorm)); // maybe wrong use rbanorm
 
         // printf("rabmenorm %f %f\n", rabmenorm0, rabmenorm[0]);
         // printf("rbamenorm %f %f\n", rbamenorm0, rbamenorm[0]);
 
-        __m256 div_1x = _mm256_div_ps(rxab, rabnorm);
-        __m256 div_1y = _mm256_div_ps(ryab, rabnorm);
-        __m256 div_2x = _mm256_div_ps(rxabme, rabmenorm);
-        __m256 div_2y = _mm256_div_ps(ryabme, rabmenorm);
+        __m256 div_1x = _mm256_mul_ps(rxab, rabnorm);
+        __m256 div_1y = _mm256_mul_ps(ryab, rabnorm);
+        __m256 div_2x = _mm256_mul_ps(rxabme, rabmenorm);
+        __m256 div_2y = _mm256_mul_ps(ryabme, rabmenorm);
 
         __m256 repxab = _mm256_add_ps(div_1x, div_2x);
         __m256 repyab = _mm256_add_ps(div_1y, div_2y);
 
-        __m256 div_2x_me = _mm256_div_ps(rxbame, rbamenorm);
-        __m256 div_2y_me = _mm256_div_ps(rybame, rbamenorm);
+        __m256 div_2x_me = _mm256_mul_ps(rxbame, rbamenorm);
+        __m256 div_2y_me = _mm256_mul_ps(rybame, rbamenorm);
 
         __m256 repxba = _mm256_sub_ps(div_2x_me, div_1x);
         __m256 repyba = _mm256_sub_ps(div_2y_me, div_1y);
@@ -382,20 +382,20 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         // printf("bab %f %f\n", bab0, bab[0]);
         // printf("bba %f %f\n", bba0, bba[0]);
 
-        __m256 babnorm = _mm256_sqrt_ps(bab);
-        __m256 bbanorm = _mm256_sqrt_ps(bba);
-        babnorm = _mm256_mul_ps(babnorm, half);
-        bbanorm = _mm256_mul_ps(bbanorm, half);
+        __m256 babnorm = _mm256_rsqrt_ps(bab);
+        __m256 bbanorm = _mm256_rsqrt_ps(bba);
+        babnorm = _mm256_mul_ps(babnorm, two);
+        bbanorm = _mm256_mul_ps(bbanorm, two);
 
-        __m256 cfab = exp_fast_vec_2_5_1(_mm256_mul_ps(babnorm, inv_sigma_vec), one, exp_constant);
+        __m256 cfab = exp_fast_vec_2_5_1(_mm256_mul_ps(_mm256_rcp_ps(babnorm), inv_sigma_vec), one, exp_constant);
         cfab = _mm256_mul_ps(cfab, div_factor_vec);
         cfab = _mm256_mul_ps(cfab, normsumab);
-        cfab = _mm256_div_ps(cfab, babnorm);
+        cfab = _mm256_mul_ps(cfab, babnorm);
 
-        __m256 cfba = exp_fast_vec_2_5_1(_mm256_mul_ps(bbanorm, inv_sigma_vec), one, exp_constant);
+        __m256 cfba = exp_fast_vec_2_5_1(_mm256_mul_ps(_mm256_rcp_ps(bbanorm), inv_sigma_vec), one, exp_constant);
         cfba = _mm256_mul_ps(cfba, div_factor_vec);
         cfba = _mm256_mul_ps(cfba, normsumba);
-        cfba = _mm256_div_ps(cfba, bbanorm);
+        cfba = _mm256_mul_ps(cfba, bbanorm);
 
         repxab = _mm256_mul_ps(repxab, cfab);
         repyab = _mm256_mul_ps(repyab, cfab);
@@ -418,12 +418,12 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         // printf("cba %f %f\n", cba0, cba[0]);
 
         __m256 repxab_2 = _mm256_mul_ps(repxab, repxab);
-        __m256 thab = _mm256_sqrt_ps(_mm256_fmadd_ps(repyab, repyab, repxab_2));
-        thab = _mm256_mul_ps(thab, cospsi_vec);
+        __m256 thab = _mm256_rsqrt_ps(_mm256_fmadd_ps(repyab, repyab, repxab_2));
+        thab = _mm256_mul_ps(_mm256_rcp_ps(thab), cospsi_vec);
 
         __m256 repxba_2 = _mm256_mul_ps(repxba, repxba);
-        __m256 thba = _mm256_sqrt_ps(_mm256_fmadd_ps(repyba, repyba, repxba_2));
-        thba = _mm256_mul_ps(thba, cospsi_vec);
+        __m256 thba = _mm256_rsqrt_ps(_mm256_fmadd_ps(repyba, repyba, repxba_2));
+        thba = _mm256_mul_ps(_mm256_rcp_ps(thba), cospsi_vec);
 
         // printf("thab %f %f\n", thab0, thab[0]);
         // printf("thba %f %f\n", thba0, thba[0]);
