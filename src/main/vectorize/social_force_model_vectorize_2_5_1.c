@@ -152,7 +152,7 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
           // compute norm r_ab
           r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
           r_ab_2_y = _mm256_mul_ps(r_ab_y, r_ab_y);
-          r_ab_norm = _mm256_sqrt_ps(_mm256_add_ps(r_ab_2_x, r_ab_2_y));
+          r_ab_norm = _mm256_rsqrt_ps(_mm256_add_ps(r_ab_2_x, r_ab_2_y));
 
           r_ab_me_x = _mm256_sub_ps(r_ab_x, _mm256_mul_ps(delta_b, e_b_x));
           r_ab_me_y = _mm256_sub_ps(r_ab_y, _mm256_mul_ps(delta_b, e_b_y));
@@ -160,27 +160,27 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
           // compute norm r_ab_me
           r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
           r_ab_me_2_y = _mm256_mul_ps(r_ab_me_y, r_ab_me_y);
-          r_ab_me_norm = _mm256_sqrt_ps(_mm256_add_ps(r_ab_me_2_x, r_ab_me_2_y));
+          r_ab_me_norm = _mm256_rsqrt_ps(_mm256_add_ps(r_ab_me_2_x, r_ab_me_2_y));
 
-          norm_sum = _mm256_add_ps(r_ab_norm, r_ab_me_norm);
+          norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
 
-          repulsion_x = _mm256_div_ps(r_ab_x, r_ab_norm);
-          repulsion_x = _mm256_add_ps(repulsion_x, _mm256_div_ps(r_ab_me_x, r_ab_me_norm));
+          repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
+          repulsion_x = _mm256_add_ps(repulsion_x, _mm256_mul_ps(r_ab_me_x, r_ab_me_norm));
 
-          repulsion_y = _mm256_div_ps(r_ab_y, r_ab_norm);
-          repulsion_y = _mm256_add_ps(repulsion_y, _mm256_div_ps(r_ab_me_y, r_ab_me_norm));
+          repulsion_y = _mm256_mul_ps(r_ab_y, r_ab_norm);
+          repulsion_y = _mm256_add_ps(repulsion_y, _mm256_mul_ps(r_ab_me_y, r_ab_me_norm));
 
           norm_sum_2 = _mm256_mul_ps(norm_sum, norm_sum);
           delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
-          b = _mm256_sqrt_ps(_mm256_sub_ps(norm_sum_2, delta_b_2));
-          b = _mm256_div_ps(b, two_vec);
+          b = _mm256_rsqrt_ps(_mm256_sub_ps(norm_sum_2, delta_b_2));
+          b = _mm256_mul_ps(b, two_vec);
 
-          exp = _mm256_div_ps(b, sigma_vec);
-          exp = _mm256_mul_ps(exp, minus1_vec);
+          exp = _mm256_mul_ps(b, sigma_vec);
+          exp = _mm256_mul_ps(_mm256_rcp_ps(exp), minus1_vec);
           exp = exp_fast_vec_2_5_1(exp, one, exp_constant);
 
           common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
-          common_factor = _mm256_div_ps(common_factor, b);
+          common_factor = _mm256_mul_ps(common_factor, b);
           common_factor = _mm256_mul_ps(exp, common_factor);
 
           repulsion_x = _mm256_mul_ps(repulsion_x, common_factor);
@@ -189,14 +189,14 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
           // compute norm r_ab
           repulsion_2_x = _mm256_mul_ps(repulsion_x, repulsion_x);
           repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
-          threshold = _mm256_sqrt_ps(_mm256_add_ps(repulsion_2_x, repulsion_2_y));
+          threshold = _mm256_rsqrt_ps(_mm256_add_ps(repulsion_2_x, repulsion_2_y));
 
           check_x = _mm256_mul_ps(e_a_x, repulsion_x);
           check_y = _mm256_mul_ps(e_a_y, repulsion_y);
 
           check = _mm256_add_ps(check_x, check_y);
 
-          threshold = _mm256_mul_ps(threshold, projection_factor_vec);
+          threshold = _mm256_mul_ps(_mm256_rcp_ps(threshold), projection_factor_vec);
 
           mask = _mm256_cmp_ps(_mm256_mul_ps(check, minus1_vec), threshold, _CMP_GE_OQ);
 
