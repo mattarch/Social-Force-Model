@@ -57,180 +57,67 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       speed[j + 3] *= TIMESTEP;
     } // n* (1 mult) -> n flops
     // iterate over every person
-    for (int i = 0; i < n - 7; i += 8)
+
     {
-      /************************************************/
-      // LOADS
-      /************************************************/
-      float sfx0 = social_force[IndexX(i)]; //social force x
-      float sfy0 = social_force[IndexY(i, n)];
-      float sfx1 = social_force[IndexX(i + 1)];
-      float sfy1 = social_force[IndexY(i + 1, n)];
-      float sfx2 = social_force[IndexX(i + 2)];
-      float sfy2 = social_force[IndexY(i + 2, n)];
-      float sfx3 = social_force[IndexX(i + 3)];
-      float sfy3 = social_force[IndexY(i + 3, n)];
-      float sfx4 = social_force[IndexX(i + 4)];
-      float sfy4 = social_force[IndexY(i + 4, n)];
-      float sfx5 = social_force[IndexX(i + 5)];
-      float sfy5 = social_force[IndexY(i + 5, n)];
-      float sfx6 = social_force[IndexX(i + 6)];
-      float sfy6 = social_force[IndexY(i + 6, n)];
-      float sfx7 = social_force[IndexX(i + 7)];
-      float sfy7 = social_force[IndexY(i + 7, n)];
+      __m256 border;
+      __m256 r_a_y;
 
-      float rxa0 = position[IndexX(i)];
-      float rya0 = position[IndexY(i, n)];
-      float rxa1 = position[IndexX(i + 1)];
-      float rya1 = position[IndexY(i + 1, n)];
-      float rxa2 = position[IndexX(i + 2)];
-      float rya2 = position[IndexY(i + 2, n)];
-      float rxa3 = position[IndexX(i + 3)];
-      float rya3 = position[IndexY(i + 3, n)];
-      float rxa4 = position[IndexX(i + 4)];
-      float rya4 = position[IndexY(i + 4, n)];
-      float rxa5 = position[IndexX(i + 5)];
-      float rya5 = position[IndexY(i + 5, n)];
-      float rxa6 = position[IndexX(i + 6)];
-      float rya6 = position[IndexY(i + 6, n)];
-      float rxa7 = position[IndexX(i + 7)];
-      float rya7 = position[IndexY(i + 7, n)];
+      __m256 r_aB_y;
 
-      float exa0 = desired_direction[IndexX(i)];
-      float eya0 = desired_direction[IndexY(i, n)];
-      float exa1 = desired_direction[IndexX(i + 1)];
-      float eya1 = desired_direction[IndexY(i + 1, n)];
-      float exa2 = desired_direction[IndexX(i + 2)];
-      float eya2 = desired_direction[IndexY(i + 2, n)];
-      float exa3 = desired_direction[IndexX(i + 3)];
-      float eya3 = desired_direction[IndexY(i + 3, n)];
-      float exa4 = desired_direction[IndexX(i + 4)];
-      float eya4 = desired_direction[IndexY(i + 4, n)];
-      float exa5 = desired_direction[IndexX(i + 5)];
-      float eya5 = desired_direction[IndexY(i + 5, n)];
-      float exa6 = desired_direction[IndexX(i + 6)];
-      float eya6 = desired_direction[IndexY(i + 6, n)];
-      float exa7 = desired_direction[IndexX(i + 7)];
-      float eya7 = desired_direction[IndexY(i + 7, n)];
+      __m256 r_aB_minus_y;
 
-      float avx0 = actual_velocity[IndexX(i)];
-      float avy0 = actual_velocity[IndexY(i, n)];
-      float avx1 = actual_velocity[IndexX(i + 1)];
-      float avy1 = actual_velocity[IndexY(i + 1, n)];
-      float avx2 = actual_velocity[IndexX(i + 2)];
-      float avy2 = actual_velocity[IndexY(i + 2, n)];
-      float avx3 = actual_velocity[IndexX(i + 3)];
-      float avy3 = actual_velocity[IndexY(i + 3, n)];
-      float avx4 = actual_velocity[IndexX(i + 4)];
-      float avy4 = actual_velocity[IndexY(i + 4, n)];
-      float avx5 = actual_velocity[IndexX(i + 5)];
-      float avy5 = actual_velocity[IndexY(i + 5, n)];
-      float avx6 = actual_velocity[IndexX(i + 6)];
-      float avy6 = actual_velocity[IndexY(i + 6, n)];
-      float avx7 = actual_velocity[IndexX(i + 7)];
-      float avy7 = actual_velocity[IndexY(i + 7, n)];
+      __m256 r_aB_norm;
 
-      float dsv0 = desired_speed[i];     //desired speed value
-      float dsv1 = desired_speed[i + 1]; //desired speed value
-      float dsv2 = desired_speed[i + 2]; //desired speed value
-      float dsv3 = desired_speed[i + 3]; //desired speed value
-      float dsv4 = desired_speed[i + 4]; //desired speed value
-      float dsv5 = desired_speed[i + 5]; //desired speed value
-      float dsv6 = desired_speed[i + 6]; //desired speed value
-      float dsv7 = desired_speed[i + 7]; //desired speed value
+      __m256 mask_y;
 
-      float da0 = speed[i];
-      float da1 = speed[i + 1];
-      float da2 = speed[i + 2];
-      float da3 = speed[i + 3];
-      float da4 = speed[i + 4];
-      float da5 = speed[i + 5];
-      float da6 = speed[i + 6];
-      float da7 = speed[i + 7];
+      __m256 common_factor;
+      __m256 exp;
 
-      /************************************************/
-      // UPDATE BORDER REPULSION TERM
-      /************************************************/
+      __m256 zero = _mm256_set1_ps(0);
+      __m256 one = _mm256_set1_ps(1);
 
-      float ryaB00 = rya0 - fb; //1 add
-      float ryaB10 = rya1 - fb; //1 add
-      float ryaB20 = rya2 - fb; //1 add
-      float ryaB30 = rya3 - fb; //1 add
-      float ryaB40 = rya4 - fb; //1 add
-      float ryaB50 = rya5 - fb; //1 add
-      float ryaB60 = rya6 - fb; //1 add
-      float ryaB70 = rya7 - fb; //1 add
+      __m256 minus1 = _mm256_set1_ps(-1);
 
-      float se00 = exp_fast(ryaB00 * INV_R) * UTIMESR / (-ryaB00); //1 exp, 2 mult, 1 div
-      float se10 = exp_fast(ryaB10 * INV_R) * UTIMESR / (-ryaB10); //1 exp, 2 mult, 1 div
-      float se20 = exp_fast(ryaB20 * INV_R) * UTIMESR / (-ryaB20); //1 exp, 2 mult, 1 div
-      float se30 = exp_fast(ryaB30 * INV_R) * UTIMESR / (-ryaB30); //1 exp, 2 mult, 1 div
-      float se40 = exp_fast(ryaB40 * INV_R) * UTIMESR / (-ryaB40); //1 exp, 2 mult, 1 div
-      float se50 = exp_fast(ryaB50 * INV_R) * UTIMESR / (-ryaB50); //1 exp, 2 mult, 1 div
-      float se60 = exp_fast(ryaB60 * INV_R) * UTIMESR / (-ryaB60); //1 exp, 2 mult, 1 div
-      float se70 = exp_fast(ryaB70 * INV_R) * UTIMESR / (-ryaB70); //1 exp, 2 mult, 1 div
+      __m256 r_vec = _mm256_set1_ps(R);
+      __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B);
 
-      float rb00 = se00 * ryaB00; // repulsion border 0 , 1 mult
-      float rb10 = se10 * ryaB10; // repulsion border 0 , 1 mult
-      float rb20 = se20 * ryaB20; // repulsion border 0 , 1 mult
-      float rb30 = se30 * ryaB30; // repulsion border 0 , 1 mult
-      float rb40 = se40 * ryaB40; // repulsion border 0 , 1 mult
-      float rb50 = se50 * ryaB50; // repulsion border 0 , 1 mult
-      float rb60 = se60 * ryaB60; // repulsion border 0 , 1 mult
-      float rb70 = se70 * ryaB70; // repulsion border 0 , 1 mult
+      __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
 
-      float ryaB01 = rya0 - sb; //1 add
-      float ryaB11 = rya1 - sb; //1 add
-      float ryaB21 = rya2 - sb; //1 add
-      float ryaB31 = rya3 - sb; //1 add
-      float ryaB41 = rya4 - sb; //1 add
-      float ryaB51 = rya5 - sb; //1 add
-      float ryaB61 = rya6 - sb; //1 add
-      float ryaB71 = rya7 - sb; //1 add
+      for (int j = 0; j < 2; j++)
+      {
+        border = _mm256_broadcast_ss(borders + j);
 
-      float se01 = exp_fast(-ryaB01 * INV_R) * UTIMESR / (ryaB01); //1 exp, 2 mult, 1 div
-      float se11 = exp_fast(-ryaB11 * INV_R) * UTIMESR / (ryaB11); //1 exp, 2 mult, 1 div
-      float se21 = exp_fast(-ryaB21 * INV_R) * UTIMESR / (ryaB21); //1 exp, 2 mult, 1 div
-      float se31 = exp_fast(-ryaB31 * INV_R) * UTIMESR / (ryaB31); //1 exp, 2 mult, 1 div
-      float se41 = exp_fast(-ryaB41 * INV_R) * UTIMESR / (ryaB41); //1 exp, 2 mult, 1 div
-      float se51 = exp_fast(-ryaB51 * INV_R) * UTIMESR / (ryaB51); //1 exp, 2 mult, 1 div
-      float se61 = exp_fast(-ryaB61 * INV_R) * UTIMESR / (ryaB61); //1 exp, 2 mult, 1 div
-      float se71 = exp_fast(-ryaB71 * INV_R) * UTIMESR / (ryaB71); //1 exp, 2 mult, 1 div
+        for (int i = 0; i < n - 7; i += 8)
+        {
+          r_a_y = _mm256_load_ps(position + n + i);
 
-      float rb01 = rb00 + se01 * ryaB01; //1 mult
-      float rb11 = rb10 + se11 * ryaB11; //1 mult
-      float rb21 = rb20 + se21 * ryaB21; //1 mult
-      float rb31 = rb30 + se31 * ryaB31; //1 mult
-      float rb41 = rb40 + se41 * ryaB41; //1 mult
-      float rb51 = rb50 + se51 * ryaB51; //1 mult
-      float rb61 = rb60 + se61 * ryaB61; //1 mult
-      float rb71 = rb70 + se71 * ryaB71; //1 mult
+          r_aB_y = _mm256_sub_ps(r_a_y, border);
 
-      sfy0 += rb01; //1 add
-      sfy1 += rb11; //1 add
-      sfy2 += rb21; //1 add
-      sfy3 += rb31; //1 add
-      sfy4 += rb41; //1 add
-      sfy5 += rb51; //1 add
-      sfy6 += rb61; //1 add
-      sfy7 += rb71; //1 add
+          r_aB_minus_y = _mm256_mul_ps(r_aB_y, minus1);
 
-      social_force[IndexX(i)] = sfx0;
-      social_force[IndexY(i, n)] = sfy0;
-      social_force[IndexX(i + 1)] = sfx1;
-      social_force[IndexY(i + 1, n)] = sfy1;
-      social_force[IndexX(i + 2)] = sfx2;
-      social_force[IndexY(i + 2, n)] = sfy2;
-      social_force[IndexX(i + 3)] = sfx3;
-      social_force[IndexY(i + 3, n)] = sfy3;
-      social_force[IndexX(i + 4)] = sfx4;
-      social_force[IndexY(i + 4, n)] = sfy4;
-      social_force[IndexX(i + 5)] = sfx5;
-      social_force[IndexY(i + 5, n)] = sfy5;
-      social_force[IndexX(i + 6)] = sfx6;
-      social_force[IndexY(i + 6, n)] = sfy6;
-      social_force[IndexX(i + 7)] = sfx7;
-      social_force[IndexY(i + 7, n)] = sfy7;
+          mask_y = _mm256_cmp_ps(r_aB_y, zero, _CMP_GE_OQ);
+          r_aB_norm = _mm256_blendv_ps(r_aB_minus_y, r_aB_y, mask_y);
+
+          exp = _mm256_div_ps(r_aB_norm, r_vec);
+          exp = _mm256_mul_ps(exp, minus1);
+          exp = exp_fast_vec_2_5_1(exp, one, exp_constant);
+
+          common_factor = _mm256_div_ps(u_alpha_b_vec, r_vec);
+          common_factor = _mm256_div_ps(common_factor, r_aB_norm);
+          common_factor = _mm256_mul_ps(exp, common_factor);
+
+          common_factor = _mm256_mul_ps(r_aB_y, common_factor);
+
+          social_force[IndexY(i, n)] += common_factor[0];
+          social_force[IndexY(i + 1, n)] += common_factor[1];
+          social_force[IndexY(i + 2, n)] += common_factor[2];
+          social_force[IndexY(i + 3, n)] += common_factor[3];
+          social_force[IndexY(i + 4, n)] += common_factor[4];
+          social_force[IndexY(i + 5, n)] += common_factor[5];
+          social_force[IndexY(i + 6, n)] += common_factor[6];
+          social_force[IndexY(i + 7, n)] += common_factor[7];
+        } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
+      }
     }
 
     {
