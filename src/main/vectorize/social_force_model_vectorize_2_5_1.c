@@ -59,68 +59,6 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
     // iterate over every person
 
     {
-      __m256 border;
-      __m256 r_a_y;
-
-      __m256 r_aB_y;
-
-      __m256 r_aB_minus_y;
-
-      __m256 r_aB_norm;
-
-      __m256 mask_y;
-
-      __m256 common_factor;
-      __m256 exp;
-
-      __m256 zero = _mm256_set1_ps(0);
-      __m256 one = _mm256_set1_ps(1);
-
-      __m256 minus1 = _mm256_set1_ps(-1);
-
-      __m256 r_vec = _mm256_set1_ps(R);
-      __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B);
-
-      __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
-
-      for (int j = 0; j < 2; j++)
-      {
-        border = _mm256_broadcast_ss(borders + j);
-
-        for (int i = 0; i < n - 7; i += 8)
-        {
-          r_a_y = _mm256_load_ps(position + n + i);
-
-          r_aB_y = _mm256_sub_ps(r_a_y, border);
-
-          r_aB_minus_y = _mm256_mul_ps(r_aB_y, minus1);
-
-          mask_y = _mm256_cmp_ps(r_aB_y, zero, _CMP_GE_OQ);
-          r_aB_norm = _mm256_blendv_ps(r_aB_minus_y, r_aB_y, mask_y);
-
-          exp = _mm256_div_ps(r_aB_norm, r_vec);
-          exp = _mm256_mul_ps(exp, minus1);
-          exp = exp_fast_vec_2_5_1(exp, one, exp_constant);
-
-          common_factor = _mm256_div_ps(u_alpha_b_vec, r_vec);
-          common_factor = _mm256_div_ps(common_factor, r_aB_norm);
-          common_factor = _mm256_mul_ps(exp, common_factor);
-
-          common_factor = _mm256_mul_ps(r_aB_y, common_factor);
-
-          social_force[IndexY(i, n)] += common_factor[0];
-          social_force[IndexY(i + 1, n)] += common_factor[1];
-          social_force[IndexY(i + 2, n)] += common_factor[2];
-          social_force[IndexY(i + 3, n)] += common_factor[3];
-          social_force[IndexY(i + 4, n)] += common_factor[4];
-          social_force[IndexY(i + 5, n)] += common_factor[5];
-          social_force[IndexY(i + 6, n)] += common_factor[6];
-          social_force[IndexY(i + 7, n)] += common_factor[7];
-        } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
-      }
-    }
-
-    {
 
       __m256 position_i_x;
       __m256 position_i_y;
@@ -335,11 +273,34 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       __m256 div_factor_vec = _mm256_set1_ps(DIV_FACTOR);
       __m256 cospsi_vec = _mm256_set1_ps(cospsi);
       __m256 influencer_vec = _mm256_set1_ps(INFLUENCE);
+      __m256 utimesr_vec = _mm256_set1_ps(UTIMESR);
+      __m256 invr_vec = _mm256_set1_ps(1 / R);
+
       __m256 da = _mm256_load_ps(speed + IndexX(i));
       __m256 exa = _mm256_load_ps(desired_direction + IndexX(i));
       __m256 eya = _mm256_load_ps(desired_direction + IndexY(i, n));
       __m256 sfx = _mm256_setzero_ps();
       __m256 sfy = _mm256_setzero_ps();
+      __m256 fb_vec = _mm256_set1_ps(fb);
+      __m256 sb_vec = _mm256_set1_ps(sb);
+
+      /************************************************/
+      // UPDATE BORDER REPULSION TERM
+      /************************************************/
+      __m256 ryaB0 = _mm256_sub_ps(rya, fb_vec);
+      __m256 se0 = exp_fast_vec_2_5_1(_mm256_mul_ps(ryaB0, invr_vec), one, exp_constant);
+      se0 = _mm256_mul_ps(se0, utimesr_vec);
+      se0 = _mm256_div_ps(se0, ryaB0);
+      se0 = _mm256_mul_ps(se0, minus_one);
+      __m256 rb0 = _mm256_mul_ps(se0, ryaB0);
+
+      __m256 ryaB1 = _mm256_sub_ps(rya, sb_vec);
+      __m256 se1 = exp_fast_vec_2_5_1(_mm256_mul_ps(_mm256_mul_ps(ryaB1,minus_one), invr_vec), one, exp_constant);
+      se1 = _mm256_mul_ps(se1, utimesr_vec);
+      se1 = _mm256_div_ps(se1, ryaB1);
+      __m256 rb1 = _mm256_mul_ps(se1, ryaB1);
+
+      sfy = _mm256_add_ps(rb0, rb1);
 
       //iterate over all people
       for (int j = i + 8; j < n; j++) // for (int j = i + 1; j < n; j++)
@@ -514,32 +475,8 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       sfx = _mm256_fmadd_ps(inv_relax_time_vec, vdx, sfx);
       sfy = _mm256_fmadd_ps(inv_relax_time_vec, vdy, sfy);
 
-      social_force[IndexX(i)] += sfx[0];
-      social_force[IndexY(i, n)] += sfy[0];
-      social_force[IndexX(i + 1)] += sfx[1];
-      social_force[IndexY(i + 1, n)] += sfy[1];
-      social_force[IndexX(i + 2)] += sfx[2];
-      social_force[IndexY(i + 2, n)] += sfy[2];
-      social_force[IndexX(i + 3)] += sfx[3];
-      social_force[IndexY(i + 3, n)] += sfy[3];
-      social_force[IndexX(i + 4)] += sfx[4];
-      social_force[IndexY(i + 4, n)] += sfy[4];
-      social_force[IndexX(i + 5)] += sfx[5];
-      social_force[IndexY(i + 5, n)] += sfy[5];
-      social_force[IndexX(i + 6)] += sfx[6];
-      social_force[IndexY(i + 6, n)] += sfy[6];
-      social_force[IndexX(i + 7)] += sfx[7];
-      social_force[IndexY(i + 7, n)] += sfy[7];
-    } //n * (12*(n-1) + 3*(n_borders) + 2) ADDS
-      //n * (18*(n-1) + 8*(n_borders) + 4) MULTS
-      //n * (6*(n-1) + n_borders )         DIVS
-      //n * (n-1 + n_borders )             EXPS
-      //n * (4*(n-1))                      SQRTS
+      __m256 timestep_vec = _mm256_set1_ps(TIMESTEP);
 
-    __m256 timestep_vec = _mm256_set1_ps(TIMESTEP);
-    __m256 one = _mm256_set1_ps(1);
-    for (int i = 0; i < n - 7; i += 8)
-    {
       /************************************************/
       // LOADS
       /************************************************/
@@ -550,6 +487,8 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
       __m256 social_force_x = _mm256_load_ps(social_force + IndexX(i));
       __m256 social_force_y = _mm256_load_ps(social_force + IndexY(i, n));
+      social_force_x = _mm256_add_ps(social_force_x, sfx);
+      social_force_y = _mm256_add_ps(social_force_y, sfy);
 
       __m256 pvx = _mm256_load_ps(actual_velocity + IndexX(i));
       __m256 pvy = _mm256_load_ps(actual_velocity + IndexY(i, n));
