@@ -49,12 +49,13 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
   {
     //precomputation of the space walked in TIMESTEP [s], speed can be overwritten because it
     //is only used in the people repulsion term
-    for (int j = 0; j < n - 3; j += 4)
+    __m256 timestep_vec = _mm256_set1_ps(TIMESTEP);
+    __m256 speed_vec;
+    for (int j = 0; j < n - 7; j += 8)
     {
-      speed[j] *= TIMESTEP; // 1 mult -> 1 flop
-      speed[j + 1] *= TIMESTEP;
-      speed[j + 2] *= TIMESTEP;
-      speed[j + 3] *= TIMESTEP;
+      speed_vec = _mm256_load_ps(speed + j);
+      speed_vec = _mm256_mul_ps(speed_vec, timestep_vec);
+      _mm256_store_ps(speed + j, speed_vec);
     } // n* (1 mult) -> n flops
     // iterate over every person
 
@@ -147,32 +148,30 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
           r_ab_x = _mm256_sub_ps(position_i_x, position_j_x);
           r_ab_y = _mm256_sub_ps(position_i_y, position_j_y);
 
-          delta_b = vb;
+          delta_b = _mm256_mul_ps(vb, minus1_vec);
 
           // compute norm r_ab
           r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
-          r_ab_2_y = _mm256_mul_ps(r_ab_y, r_ab_y);
-          r_ab_norm = _mm256_rsqrt_ps(_mm256_add_ps(r_ab_2_x, r_ab_2_y));
+          r_ab_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
 
-          r_ab_me_x = _mm256_sub_ps(r_ab_x, _mm256_mul_ps(delta_b, e_b_x));
-          r_ab_me_y = _mm256_sub_ps(r_ab_y, _mm256_mul_ps(delta_b, e_b_y));
+          r_ab_me_x = _mm256_fmadd_ps(delta_b, e_b_x, r_ab_x);
+          r_ab_me_y = _mm256_fmadd_ps(delta_b, e_b_y, r_ab_y);
 
           // compute norm r_ab_me
           r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
-          r_ab_me_2_y = _mm256_mul_ps(r_ab_me_y, r_ab_me_y);
-          r_ab_me_norm = _mm256_rsqrt_ps(_mm256_add_ps(r_ab_me_2_x, r_ab_me_2_y));
+          r_ab_me_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_me_y,r_ab_me_y, r_ab_me_2_x));
 
           norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
 
           repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
-          repulsion_x = _mm256_add_ps(repulsion_x, _mm256_mul_ps(r_ab_me_x, r_ab_me_norm));
+          repulsion_x = _mm256_fmadd_ps(r_ab_me_x, r_ab_me_norm, repulsion_x);
 
           repulsion_y = _mm256_mul_ps(r_ab_y, r_ab_norm);
-          repulsion_y = _mm256_add_ps(repulsion_y, _mm256_mul_ps(r_ab_me_y, r_ab_me_norm));
+          repulsion_y = _mm256_fmadd_ps(r_ab_me_y, r_ab_me_norm, repulsion_y);
 
-          norm_sum_2 = _mm256_mul_ps(norm_sum, norm_sum);
+          
           delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
-          b = _mm256_rsqrt_ps(_mm256_sub_ps(norm_sum_2, delta_b_2));
+          b = _mm256_rsqrt_ps(_mm256_fmsub_ps(norm_sum,norm_sum, delta_b_2));
           b = _mm256_mul_ps(b, two_vec);
 
           exp = _mm256_mul_ps(b, sigma_vec);
@@ -188,13 +187,11 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
           // compute norm r_ab
           repulsion_2_x = _mm256_mul_ps(repulsion_x, repulsion_x);
-          repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
-          threshold = _mm256_rsqrt_ps(_mm256_add_ps(repulsion_2_x, repulsion_2_y));
+          threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_y, repulsion_y, repulsion_2_x));
 
           check_x = _mm256_mul_ps(e_a_x, repulsion_x);
-          check_y = _mm256_mul_ps(e_a_y, repulsion_y);
 
-          check = _mm256_add_ps(check_x, check_y);
+          check = _mm256_fmadd_ps(e_a_y, repulsion_y, check_x);
 
           threshold = _mm256_mul_ps(_mm256_rcp_ps(threshold), projection_factor_vec);
 
@@ -356,17 +353,12 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
         __m256 div_1x = _mm256_mul_ps(rxab, rabnorm);
         __m256 div_1y = _mm256_mul_ps(ryab, rabnorm);
-        __m256 div_2x = _mm256_mul_ps(rxabme, rabmenorm);
-        __m256 div_2y = _mm256_mul_ps(ryabme, rabmenorm);
 
-        __m256 repxab = _mm256_add_ps(div_1x, div_2x);
-        __m256 repyab = _mm256_add_ps(div_1y, div_2y);
+        __m256 repxab = _mm256_fmadd_ps(rxabme, rabmenorm, div_1x);
+        __m256 repyab = _mm256_fmadd_ps(ryabme, rabmenorm, div_1y);
 
-        __m256 div_2x_me = _mm256_mul_ps(rxbame, rbamenorm);
-        __m256 div_2y_me = _mm256_mul_ps(rybame, rbamenorm);
-
-        __m256 repxba = _mm256_sub_ps(div_2x_me, div_1x);
-        __m256 repyba = _mm256_sub_ps(div_2y_me, div_1y);
+        __m256 repxba = _mm256_fmsub_ps(rxbame, rbamenorm, div_1x);
+        __m256 repyba = _mm256_fmsub_ps(rybame, rbamenorm, div_1y);
 
         // printf("repxab00 %f %f\n", repxab00, repxab[0]);
 
@@ -466,11 +458,9 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       __m256 avy = _mm256_load_ps(actual_velocity + IndexY(i, n));
       __m256 inv_relax_time_vec = _mm256_set1_ps(INV_RELAX_TIME);
 
-      vdx = _mm256_mul_ps(dsv, exa);
-      vdy = _mm256_mul_ps(dsv, eya);
-
-      vdx = _mm256_sub_ps(vdx, avx);
-      vdy = _mm256_sub_ps(vdy, avy);
+      
+      vdx = _mm256_fmsub_ps(dsv, exa, avx);
+      vdy = _mm256_fmsub_ps(dsv, eya, avy);
 
       sfx = _mm256_fmadd_ps(inv_relax_time_vec, vdx, sfx);
       sfy = _mm256_fmadd_ps(inv_relax_time_vec, vdy, sfy);
