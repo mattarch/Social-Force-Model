@@ -388,7 +388,7 @@ void update_people_repulsion_term_vectorize_4(float *position, float *desired_di
       }
 
       _mm256_store_ps(people_repulsion_term + 8 * i, repulsion_x);
-      _mm256_store_ps(people_repulsion_term + n * n + 8 * i, repulsion_y);
+      _mm256_store_ps(people_repulsion_term + 8 * n + 8 * i, repulsion_y);
     }
   }
   // upper triangle
@@ -403,7 +403,7 @@ void update_people_repulsion_term_vectorize_4(float *position, float *desired_di
       e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
 
       __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
-      __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * i);
+      __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * i);
 
       for (int j = k * 8; j < n - 7; j += 8)
       {
@@ -476,7 +476,7 @@ void update_people_repulsion_term_vectorize_4(float *position, float *desired_di
         people_repulsion_y = _mm256_add_ps(people_repulsion_y, repulsion_y);
       }
       _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
-      _mm256_store_ps(people_repulsion_term + n * n + 8 * i, people_repulsion_y);
+      _mm256_store_ps(people_repulsion_term + 8 * n + 8 * i, people_repulsion_y);
     }
   }
 
@@ -492,7 +492,7 @@ void update_people_repulsion_term_vectorize_4(float *position, float *desired_di
       e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
 
       __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
-      __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * i);
+      __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * i);
 
       for (int j = 0; j < k * 8; j += 8)
       {
@@ -565,7 +565,7 @@ void update_people_repulsion_term_vectorize_4(float *position, float *desired_di
         people_repulsion_y = _mm256_add_ps(people_repulsion_y, repulsion_y);
       }
       _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
-      _mm256_store_ps(people_repulsion_term + n * n + 8 * i, people_repulsion_y);
+      _mm256_store_ps(people_repulsion_term + 8 * n + 8 * i, people_repulsion_y);
     }
   }
   /*
@@ -914,14 +914,14 @@ void compute_social_force_vectorize_4(float *acceleration_term, float *people_re
     social_force_x = _mm256_add_ps(unpacked, social_force_x);
     _mm256_store_ps(social_force + p, social_force_x);
 
-    row_add0_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * p);
-    row_add1_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 1));
-    row_add2_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 2));
-    row_add3_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 3));
-    row_add4_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 4));
-    row_add5_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 5));
-    row_add6_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 6));
-    row_add7_y = _mm256_load_ps(people_repulsion_term + n * n + 8 * (p + 7));
+    row_add0_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * p);
+    row_add1_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 1));
+    row_add2_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 2));
+    row_add3_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 3));
+    row_add4_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 4));
+    row_add5_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 5));
+    row_add6_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 6));
+    row_add7_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 7));
 
     row_add0_y = _mm256_hadd_ps(row_add0_y, _mm256_permute2f128_ps(row_add0_y, row_add0_y, 3));
     row_add1_y = _mm256_hadd_ps(row_add1_y, _mm256_permute2f128_ps(row_add1_y, row_add1_y, 3));
