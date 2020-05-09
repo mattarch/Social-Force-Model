@@ -742,10 +742,9 @@ void update_border_repulsion_term_vectorize_4(float *position, float *borders, f
 
   __m256 minus1 = _mm256_set1_ps(-1);
 
-  __m256 r_vec_inv = _mm256_set1_ps(1/R);
-  __m256 minus_r_vec_inv = _mm256_set1_ps(-1/R);
-  __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B/R);
-
+  __m256 r_vec_inv = _mm256_set1_ps(1 / R);
+  __m256 minus_r_vec_inv = _mm256_set1_ps(-1 / R);
+  __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B / R);
 
   __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
 
@@ -1063,7 +1062,7 @@ void update_position_vectorize_4(float *position, float *desired_direction, floa
 
     // norm
     prefered_velocity_2_x = _mm256_mul_ps(prefered_velocity_x, prefered_velocity_x);
-    prefered_velocity_norm_inv = _mm256_rsqrt_ps(_mm256_fmadd_ps(prefered_velocity_y,prefered_velocity_y, prefered_velocity_2_x));
+    prefered_velocity_norm_inv = _mm256_rsqrt_ps(_mm256_fmadd_ps(prefered_velocity_y, prefered_velocity_y, prefered_velocity_2_x));
     prefered_velocity_norm = _mm256_rcp_ps(prefered_velocity_norm_inv);
 
     max_speed = _mm256_load_ps(desired_max_speed + i);
@@ -1143,6 +1142,7 @@ void simulation_basic_vectorize_4(int number_of_people, int n_timesteps, float *
     update_border_repulsion_term_vectorize_4(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
     compute_social_force_vectorize_4(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position_vectorize_4(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
+
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
   }
 

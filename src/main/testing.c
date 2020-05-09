@@ -199,7 +199,7 @@ void run_finite_differences(sim_func f, struct arguments arguments)
 int compare_simulations(sim_t **sim_list, int sim_counter)
 {
     int error_check = 0;
-    int number_of_people = 40;
+    int number_of_people = 80;
     int n_timesteps = 1;
     int n_test_timesteps = 300;
     float *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
@@ -335,7 +335,7 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
                 }
 
                 copy_state_new(oracle_position, oracle_desired_direction, oracle_final_destination, oracle_borders, oracle_desired_speed, oracle_desired_max_speed,
-                               &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people,sim_list[i]);
+                               &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people, sim_list[i]);
             }
         }
 
@@ -480,6 +480,8 @@ int check_square_distance(float *expected, float *res, int n, int case_n)
         for (int i = 0; i < n; i++)
         {
             acc = fabs(expected[IndexX(i)] - res[IndexX(i)]);
+            printf("x: %lf %lf %lf %d \n", expected[IndexX(i)], res[IndexX(i)], acc, IndexX(i));
+
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
@@ -490,6 +492,8 @@ int check_square_distance(float *expected, float *res, int n, int case_n)
         for (int i = 0; i < n; i++)
         {
             acc = fabs(expected[IndexY(i, n)] - res[IndexY(i, n)]);
+            printf("y: %lf %lf %lf %d \n", expected[IndexY(i, n)], res[IndexY(i, n)], acc, IndexY(i, n));
+
             if (isnan(acc) || acc > EPS_NEW)
             {
                 wrong = 1;
@@ -505,6 +509,7 @@ int check_square_distance(float *expected, float *res, int n, int case_n)
             {
 
                 acc = fabs(expected[IndexX_matrix(i, j, n)] - res[IndexX_matrix(i, j, n)]);
+
                 if (isnan(acc) || acc > EPS_NEW)
                 {
                     wrong = 1;
@@ -702,7 +707,7 @@ void copy_state(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *
 }
 
 void copy_state_new(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
-                    float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n, sim_t* sim)
+                    float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n, sim_t *sim)
 {
 
     for (int i = 0; i < n; i++)
