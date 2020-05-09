@@ -11,6 +11,8 @@ extern struct arguments arguments;
 extern char filename_global[80];
 
 /* function defined in the header file itself */
+int contains_substring(char* haystack, char *needle);
+
 void get_filename();
 void output_to_file_initial_state(char *filename, float *position, float *actual_speed, float *desired_direction, float *final_destination, int n, int n_timestep);
 void output_to_file_persons(char *filename, float *position, float *actual_speed, float *desired_direction, float *final_destination, int n, int n_timestep);

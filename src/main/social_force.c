@@ -47,6 +47,9 @@ char filename_global[80];
 
 int seed = 0;
 
+#define IS_FLOAT 0
+#define IS_DOUBLE 1
+
 //cost of each operation
 const int add_cost = 1;
 const int mult_cost = 1;
@@ -97,12 +100,20 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if (strstr(arguments.benchmark, "all") != 0)
+        if (contains_substring(arguments.benchmark, "all"))
         {
             for (int i = 0; i < sim_counter; i++)
             {
+
                 sim_t sim = *sim_list[i];
-                run_bench(sim);
+                if (sim.is_double)
+                {
+                    run_bench_double(sim);
+                }
+                else
+                {
+                    run_bench_float(sim);
+                }
             }
         }
         else
@@ -110,9 +121,17 @@ int main(int argc, char *argv[])
             for (int i = 0; i < sim_counter; i++)
             {
                 sim_t sim = *sim_list[i];
-                if (strstr(arguments.benchmark, sim.name) != 0)
+
+                if (contains_substring(arguments.benchmark, sim.name))
                 {
-                    run_bench(sim);
+                    if (sim.is_double)
+                    {
+                        run_bench_double(sim);
+                    }
+                    else
+                    {
+                        run_bench_float(sim);
+                    }
                 }
             }
         }
@@ -139,27 +158,6 @@ void initialize_people(float *position, float *desired_direction, float *final_d
 {
 
     srand(seed);
-    /*for (int i = 0; i < n; i++)
-    {
-        // initialize values independant of starting point and target point
-        position[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX;          // starting position y coordinate
-        desired_direction[IndexY(i,n)] = 0.0;                                         // starting value for direct_y
-        final_destination[IndexY(i,n)] = rand() * arguments.walkway_width / RAND_MAX; // target y coordinate
-        desired_speed[i] = sampleNormal(0.0676, AVG_SPEED);
-
-        if (i % 2) // initialize this person to walk from left to right
-        {
-            position[IndexX(i)] = 0.0 - rand() * arguments.walkway_length / RAND_MAX;                                           // starting position x coordinate
-            desired_direction[IndexX(i)] = 1.0;                                                                                 // starting value for direct_x
-            final_destination[IndexX(i)] = arguments.walkway_length + 10 + rand() * (arguments.walkway_length - 10) / RAND_MAX; // target x coordinate
-        }
-        else // initialize this person to walk from right to left
-        {
-            position[IndexX(i)] = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            desired_direction[IndexX(i)] = -1.0;                                                           // starting value for direct_x
-            final_destination[IndexX(i)] = -10 - rand() * (arguments.walkway_length - 10) / RAND_MAX;      // target x coordinate
-        }
-    }*/
 
     for (int i = 0; i < n; i++)
     {
@@ -196,7 +194,6 @@ void initialize_people(float *position, float *desired_direction, float *final_d
         position[IndexY(i, n)] = current_y;
         final_destination[IndexX(i)] = target_x;
         final_destination[IndexY(i, n)] = target_y;
-        
     }
 }
 /*
@@ -248,14 +245,14 @@ void initialize_borders(float *borders, int n_borders)
 void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter)
 {
     //add_function(sim_list, sim_counter, simulation_basic, compute_basic_flops, "basic");
-   // add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
+    // add_function(sim_list, sim_counter, simulation_basic_simplified, compute_simplified_flops, "simplified");
 
     //add_function(sim_list, sim_counter, simulation_basic_vectorize_1, compute_simplified_flops, "vectorize_1");
     //add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, compute_simplified_flops, "vectorize_2_5_1");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_2, compute_simplified_flops, "vectorize_2");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_4, compute_simplified_flops, "vectorize_4");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_5, compute_simplified_flops, "vectorize_5");
+    //add_function(sim_list, sim_counter, simulation_basic_vectorize_2, compute_simplified_flops, "vectorize_2");
+    //add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_4, compute_simplified_flops, IS_FLOAT, "vectorize_4");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_5, compute_simplified_flops, IS_FLOAT, "vectorize_5");
 
     //add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
@@ -271,7 +268,7 @@ int compare(const void *a, const void *b)
 /*
 *   This function benchmarks all the implementation stored into the list.
 */
-void run_bench(sim_t sim)
+void run_bench_float(sim_t sim)
 {
     char *name = sim.name;
     sim_func f = sim.f;
@@ -301,8 +298,8 @@ void run_bench(sim_t sim)
     set_zero(actual_velocity, number_of_people * 2);
     float *acceleration_term = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(acceleration_term, number_of_people * 2);
-    float *people_repulsion_term = (float *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(float), 32);
-    set_zero(people_repulsion_term, number_of_people * number_of_people * 2);
+    float *people_repulsion_term = (float *)aligned_malloc(number_of_people * 8 * 2 * sizeof(float), 32);
+    set_zero(people_repulsion_term, 8 * number_of_people * 2);
     float *border_repulsion_term = (float *)aligned_malloc(number_of_people * N_BORDERS * 2 * sizeof(float), 32);
     set_zero(border_repulsion_term, number_of_people * N_BORDERS * 2);
     float *social_force = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
@@ -384,6 +381,13 @@ void run_bench(sim_t sim)
 }
 
 /*
+*   This function benchmarks all the implementation stored into the list.
+*/
+void run_bench_double(sim_t sim)
+{
+}
+
+/*
 *   Function that returns the number of flops. Computed useing wxMaxima.
 */
 long long unsigned int compute_basic_flops(int number_of_people)
@@ -432,13 +436,14 @@ long long unsigned int compute_simplified_flops(int number_of_people)
 /*
 *   Appends a simulation function to the list
 */
-void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f, char *name)
+void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f, int is_double, char *name)
 {
     (*sim_counter) = *sim_counter + 1;
     sim_t *sim = (sim_t *)malloc(sizeof(sim_t));
     sim->f = f;
-    sim->name = name;
     sim->flops_f = flops_f;
+    sim->is_double = is_double;
+    sim->name = name;
     sim_list[*sim_counter - 1] = sim;
 }
 

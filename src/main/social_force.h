@@ -17,15 +17,15 @@
 // parameters model PAGE 8
 #define V_ALPHA_BETA 2.1 // in m^{2}s^{-2}
 #define SIGMA 0.3        // in m
-#define INV_SIGMA 3.333333333  
-#define U_ALPHA_B 10.0   // in m^{2}s^{-2}
-#define UTIMESR 50.0     // U_ALPHA_B * INV_R
-#define R 0.2            // in m
+#define INV_SIGMA 3.333333333
+#define U_ALPHA_B 10.0 // in m^{2}s^{-2}
+#define UTIMESR 50.0   // U_ALPHA_B * INV_R
+#define R 0.2          // in m
 #define INV_R 5
-#define PSI 1.75         // in radians
+#define PSI 1.75                   // in radians
 #define PROJECTION_FACTOR -0.17825 // == cos(PSI), pure
-#define INFLUENCE 0.5    // pure 
-#define DIV_FACTOR 1.75  // == V_ALPHA_BETA / 4 / SIGMA , pure
+#define INFLUENCE 0.5              // pure
+#define DIV_FACTOR 1.75            // == V_ALPHA_BETA / 4 / SIGMA , pure
 
 // benchmark parameters
 #define REP 15
@@ -68,6 +68,7 @@ typedef struct
 {
   sim_func f;
   flops_func flops_f;
+  int is_double;
   char *name;
 } sim_t;
 
@@ -75,11 +76,12 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
 void initialize_people(float *position, float *desired_direction, float *final_destination, float *desired_speed, int n);
 void compute_max_speed(float *desired_speed, float *desired_max_speed, int n);
 void initialize_borders(float *borders, int n_borders);
-void run_bench(sim_t sim);
+void run_bench_float(sim_t sim);
+void run_bench_double(sim_t sim);
 int compare(const void *a, const void *b);
 long long unsigned int compute_basic_flops(int number_of_people);
 long long unsigned int compute_simplified_flops(int number_of_people);
-void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f, char *name);
+void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f, int is_double, char *name);
 void add_test_function(sim_func *test_functions_list, sim_func f, int *test_func_counter);
 
 #endif

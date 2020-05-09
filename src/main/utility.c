@@ -187,6 +187,11 @@ void free_all(int n, ...)
     va_end(list);
 }
 
+int contains_substring(char *haystack, char *needle)
+{
+    return strstr(haystack, needle) != NULL;
+}
+
 float exp_fast(float x)
 {
     x = 1.0 + x / 16384;
