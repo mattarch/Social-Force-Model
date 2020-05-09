@@ -169,13 +169,13 @@ void initialize_people(float *position, float *desired_direction, float *final_d
         double current_x, target_x;
         if (i % 2) // initialize this person to walk from left to right
         {
-            current_x = 0.0 - rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            target_x = arguments.walkway_length + 10 + rand() * (arguments.walkway_length-10) / RAND_MAX;                       // target x coordinate
+            current_x = 0.0 - rand() * arguments.walkway_length / RAND_MAX;                                 // starting position x coordinate
+            target_x = arguments.walkway_length + 10 + rand() * (arguments.walkway_length - 10) / RAND_MAX; // target x coordinate
         }
         else // initialize this person to walk from right to left
         {
             current_x = arguments.walkway_length + rand() * arguments.walkway_length / RAND_MAX; // starting position x coordinate
-            target_x = - 10 - rand() * (arguments.walkway_length-10) / RAND_MAX;                                                                 // target x coordinate
+            target_x = -10 - rand() * (arguments.walkway_length - 10) / RAND_MAX;                // target x coordinate
         }
 
         // compute differences
@@ -187,18 +187,15 @@ void initialize_people(float *position, float *desired_direction, float *final_d
         double normalizer = sqrt(d);                      // 1 sqrt => 1 flop
 
         // update desired_direction
-        desired_direction[IndexX(i)] = delta_x / normalizer;     // 1 div => 1 flop
-        desired_direction[IndexY(i,n)] = delta_y / normalizer; // 1 div => 1 flop
+        desired_direction[IndexX(i)] = delta_x / normalizer;    // 1 div => 1 flop
+        desired_direction[IndexY(i, n)] = delta_y / normalizer; // 1 div => 1 flop
 
         // write position and target to vector
         position[IndexX(i)] = current_x;
-        position[IndexY(i,n)] = current_y;
+        position[IndexY(i, n)] = current_y;
         final_destination[IndexX(i)] = target_x;
-        final_destination[IndexY(i,n)] = target_y;
+        final_destination[IndexY(i, n)] = target_y;
     }
-
-
-
 }
 /*
   This function computes the max speed value for every person.
@@ -255,7 +252,7 @@ void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_func
     add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, compute_simplified_flops, "vectorize_2_5_1");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_3, compute_simplified_flops, "vectorize_3");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_4, compute_simplified_flops, "vectorize_4");
-    
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_4, compute_simplified_flops, "vectorize_5");
 
     //add_test_function(test_functions_list, test_simulation_basic, test_func_counter);
 }
