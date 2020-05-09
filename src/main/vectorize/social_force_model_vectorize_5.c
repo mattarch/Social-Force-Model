@@ -1352,7 +1352,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
           }
 
           _mm256_store_ps(people_repulsion_term + 8 * i, repulsion_x);
-          _mm256_store_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i, repulsion_y);
+          _mm256_store_ps(people_repulsion_term + 8 * number_of_people + 8 * i, repulsion_y);
         }
       }
       // first block row
@@ -1367,7 +1367,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
           e_a_y = _mm256_broadcast_ss(desired_direction + number_of_people + i);
 
           __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
-          __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i);
+          __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * i);
 
           for (int j = k * 8; j < number_of_people - 7; j += 8)
           {
@@ -1440,7 +1440,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
             people_repulsion_y = _mm256_add_ps(people_repulsion_y, repulsion_y);
           }
           _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
-          _mm256_store_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i, people_repulsion_y);
+          _mm256_store_ps(people_repulsion_term + 8 * number_of_people + 8 * i, people_repulsion_y);
         }
       }
 
@@ -1456,7 +1456,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
           e_a_y = _mm256_broadcast_ss(desired_direction + number_of_people + i);
 
           __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
-          __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i);
+          __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * i);
 
           for (int j = 0; j < (k - 1) * 8; j += 8)
           {
@@ -1601,7 +1601,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
           }
 
           _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
-          _mm256_store_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i, people_repulsion_y);
+          _mm256_store_ps(people_repulsion_term + 8 * number_of_people + 8 * i, people_repulsion_y);
         }
       }
 
@@ -1616,7 +1616,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
           e_a_y = _mm256_broadcast_ss(desired_direction + number_of_people + i);
 
           __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
-          __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i);
+          __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * i);
 
           for (int j = 0; j < k * 8; j += 8)
           {
@@ -1689,7 +1689,7 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
             people_repulsion_y = _mm256_add_ps(people_repulsion_y, repulsion_y);
           }
           _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
-          _mm256_store_ps(people_repulsion_term + number_of_people * number_of_people + 8 * i, people_repulsion_y);
+          _mm256_store_ps(people_repulsion_term + 8 * number_of_people + 8 * i, people_repulsion_y);
         }
       }
     }
@@ -1924,14 +1924,14 @@ void simulation_basic_vectorize_5(int number_of_people, int n_timesteps, float *
 
         social_force_x = _mm256_add_ps(unpacked, social_force_x);
 
-        row_add0_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * p);
-        row_add1_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 1));
-        row_add2_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 2));
-        row_add3_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 3));
-        row_add4_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 4));
-        row_add5_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 5));
-        row_add6_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 6));
-        row_add7_y = _mm256_load_ps(people_repulsion_term + number_of_people * number_of_people + 8 * (p + 7));
+        row_add0_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * p);
+        row_add1_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 1));
+        row_add2_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 2));
+        row_add3_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 3));
+        row_add4_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 4));
+        row_add5_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 5));
+        row_add6_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 6));
+        row_add7_y = _mm256_load_ps(people_repulsion_term + 8 * number_of_people + 8 * (p + 7));
 
         row_add0_y = _mm256_hadd_ps(row_add0_y, _mm256_permute2f128_ps(row_add0_y, row_add0_y, 3));
         row_add1_y = _mm256_hadd_ps(row_add1_y, _mm256_permute2f128_ps(row_add1_y, row_add1_y, 3));
