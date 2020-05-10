@@ -10,15 +10,16 @@
 #include <string.h>
 
 // fix aligenment
-#include "aligned_free.h"
-#include "aligned_malloc.h"
+#include "../aligned_free.h"
+#include "../aligned_malloc.h"
 
-#include "parse_args.h"
-#include "social_force.h"
+#include "../parse_args.h"
+#include "../social_force.h"
+#include "../utility.h"
+
 #include "compare_simulations_double.h"
 #include "test_sets_double.h"
 
-#include "utility.h"
 
 extern int seed;
 

@@ -10,15 +10,15 @@
 #include <string.h>
 
 // fix aligenment
-#include "aligned_free.h"
-#include "aligned_malloc.h"
+#include "../aligned_free.h"
+#include "../aligned_malloc.h"
 
-#include "parse_args.h"
-#include "social_force.h"
+#include "../parse_args.h"
+#include "../social_force.h"
+#include "../utility.h"
+
 #include "compare_simulations_float.h"
 #include "test_sets_float.h"
-
-#include "utility.h"
 
 extern int seed;
 
@@ -62,7 +62,6 @@ int check_absolute_distance_vec(float *expected, float *res, float *error_vector
 
     return check;
 }
-
 
 /*
 * Runs all the simulation and compare the result to the basic version

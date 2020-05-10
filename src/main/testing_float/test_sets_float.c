@@ -6,15 +6,16 @@
 #include <string.h>
 
 // fix aligenment
-#include "aligned_free.h"
-#include "aligned_malloc.h"
+#include "../aligned_free.h"
+#include "../aligned_malloc.h"
 
-#include "parse_args.h"
-#include "social_force.h"
+#include "../parse_args.h"
+#include "../social_force.h"
+#include "../social_force_model_basic_simplified.h"
+#include "../utility.h"
+
 #include "compare_simulations_float.h"
 #include "test_sets_float.h"
-#include "../social_force_model_basic_simplified.h"
-#include "utility.h"
 
 // basic direction test case for 4 persons
 float direction_position0[] = {0, 0, 10, 10, 0, 0, 10, 10};

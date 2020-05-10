@@ -6,15 +6,16 @@
 #include <string.h>
 
 // fix aligenment
-#include "aligned_free.h"
-#include "aligned_malloc.h"
+#include "../aligned_free.h"
+#include "../aligned_malloc.h"
 
-#include "parse_args.h"
-#include "social_force.h"
+#include "../parse_args.h"
+#include "../social_force.h"
+#include "../social_force_model_basic_simplified_double.h"
+#include "../utility.h"
+
 #include "compare_simulations_double.h"
 #include "test_sets_double.h"
-#include "../social_force_model_basic_simplified_double.h"
-#include "utility.h"
 
 // basic direction test case for 4 persons
 double direction_position0_double[] = {0, 0, 10, 10, 0, 0, 10, 10};
@@ -49,8 +50,8 @@ double repulsion_speed0_double[] = {0.7, 0.5, 1.3};
 double repulsion_direction0_double[] = {0, 1, 1, 0, 4, 3};
 int repulsion_n0_double = 3;
 double repulsion_expected_result0_double[] = {0, 0, -0.000020266568837, 0.000005901638773, -0.000000000000016, -0.000000000000004,
-                                      0.000033293428727, -0.000018112519707, 0, 0, -0.000000000027150, -0.000000000023879,
-                                      0.000004591945972, -0.000000780381604, 0.034905007547125, 0.084268142615003, 0, 0};
+                                              0.000033293428727, -0.000018112519707, 0, 0, -0.000000000027150, -0.000000000023879,
+                                              0.000004591945972, -0.000000780381604, 0.034905007547125, 0.084268142615003, 0, 0};
 
 double border_pos0_double[] = {0, 0, 10, 10};
 double border_borders0_double[] = {0, 10};
@@ -61,13 +62,13 @@ int border_nb0_double = 2;
 // basic social force test for 4 persons and 2 walls
 double social_acc0_double[] = {1, 2, -3, 5, 2, 2, -4, -2};
 double social_prep0_double[] = {0, 0, 1, 1, 2, 3, -1, 1,
-                        -1, -1, 0, 0, 2, 2, -2, 1,
-                        -2, -3, -2, -2, 0, 0, 3, -1,
-                        1, -1, 2, -1, -3, 1, 0, 0};
+                                -1, -1, 0, 0, 2, 2, -2, 1,
+                                -2, -3, -2, -2, 0, 0, 3, -1,
+                                1, -1, 2, -1, -3, 1, 0, 0};
 double social_brep0_double[] = {0, 1, 1, 1,
-                        -1, 1, 0, 1,
-                        0, 0, 1, 2,
-                        2, 1, -1, 2};
+                                -1, 1, 0, 1,
+                                0, 0, 1, 2,
+                                2, 1, -1, 2};
 double social_expected0_double[] = {4, 9, -5, 9, 2, -2, -3, 0};
 int social_n0_double = 4;
 int social_nb0_double = 2;
