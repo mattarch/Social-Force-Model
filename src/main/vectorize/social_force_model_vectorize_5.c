@@ -11,7 +11,6 @@
 
 #include "social_force_model_vectorize_5.h"
 #include "../social_force.h"
-#include "../testing.h"
 #include "../utility.h"
 
 extern char filename_global[80];

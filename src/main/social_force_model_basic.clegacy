@@ -9,7 +9,6 @@
 
 #include "social_force_model_basic.h"
 #include "social_force.h"
-#include "testing.h"
 #include "utility.h"
 
 extern char filename_global[80];
