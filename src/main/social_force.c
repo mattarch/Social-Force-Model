@@ -27,6 +27,8 @@
 #include "vectorize/social_force_model_vectorize_1.h"
 #include "vectorize/social_force_model_vectorize_2.h"
 #include "vectorize/social_force_model_vectorize_3.h"
+#include "vectorize/social_force_model_vectorize_2_double.h"
+#include "vectorize/social_force_model_vectorize_3_double.h"
 #include "vectorize/social_force_model_vectorize_4.h"
 #include "vectorize/social_force_model_vectorize_5.h"
 
@@ -169,6 +171,8 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
 void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)
 {
     add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE, "simplified_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, "vectorize_2_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_3_double, compute_simplified_flops, IS_DOUBLE, "vectorize_3_double");
 
     add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
 }
