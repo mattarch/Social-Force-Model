@@ -379,7 +379,7 @@ void run_bench_float(sim_t sim)
     char *name = sim.name;
     sim_func f = sim.f;
     flops_func flops_f = sim.flops_f;
-    long double cycles = 0.;
+    double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;
 
@@ -432,7 +432,7 @@ void run_bench_float(sim_t sim)
         f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = (long double)end;
+        cycles = (double)end;
         // printf("%Lf\t%llu\n", cycles, end);
         multiplier = (CYCLES_REQUIRED) / (cycles);
     } while (multiplier > 2);
@@ -452,7 +452,7 @@ void run_bench_float(sim_t sim)
         f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = ((long double)end);
+        cycles = ((double)end);
         // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
         // total_cycles += cycles;
         
@@ -475,7 +475,7 @@ void run_bench_float(sim_t sim)
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
-    long double performance = (long double) flops / cycles;
+    double performance = (double) flops / cycles;
     printf("%s %d %llu %Lf %.8Lf\n", name, number_of_people, flops, cycles, performance);
 }
 
@@ -487,7 +487,7 @@ void run_bench_double(sim_t sim)
     char *name = sim.name;
     sim_func_double f = sim.f_double;
     flops_func flops_f = sim.flops_f;
-    long double cycles = 0.;
+    double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;
 
@@ -540,7 +540,7 @@ void run_bench_double(sim_t sim)
         f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = (long double)end;
+        cycles = (double)end;
         // printf("%Lf\t%llu\n", cycles, end);
         multiplier = (CYCLES_REQUIRED) / (cycles);
     } while (multiplier > 2);
@@ -561,7 +561,7 @@ void run_bench_double(sim_t sim)
         f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = ((long double)end);
+        cycles = ((double)end);
         // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
         // total_cycles += cycles;
         
@@ -584,7 +584,7 @@ void run_bench_double(sim_t sim)
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
-    long double performance = (long double) flops / cycles;
+    double performance = (double) flops / cycles;
     printf("%s %d %llu %Lf %.8Lf\n", name, number_of_people, flops, cycles, performance);
 }
 
