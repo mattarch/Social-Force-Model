@@ -33,6 +33,9 @@
 
 #define NTESTS_FINITE_DIFFERENCES 10
 
+#define EPS 1e-02
+#define EPS_NEW 1e-02
+
 #ifdef DEBUG
 #define CONSOLE_PRINT(x) printf x
 #else
@@ -60,28 +63,44 @@
 #define IndexX_border_old(i, j, n) ((i * (2 * 2) + 2 * j))
 #define IndexY_border_old(i, j, n) ((i * (2 * 2) + 2 * j + 1))
 
+#define IS_FLOAT 0
+#define IS_DOUBLE 1
+
 // typedefs
 typedef void (*sim_func)(int, int, float *, float *, float *, float *, float *, float *, float *, float *, float *, float *, float *, float *);
+typedef void (*sim_func_double)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
+
 typedef long long unsigned int (*flops_func)(int);
 
 typedef struct
 {
   sim_func f;
+  sim_func_double f_double;
   flops_func flops_f;
   int is_double;
   char *name;
 } sim_t;
 
-void add_implementations(sim_t **sim_list, int *sim_counter, sim_func *test_functions_list, int *test_func_counter);
-void initialize_people(float *position, float *desired_direction, float *final_destination, float *desired_speed, int n);
-void compute_max_speed(float *desired_speed, float *desired_max_speed, int n);
-void initialize_borders(float *borders, int n_borders);
+void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter);
+void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter);
+
+void add_function(sim_t **sim_list, int *sim_counter, sim_func f, sim_func_double f_double, flops_func flops_f, int is_double, char *name);
+void add_test_function(sim_t **test_functions_list, sim_func f, sim_func_double f_double, int is_double, int *test_func_counter);
+
+/* initialization */
+void initialize_people_float(float *position, float *desired_direction, float *final_destination, float *desired_speed, int n);
+void initialize_max_speed_float(float *desired_speed, float *desired_max_speed, int n);
+void initialize_borders_float(float *borders, int n_borders);
+
+void initialize_people_double(double *position, double *desired_direction, double *final_destination, double *desired_speed, int n);
+void initialize_max_speed_double(double *desired_speed, double *desired_max_speed, int n);
+void initialize_borders_double(double *borders, int n_borders);
+
+/* benchmarking */
 void run_bench_float(sim_t sim);
 void run_bench_double(sim_t sim);
 int compare(const void *a, const void *b);
 long long unsigned int compute_basic_flops(int number_of_people);
 long long unsigned int compute_simplified_flops(int number_of_people);
-void add_function(sim_t **sim_list, int *sim_counter, sim_func f, flops_func flops_f, int is_double, char *name);
-void add_test_function(sim_func *test_functions_list, sim_func f, int *test_func_counter);
 
 #endif

@@ -63,6 +63,22 @@ void output_to_file_initial_state(char *filename, float *position, float *actual
     output_to_file_persons(filename, position, actual_speed, desired_direction, final_destination, n, n_timestep);
 }
 
+void output_to_file_initial_state_double(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep)
+{
+    FILE *fptr;
+
+    fptr = fopen(filename, "a"); // -a option: data is appended to end of the file; If the file does not exist, it will be created.
+
+    if (!fptr)
+    {
+        perror("Error reading file in output_to_file_initial_state");
+    }
+
+    output_to_file_constants(filename);
+
+    output_to_file_persons_double(filename, position, actual_speed, desired_direction, final_destination, n, n_timestep);
+}
+
 /*
   This function outputs the defined constants to the given filename
   Parameters: filename: name of the .txt file
@@ -119,15 +135,53 @@ void output_to_file_persons(char *filename, float *position, float *speed, float
 
     for (int i = 0; i < n; i++)
     {
-        float position_x = position[2 * i];
-        float position_y = position[2 * i + 1];
+        float position_x = position[IndexX(i)];
+        float position_y = position[IndexY(i, n)];
         float speed_c = speed[i];
-        float desired_direction_x = desired_direction[2 * i];
-        float desired_direction_y = desired_direction[2 * i + 1];
-        float final_destination_x = final_destination[2 * i];
-        float final_destination_y = final_destination[2 * i + 1];
+        float desired_direction_x = desired_direction[IndexX(i)];
+        float desired_direction_y = desired_direction[IndexY(i, n)];
+        float final_destination_x = final_destination[IndexX(i)];
+        float final_destination_y = final_destination[IndexY(i, n)];
         float vel_x = desired_direction_x * speed_c;
         float vel_y = desired_direction_y * speed_c;
+
+        fprintf(fptr, "%f ", position_x);
+        fprintf(fptr, "%f ", position_y);
+        fprintf(fptr, "%f ", speed_c);
+        fprintf(fptr, "%f ", desired_direction_x);
+        fprintf(fptr, "%f ", desired_direction_y);
+        fprintf(fptr, "%f ", final_destination_x);
+        fprintf(fptr, "%f ", final_destination_y);
+        fprintf(fptr, "%f ", vel_x);
+        fprintf(fptr, "%f ", vel_y);
+        fprintf(fptr, "\n");
+    }
+
+    fclose(fptr);
+}
+
+void output_to_file_persons_double(char *filename, double *position, double *speed, double *desired_direction, double *final_destination, int n, int n_timestep)
+{
+    FILE *fptr;
+
+    fptr = fopen(filename, "a"); // -a option: data is appended to end of the file; If the file does not exist, it will be created.
+
+    if (!fptr)
+    {
+        perror("Error reading file in output_to_file_persons");
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        double position_x = position[IndexX(i)];
+        double position_y = position[IndexY(i, n)];
+        double speed_c = speed[i];
+        double desired_direction_x = desired_direction[IndexX(i)];
+        double desired_direction_y = desired_direction[IndexY(i, n)];
+        double final_destination_x = final_destination[IndexX(i)];
+        double final_destination_y = final_destination[IndexY(i, n)];
+        double vel_x = desired_direction_x * speed_c;
+        double vel_y = desired_direction_y * speed_c;
 
         fprintf(fptr, "%f ", position_x);
         fprintf(fptr, "%f ", position_y);
@@ -223,6 +277,14 @@ float exp_taylor(float x)
 }
 
 void set_zero(float *p, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        p[i] = 0;
+    }
+}
+
+void set_zero_double(double *p, int size)
 {
     for (int i = 0; i < size; i++)
     {
