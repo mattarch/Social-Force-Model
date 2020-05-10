@@ -379,17 +379,14 @@ void run_bench_float(sim_t sim)
     char *name = sim.name;
     sim_func f = sim.f;
     flops_func flops_f = sim.flops_f;
-    double cycles = 0.;
-    long num_runs = 5;
+    long double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;
 
     int number_of_people = arguments.n_people;
-
-    int n_timesteps = arguments.n_timesteps;
+    int n_timesteps = 1;
     // allocate memory
 
-    long long unsigned int flops = arguments.n_timesteps * flops_f(number_of_people);
 
     float *position = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(position, number_of_people * 2);
@@ -430,19 +427,17 @@ void run_bench_float(sim_t sim)
     // Warm-up phase
     do
     {
-        num_runs = num_runs * multiplier;
+        n_timesteps = n_timesteps * multiplier;
         start = start_tsc();
-        for (size_t i = 0; i < num_runs; i++)
-        {
-            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
-        }
+        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = (double)end;
+        cycles = (long double)end;
+        // printf("%Lf\t%llu\n", cycles, end);
         multiplier = (CYCLES_REQUIRED) / (cycles);
-
     } while (multiplier > 2);
 
+    long long unsigned flops = n_timesteps * flops_f(number_of_people);
     double *cycles_list = malloc(sizeof(double) * REP);
 
     initialize_people_float(position, desired_direction, final_destination, desired_speed, number_of_people);
@@ -453,17 +448,14 @@ void run_bench_float(sim_t sim)
     double total_cycles = 0;
     for (size_t j = 0; j < REP; j++)
     {
-
         start = start_tsc();
-        for (size_t i = 0; i < num_runs; ++i)
-        {
-            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
-        }
+        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = ((double)end) / num_runs;
-        total_cycles += cycles;
-
+        cycles = ((long double)end);
+        // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
+        // total_cycles += cycles;
+        
         cycles_list[j] = cycles;
     }
     total_cycles /= REP;
@@ -483,8 +475,8 @@ void run_bench_float(sim_t sim)
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
-
-    printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
+    long double performance = (long double) flops / cycles;
+    printf("%s %d %llu %Lf %.8Lf\n", name, number_of_people, flops, cycles, performance);
 }
 
 /*
@@ -495,17 +487,14 @@ void run_bench_double(sim_t sim)
     char *name = sim.name;
     sim_func_double f = sim.f_double;
     flops_func flops_f = sim.flops_f;
-    double cycles = 0.;
-    long num_runs = 5;
+    long double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;
 
     int number_of_people = arguments.n_people;
-
-    int n_timesteps = arguments.n_timesteps;
+    int n_timesteps = 1;
     // allocate memory
 
-    long long unsigned int flops = arguments.n_timesteps * flops_f(number_of_people);
 
     double *position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
     set_zero_double(position, number_of_people * 2);
@@ -546,19 +535,17 @@ void run_bench_double(sim_t sim)
     // Warm-up phase
     do
     {
-        num_runs = num_runs * multiplier;
+        n_timesteps = n_timesteps * multiplier;
         start = start_tsc();
-        for (size_t i = 0; i < num_runs; i++)
-        {
-            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
-        }
+        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = (double)end;
+        cycles = (long double)end;
+        // printf("%Lf\t%llu\n", cycles, end);
         multiplier = (CYCLES_REQUIRED) / (cycles);
-
     } while (multiplier > 2);
 
+    long long unsigned flops = n_timesteps * flops_f(number_of_people);
     double *cycles_list = malloc(sizeof(double) * REP);
 
     initialize_people_double(position, desired_direction, final_destination, desired_speed, number_of_people);
@@ -571,15 +558,13 @@ void run_bench_double(sim_t sim)
     {
 
         start = start_tsc();
-        for (size_t i = 0; i < num_runs; ++i)
-        {
-            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
-        }
+        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
 
-        cycles = ((double)end) / num_runs;
-        total_cycles += cycles;
-
+        cycles = ((long double)end);
+        // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
+        // total_cycles += cycles;
+        
         cycles_list[j] = cycles;
     }
     total_cycles /= REP;
@@ -599,8 +584,8 @@ void run_bench_double(sim_t sim)
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
-
-    printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, flops / cycles);
+    long double performance = (long double) flops / cycles;
+    printf("%s %d %llu %Lf %.8Lf\n", name, number_of_people, flops, cycles, performance);
 }
 
 /*
@@ -614,18 +599,18 @@ int compare(const void *a, const void *b)
 /*
 *   Function that returns the number of flops. Computed useing wxMaxima.
 */
-long long unsigned int compute_basic_flops(int number_of_people)
+long long unsigned compute_basic_flops(int number_of_people)
 {
-    int n = number_of_people;
-    int nb = N_BORDERS;
-    int a, b, c, d, e, f;
+    long long unsigned n = number_of_people;
+    long long unsigned nb = N_BORDERS;
+    long long unsigned a, b, c, d, e, f;
     a = add_cost;
     b = mult_cost;
     c = div_cost;
     d = sqrt_cost;
     e = exp_cost;
     f = fabs_cost;
-    long long unsigned int flops = n * (3 * a + 2 * b + 2 * c * d) +
+    long long unsigned flops = n * (3 * a + 2 * b + 2 * c * d) +
                                    n * 2 * b +
                                    n * (2 * a + 4 * b + 2 * c) +
                                    (n * n - n) * (15 * a + 22 * b + 13 * c + 4 * d + 2 * e) +
@@ -638,17 +623,17 @@ long long unsigned int compute_basic_flops(int number_of_people)
 /*
 *   Function that returns the number of flops. Computed useing wxMaxima.
 */
-long long unsigned int compute_simplified_flops(int number_of_people)
+long long unsigned compute_simplified_flops(int number_of_people)
 {
-    int n = number_of_people;
-    int nb = N_BORDERS;
-    int a, b, c, d, fe;
+    long long unsigned n = number_of_people;
+    long long unsigned nb = N_BORDERS;
+    long long unsigned a, b, c, d, fe;
     a = add_cost;
     b = mult_cost;
     c = div_cost;
     d = sqrt_cost;
     fe = fast_exp_cost;
-    long long unsigned int flops = n * (3 * a + 2 * b + 2 * c * d) +
+    long long unsigned flops = n * (3 * a + 2 * b + 2 * c + d) +
                                    n * (2 * a + 4 * b) +
                                    (n * n - n) * (12 * a + 20 * b + 7 * c + 4 * d + fe) +
                                    (nb * n) * (a + 3 * b + 3 * c + fe) +

@@ -29,7 +29,7 @@
 
 // benchmark parameters
 #define REP 15
-#define CYCLES_REQUIRED 1e8
+#define CYCLES_REQUIRED 1e9
 
 #define NTESTS_FINITE_DIFFERENCES 10
 
