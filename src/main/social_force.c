@@ -163,7 +163,7 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
     add_function(sim_list, sim_counter, simulation_basic_vectorize_3, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_3");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_4, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_4");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_5, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_5");
-    //add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_2_5_1");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_2_5_1");
 
     add_test_function(test_functions_list, test_simulation_basic_simplified, NULL, IS_FLOAT, test_func_counter);
 }
@@ -480,7 +480,7 @@ void run_bench_float(sim_t sim)
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
     double performance = (double) flops / cycles;
-    printf("%s %d %llu %Lf %.8Lf\n", name, number_of_people, flops, cycles, performance);
+    printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, performance);
 }
 
 /*
@@ -589,7 +589,7 @@ void run_bench_double(sim_t sim)
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
     double performance = (double) flops / cycles;
-    printf("%s %d %llu %Lf %.8Lf\n", name, number_of_people, flops, cycles, performance);
+    printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, performance);
 }
 
 /*
