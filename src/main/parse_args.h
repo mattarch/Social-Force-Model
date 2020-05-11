@@ -16,8 +16,8 @@ struct arguments
 {
     int n_people;
     int n_timesteps;
-    double walkway_width;
-    double walkway_length;
+    float walkway_width;
+    float walkway_length;
     char *benchmark;
     char *filename;
     bool visual;

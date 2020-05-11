@@ -3,7 +3,7 @@
 # set variables
 options="Benchmark Test Visualization/Test"
 timesteps=(25) # talk about number of iterations
-persons=(4 8 16 32 ) #64 128 256 512 1024 2048)
+persons=(8 16 32 64 128 256 512 1024)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
@@ -16,9 +16,9 @@ firstarg=basic
 # compile program
 # if macOS -> use gcc-9, else -> gcc
 if [ $os == "Darwin" ]; then
-  gcc-9 social_force.c parse_args.c utility.c testing.c social_force_model_basic.c social_force_model_basic_simplified.c aligned_free.c aligned_malloc.c -lm -O3 -ffast-math -g -o $prog
+  gcc-9 *.c  vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 else
-  gcc social_force.c parse_args.c utility.c testing.c social_force_model_basic.c social_force_model_basic_simplified.c aligned_free.c aligned_malloc.c -lm -O3 -ffast-math -g -o $prog
+  gcc *.c vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c  -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 fi
 
 # perform benchmark or test
