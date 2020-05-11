@@ -16,9 +16,9 @@ firstarg=basic
 # compile program
 # if macOS -> use gcc-9, else -> gcc
 if [ $os == "Darwin" ]; then
-  gcc-9 *.c  vectorize/*.c  testing_double/*.c testing_float/*.c -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
+  gcc-9 *.c  vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 else
-  gcc *.c vectorize/*.c  testing_double/*.c testing_float/*.c  -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
+  gcc *.c vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c  -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 fi
 
 # perform benchmark or test
