@@ -55,7 +55,7 @@ int check_absolute_distance_vec(float *expected, float *res, float *error_vector
         error_vector[i] = err;
         if (err > EPS || isnan(err))
         {
-            //printf("expected: %f, got %f, abs error %f\n", expected[i], res[i], err);
+            printf("expected: %f, got %f, abs error %f\n", expected[i], res[i], err);
             check = 1;
         }
     }
@@ -135,12 +135,6 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
               current_people_repulsion_term, current_border_repulsion_term, current_social_force, current_desired_speed, current_desired_max_speed);
 
             check += check_absolute_distance(oracle_position, current_position, number_of_people, 1);
-            //check += check_absolute_distance(oracle_speed, current_speed, number_of_people, 0);
-            //check += check_absolute_distance(oracle_desired_direction, current_desired_direction, number_of_people, 1);
-            //check += check_absolute_distance(oracle_acceleration_term, current_acceleration_term, number_of_people, 1);
-            //check += check_absolute_distance(oracle_people_repulsion_term, current_people_repulsion_term, number_of_people, 2);
-
-            //check += check_absolute_distance(oracle_border_repulsion_term, current_border_repulsion_term, number_of_people, 3);
 
             if (check)
             {
@@ -149,11 +143,11 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
             }
             else
             {
-                printf("%s iteration %d CORRECT!\n", sim_list[i]->name, j);
+                //printf("%s iteration %d CORRECT!\n", sim_list[i]->name, j);
             }
 
             copy_state(oracle_position, oracle_desired_direction, oracle_final_destination, oracle_borders, oracle_desired_speed, oracle_desired_max_speed,
-                       &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people);
+                       &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people,*sim_list[i]);
         }
 
         //check_absolute_distance_vec(oracle_position, current_position, error_vector, 2 * number_of_people);
@@ -168,6 +162,10 @@ int compare_simulations(sim_t **sim_list, int sim_counter)
         if (error_check)
         {
             printf("ERROR: implementation %s differs from the base\n", sim_list[i]->name);
+        }
+        else
+        {
+            printf("implementation  %s CORRECT!\n", sim_list[i]->name);
         }
     }
 
@@ -299,14 +297,17 @@ void copy_init(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s
 }
 
 void copy_state(float *s_pos, float *s_dir, float *s_fdes, float *s_bor, float *s_spe, float *s_mspe,
-                float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n)
+                float **pos, float **dir, float **fdes, float **bor, float **spe, float **mspe, int n, sim_t sim)
 {
-    memcpy(*pos, s_pos, n * 2 * sizeof(float));   //
-    memcpy(*dir, s_dir, n * 2 * sizeof(float));   //
-    memcpy(*fdes, s_fdes, n * 2 * sizeof(float)); //
-    memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
-    memcpy(*spe, s_spe, n * sizeof(float));
-    memcpy(*mspe, s_mspe, n * sizeof(float));
+    memcpy(*pos, s_pos, n * 2 * sizeof(float));
+    if (!(contains_substring(sim.name, "2_5_1") || contains_substring(sim.name,"stdc")))
+    {
+        memcpy(*dir, s_dir, n * 2 * sizeof(float));
+        memcpy(*fdes, s_fdes, n * 2 * sizeof(float));
+        memcpy(*bor, s_bor, N_BORDERS * sizeof(float));
+        memcpy(*spe, s_spe, n * sizeof(float));
+        memcpy(*mspe, s_mspe, n * sizeof(float));
+    }
 }
 
 void allocate_arrays(float **spe, float **vel, float **acc, float **prep, float **brep,

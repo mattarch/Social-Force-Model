@@ -119,7 +119,6 @@ void add_testcases()
 
     //position
     add_position_testcase("position_test_from_origin_0_speed_unit_social_force", position_pos0, position_dir, position_speed, position_force0, position_vel0, position_desired_speed, position_expected0, position_n0);
-    add_position_testcase("position_test_from_origin_MAX_speed_unit_social_force", position_pos1, position_dir, position_speed, position_force1, position_vel1, position_desired_speed, position_expected1, position_n1);
 }
 
 /*

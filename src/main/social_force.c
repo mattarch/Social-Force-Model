@@ -395,7 +395,6 @@ void run_bench_float(sim_t sim)
     int n_timesteps = 1;
     // allocate memory
 
-
     float *position = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(position, number_of_people * 2);
     float *speed = (float *)aligned_malloc(number_of_people * sizeof(float), 32);
@@ -463,7 +462,7 @@ void run_bench_float(sim_t sim)
         cycles = ((double)end);
         // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
         // total_cycles += cycles;
-        
+
         cycles_list[j] = cycles;
     }
     total_cycles /= REP;
@@ -483,7 +482,7 @@ void run_bench_float(sim_t sim)
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
-    double performance = (double) flops / cycles;
+    double performance = (double)flops / cycles;
     printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, performance);
 }
 
@@ -502,7 +501,6 @@ void run_bench_double(sim_t sim)
     int number_of_people = arguments.n_people;
     int n_timesteps = 1;
     // allocate memory
-
 
     double *position = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
     set_zero_double(position, number_of_people * 2);
@@ -572,7 +570,7 @@ void run_bench_double(sim_t sim)
         cycles = ((double)end);
         // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
         // total_cycles += cycles;
-        
+
         cycles_list[j] = cycles;
     }
     total_cycles /= REP;
@@ -592,7 +590,7 @@ void run_bench_double(sim_t sim)
     qsort(cycles_list, REP, sizeof(double), compare);
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
-    double performance = (double) flops / cycles;
+    double performance = (double)flops / cycles;
     printf("%s %d %llu %f %.8f\n", name, number_of_people, flops, cycles, performance);
 }
 
@@ -619,12 +617,12 @@ long long unsigned compute_basic_flops(int number_of_people)
     e = exp_cost;
     f = fabs_cost;
     long long unsigned flops = n * (3 * a + 2 * b + 2 * c * d) +
-                                   n * 2 * b +
-                                   n * (2 * a + 4 * b + 2 * c) +
-                                   (n * n - n) * (15 * a + 22 * b + 13 * c + 4 * d + 2 * e) +
-                                   (nb * n) * (a + 4 * b + 6 * c + 2 * e + f) +
-                                   n * (n + nb) * 2 * a +
-                                   n * (a * 6 + 12 * b + 3 * c + 2 * d);
+                               n * 2 * b +
+                               n * (2 * a + 4 * b + 2 * c) +
+                               (n * n - n) * (15 * a + 22 * b + 13 * c + 4 * d + 2 * e) +
+                               (nb * n) * (a + 4 * b + 6 * c + 2 * e + f) +
+                               n * (n + nb) * 2 * a +
+                               n * (a * 6 + 12 * b + 3 * c + 2 * d);
     return flops;
 }
 
@@ -642,10 +640,10 @@ long long unsigned compute_simplified_flops(int number_of_people)
     d = sqrt_cost;
     fe = fast_exp_cost;
     long long unsigned flops = n * (3 * a + 2 * b + 2 * c + d) +
-                                   n * (2 * a + 4 * b) +
-                                   (n * n - n) * (12 * a + 20 * b + 7 * c + 4 * d + fe) +
-                                   (nb * n) * (a + 3 * b + 3 * c + fe) +
-                                   n * (n + nb) * 2 * a +
-                                   n * (5 * a + 9 * b + 3 * c + d);
+                               n * (2 * a + 4 * b) +
+                               (n * n - n) * (12 * a + 20 * b + 7 * c + 4 * d + fe) +
+                               (nb * n) * (a + 3 * b + 3 * c + fe) +
+                               n * (n + nb) * 2 * a +
+                               n * (5 * a + 9 * b + 3 * c + d);
     return flops;
 }
