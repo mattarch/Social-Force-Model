@@ -38,6 +38,7 @@
 
 // standard C versions
 #include "stdc_opt/social_force_model_stdc_optv_2_5_1.h"
+#include "stdc_opt/social_force_model_stdc_optv_3_2.h"
 
 // testing
 #include "testing_float/test_sets_float.h"
@@ -169,7 +170,6 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
     add_function(sim_list, sim_counter, simulation_basic_vectorize_4, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_4");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_5, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_5");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT, "vectorize_2_5_1");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_5_double,NULL, compute_simplified_flops, IS_FLOAT, "vectorize_5_double");
 
     add_test_function(test_functions_list, test_simulation_basic_simplified, NULL, IS_FLOAT, test_func_counter);
 }
@@ -179,8 +179,10 @@ void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test
     add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE, "simplified_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, "vectorize_2_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_3_double, compute_simplified_flops, IS_DOUBLE, "vectorize_3_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_5_double, compute_simplified_flops, IS_DOUBLE, "vectorize_5_double");
 
     add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_simplified_flops, IS_DOUBLE, "stdc_optv_2_5_1_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_optv_3_2, compute_simplified_flops, IS_DOUBLE, "stdc_optv_3_2_double");
 
     add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
 }
