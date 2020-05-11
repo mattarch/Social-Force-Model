@@ -148,8 +148,8 @@ void test_people_repulsion_with_FD_double(double *people_repulsion_term, int n, 
             parameters[1] = ry_ab;
             add_estimated_gradient_people_repulsion_double(fd_gradient, parameters, 2, position, desired_direction, actual_speed, i, j, n);
 
-            double absErr = fabs(fd_gradient[0] - analytic_gradient[IndexX_matrix(i, j, n) ]);
-            double relError = 2 * absErr / (eps + analytic_gradient[IndexX_matrix(i, j, n) ] + fd_gradient[0]);
+            double absErr = fabs(fd_gradient[0] - analytic_gradient[IndexX_matrix(i, j, n)]);
+            double relError = 2 * absErr / (eps + analytic_gradient[IndexX_matrix(i, j, n)] + fd_gradient[0]);
 
             if (relError > tol && absErr > EPS)
             {
@@ -177,6 +177,8 @@ void test_people_repulsion_with_FD_double(double *people_repulsion_term, int n, 
             }
         }
     }
+
+    printf("Finite-Differences people_repulsion CORRECT\n");
 }
 // default values
 
@@ -253,4 +255,5 @@ void test_border_repulsion_with_FD_double(double *border_repulsion_term, double 
             }
         }
     }
+    printf("Finite-Differences border_repulsion CORRECT\n");
 }
