@@ -260,7 +260,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
   __m256 mask;
 
   __m256 timestep_vec = _mm256_set1_ps(-TIMESTEP);
-  __m256 minus_sigma_inv_vec = _mm256_set1_ps(-1.0/SIGMA);
+  __m256 minus_sigma_inv_vec = _mm256_set1_ps(-1.0 / SIGMA);
   __m256 div_factor_vec = _mm256_set1_ps(DIV_FACTOR);
   __m256 projection_factor_vec = _mm256_set1_ps(PROJECTION_FACTOR);
   __m256 influencer_vec = _mm256_set1_ps(INFLUENCE);
@@ -271,6 +271,303 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
   __m256 eps = _mm256_set1_ps(1e-12);
   __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
 
+  __m256 current_mask;
+
+  // diagonal
+  int n_eight = n / 8;
+  for (int k = 0; k < n_eight; k++)
+  {
+    position_j_x = _mm256_load_ps(position + 8 * k);
+    position_j_y = _mm256_load_ps(position + n + 8 * k);
+
+    e_b_x = _mm256_load_ps(desired_direction + 8 * k);
+    e_b_y = _mm256_load_ps(desired_direction + n + 8 * k);
+
+    vb = _mm256_load_ps(actual_speed + 8 * k);
+
+    for (int i = 8 * k; i < 8 * (k + 1); i++)
+    {
+      position_i_x = _mm256_broadcast_ss(position + i);
+      position_i_y = _mm256_broadcast_ss(position + n + i);
+      e_a_x = _mm256_broadcast_ss(desired_direction + i);
+      e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
+
+      r_ab_x = _mm256_sub_ps(position_i_x, position_j_x);
+      r_ab_y = _mm256_sub_ps(position_i_y, position_j_y);
+
+      delta_b = _mm256_mul_ps(vb, timestep_vec);
+
+      // compute norm r_ab
+      r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
+      r_ab_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
+
+      r_ab_me_x = _mm256_fmadd_ps(delta_b, e_b_x, r_ab_x);
+      r_ab_me_y = _mm256_fmadd_ps(delta_b, e_b_y, r_ab_y);
+
+      // compute norm r_ab_me
+      r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
+      r_ab_me_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
+
+      // sum up norms
+      norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
+
+      repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
+      repulsion_x = _mm256_fmadd_ps(r_ab_me_x, r_ab_me_norm, repulsion_x);
+
+      repulsion_y = _mm256_mul_ps(r_ab_y, r_ab_norm);
+      repulsion_y = _mm256_fmadd_ps(r_ab_me_y, r_ab_me_norm, repulsion_y);
+
+      delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
+      b = _mm256_rsqrt_ps(_mm256_fmsub_ps(norm_sum, norm_sum, delta_b_2));
+      b = _mm256_rcp_ps(b);
+      b = _mm256_mul_ps(b, half_vec);
+
+      exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
+      exp = exp_fast_vec_3(exp, one, exp_constant);
+
+      common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
+      common_factor = _mm256_div_ps(common_factor, b);
+      common_factor = _mm256_mul_ps(exp, common_factor);
+
+      repulsion_x = _mm256_mul_ps(repulsion_x, common_factor);
+      repulsion_y = _mm256_mul_ps(repulsion_y, common_factor);
+
+      // compute norm r_ab
+      repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
+      threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x, repulsion_x, repulsion_2_y));
+      threshold = _mm256_rcp_ps(threshold);
+
+      check_y = _mm256_mul_ps(e_a_y, repulsion_y);
+      check = _mm256_fmadd_ps(e_a_x, repulsion_x, check_y);
+
+      threshold = _mm256_mul_ps(threshold, projection_factor_vec);
+
+      mask = _mm256_cmp_ps(_mm256_mul_ps(check, minus1_vec), threshold, _CMP_GE_OQ);
+
+      w = _mm256_blendv_ps(influencer_vec, one, mask);
+
+      repulsion_x = _mm256_mul_ps(w, repulsion_x);
+      repulsion_y = _mm256_mul_ps(w, repulsion_y);
+
+      switch (i % 8)
+      {
+      case 0:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b11111110);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b11111110);
+
+        break;
+      case 1:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b11111101);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b11111101);
+        break;
+      case 2:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b11111011);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b11111011);
+        break;
+      case 3:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b11110111);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b11110111);
+        break;
+      case 4:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b11101111);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b11101111);
+        break;
+      case 5:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b11011111);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b11011111);
+        break;
+      case 6:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b10111111);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b10111111);
+        break;
+      case 7:
+        repulsion_x = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_x, 0b01111111);
+        repulsion_y = _mm256_blend_ps(_mm256_setzero_ps(), repulsion_y, 0b01111111);
+        break;
+      }
+
+      _mm256_store_ps(people_repulsion_term + 8 * i, repulsion_x);
+      _mm256_store_ps(people_repulsion_term + 8 * n + 8 * i, repulsion_y);
+    }
+  }
+  // upper triangle
+
+  for (int k = 1; k < n_eight; k++)
+  {
+    for (int i = (k - 1) * 8; i < k * 8; i++)
+    {
+      position_i_x = _mm256_broadcast_ss(position + i);
+      position_i_y = _mm256_broadcast_ss(position + n + i);
+      e_a_x = _mm256_broadcast_ss(desired_direction + i);
+      e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
+
+      __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
+      __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * i);
+
+      for (int j = k * 8; j < n - 7; j += 8)
+      {
+        position_j_x = _mm256_load_ps(position + j);
+        position_j_y = _mm256_load_ps(position + n + j);
+
+        r_ab_x = _mm256_sub_ps(position_i_x, position_j_x);
+        r_ab_y = _mm256_sub_ps(position_i_y, position_j_y);
+
+        e_b_x = _mm256_load_ps(desired_direction + j);
+        e_b_y = _mm256_load_ps(desired_direction + n + j);
+
+        vb = _mm256_load_ps(actual_speed + j);
+
+        delta_b = _mm256_mul_ps(vb, timestep_vec);
+
+        // compute norm r_ab
+        r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
+        r_ab_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
+
+        r_ab_me_x = _mm256_fmadd_ps(delta_b, e_b_x, r_ab_x);
+        r_ab_me_y = _mm256_fmadd_ps(delta_b, e_b_y, r_ab_y);
+
+        // compute norm r_ab_me
+        r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
+        r_ab_me_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
+
+        // sum up norms
+        norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
+
+        repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
+        repulsion_x = _mm256_fmadd_ps(r_ab_me_x, r_ab_me_norm, repulsion_x);
+
+        repulsion_y = _mm256_mul_ps(r_ab_y, r_ab_norm);
+        repulsion_y = _mm256_fmadd_ps(r_ab_me_y, r_ab_me_norm, repulsion_y);
+
+        delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
+        b = _mm256_rsqrt_ps(_mm256_fmsub_ps(norm_sum, norm_sum, delta_b_2));
+        b = _mm256_rcp_ps(b);
+        b = _mm256_mul_ps(b, half_vec);
+
+        exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
+        exp = exp_fast_vec_3(exp, one, exp_constant);
+
+        common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
+        common_factor = _mm256_div_ps(common_factor, b);
+        common_factor = _mm256_mul_ps(exp, common_factor);
+
+        repulsion_x = _mm256_mul_ps(repulsion_x, common_factor);
+        repulsion_y = _mm256_mul_ps(repulsion_y, common_factor);
+
+        // compute norm r_ab
+        repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
+        threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x, repulsion_x, repulsion_2_y));
+        threshold = _mm256_rcp_ps(threshold);
+
+        check_y = _mm256_mul_ps(e_a_y, repulsion_y);
+        check = _mm256_fmadd_ps(e_a_x, repulsion_x, check_y);
+
+        threshold = _mm256_mul_ps(threshold, projection_factor_vec);
+
+        mask = _mm256_cmp_ps(_mm256_mul_ps(check, minus1_vec), threshold, _CMP_GE_OQ);
+
+        w = _mm256_blendv_ps(influencer_vec, one, mask);
+
+        repulsion_x = _mm256_mul_ps(w, repulsion_x);
+        repulsion_y = _mm256_mul_ps(w, repulsion_y);
+
+        people_repulsion_x = _mm256_add_ps(people_repulsion_x, repulsion_x);
+        people_repulsion_y = _mm256_add_ps(people_repulsion_y, repulsion_y);
+      }
+      _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
+      _mm256_store_ps(people_repulsion_term + 8 * n + 8 * i, people_repulsion_y);
+    }
+  }
+
+  // lower triangle
+
+  for (int k = 1; k < n_eight; k++)
+  {
+    for (int i = k * 8; i < (k + 1) * 8; i++)
+    {
+      position_i_x = _mm256_broadcast_ss(position + i);
+      position_i_y = _mm256_broadcast_ss(position + n + i);
+      e_a_x = _mm256_broadcast_ss(desired_direction + i);
+      e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
+
+      __m256 people_repulsion_x = _mm256_load_ps(people_repulsion_term + 8 * i);
+      __m256 people_repulsion_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * i);
+
+      for (int j = 0; j < k * 8; j += 8)
+      {
+        position_j_x = _mm256_load_ps(position + j);
+        position_j_y = _mm256_load_ps(position + n + j);
+
+        r_ab_x = _mm256_sub_ps(position_i_x, position_j_x);
+        r_ab_y = _mm256_sub_ps(position_i_y, position_j_y);
+
+        e_b_x = _mm256_load_ps(desired_direction + j);
+        e_b_y = _mm256_load_ps(desired_direction + n + j);
+
+        vb = _mm256_load_ps(actual_speed + j);
+
+        delta_b = _mm256_mul_ps(vb, timestep_vec);
+
+        // compute norm r_ab
+        r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
+        r_ab_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
+
+        r_ab_me_x = _mm256_fmadd_ps(delta_b, e_b_x, r_ab_x);
+        r_ab_me_y = _mm256_fmadd_ps(delta_b, e_b_y, r_ab_y);
+
+        // compute norm r_ab_me
+        r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
+        r_ab_me_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
+
+        // sum up norms
+        norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
+
+        repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
+        repulsion_x = _mm256_fmadd_ps(r_ab_me_x, r_ab_me_norm, repulsion_x);
+
+        repulsion_y = _mm256_mul_ps(r_ab_y, r_ab_norm);
+        repulsion_y = _mm256_fmadd_ps(r_ab_me_y, r_ab_me_norm, repulsion_y);
+
+        delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
+        b = _mm256_rsqrt_ps(_mm256_fmsub_ps(norm_sum, norm_sum, delta_b_2));
+        b = _mm256_rcp_ps(b);
+        b = _mm256_mul_ps(b, half_vec);
+
+        exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
+        exp = exp_fast_vec_3(exp, one, exp_constant);
+
+        common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
+        common_factor = _mm256_div_ps(common_factor, b);
+        common_factor = _mm256_mul_ps(exp, common_factor);
+
+        repulsion_x = _mm256_mul_ps(repulsion_x, common_factor);
+        repulsion_y = _mm256_mul_ps(repulsion_y, common_factor);
+
+        // compute norm r_ab
+        repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
+        threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x, repulsion_x, repulsion_2_y));
+        threshold = _mm256_rcp_ps(threshold);
+
+        check_y = _mm256_mul_ps(e_a_y, repulsion_y);
+        check = _mm256_fmadd_ps(e_a_x, repulsion_x, check_y);
+
+        threshold = _mm256_mul_ps(threshold, projection_factor_vec);
+
+        mask = _mm256_cmp_ps(_mm256_mul_ps(check, minus1_vec), threshold, _CMP_GE_OQ);
+
+        w = _mm256_blendv_ps(influencer_vec, one, mask);
+
+        repulsion_x = _mm256_mul_ps(w, repulsion_x);
+        repulsion_y = _mm256_mul_ps(w, repulsion_y);
+
+        people_repulsion_x = _mm256_add_ps(people_repulsion_x, repulsion_x);
+        people_repulsion_y = _mm256_add_ps(people_repulsion_y, repulsion_y);
+      }
+      _mm256_store_ps(people_repulsion_term + 8 * i, people_repulsion_x);
+      _mm256_store_ps(people_repulsion_term + 8 * n + 8 * i, people_repulsion_y);
+    }
+  }
+  /*
   for (int i = 0; i < n; i++)
   {
     position_i_x = _mm256_broadcast_ss(position + i);
@@ -330,7 +627,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
 
       // compute norm r_ab
       repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
-      threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x,repulsion_x, repulsion_2_y));
+      threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x, repulsion_x, repulsion_2_y));
       threshold = _mm256_rcp_ps(threshold);
 
       check_y = _mm256_mul_ps(e_a_y, repulsion_y);
@@ -444,10 +741,9 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
 
   __m256 minus1 = _mm256_set1_ps(-1);
 
-  __m256 r_vec_inv = _mm256_set1_ps(1/R);
-  __m256 minus_r_vec_inv = _mm256_set1_ps(-1/R);
-  __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B/R);
-
+  __m256 r_vec_inv = _mm256_set1_ps(1 / R);
+  __m256 minus_r_vec_inv = _mm256_set1_ps(-1 / R);
+  __m256 u_alpha_b_vec = _mm256_set1_ps(U_ALPHA_B / R);
 
   __m256 exp_constant = _mm256_set1_ps(0.00006103515); // 1 / 16384
 
@@ -557,28 +853,8 @@ void compute_social_force_vectorize_3(float *acceleration_term, float *people_re
   __m256 row_add6_y;
   __m256 row_add7_y;
 
-
   for (int p = 0; p < n - 7; p += 8)
   {
-
-    row_add0_x = _mm256_set1_ps(0);
-    row_add1_x = _mm256_set1_ps(0);
-    row_add2_x = _mm256_set1_ps(0);
-    row_add3_x = _mm256_set1_ps(0);
-    row_add4_x = _mm256_set1_ps(0);
-    row_add5_x = _mm256_set1_ps(0);
-    row_add6_x = _mm256_set1_ps(0);
-    row_add7_x = _mm256_set1_ps(0);
-
-    row_add0_y = _mm256_set1_ps(0);
-    row_add1_y = _mm256_set1_ps(0);
-    row_add2_y = _mm256_set1_ps(0);
-    row_add3_y = _mm256_set1_ps(0);
-    row_add4_y = _mm256_set1_ps(0);
-    row_add5_y = _mm256_set1_ps(0);
-    row_add6_y = _mm256_set1_ps(0);
-    row_add7_y = _mm256_set1_ps(0);
-
     social_force_x = _mm256_load_ps(acceleration_term + p);
     social_force_y = _mm256_load_ps(acceleration_term + n + p);
 
@@ -588,18 +864,14 @@ void compute_social_force_vectorize_3(float *acceleration_term, float *people_re
     social_force_y = _mm256_add_ps(social_force_y, border0_y);
     social_force_y = _mm256_add_ps(social_force_y, border1_y);
 
-    // add repulsive terms toward other people
-    for (int beta = 0; beta < n - 7; beta += 8)
-    {
-      row_add0_x = _mm256_add_ps(row_add0_x, _mm256_load_ps(people_repulsion_term + p * n + beta));
-      row_add1_x = _mm256_add_ps(row_add1_x, _mm256_load_ps(people_repulsion_term + (p + 1) * n + beta));
-      row_add2_x = _mm256_add_ps(row_add2_x, _mm256_load_ps(people_repulsion_term + (p + 2) * n + beta));
-      row_add3_x = _mm256_add_ps(row_add3_x, _mm256_load_ps(people_repulsion_term + (p + 3) * n + beta));
-      row_add4_x = _mm256_add_ps(row_add4_x, _mm256_load_ps(people_repulsion_term + (p + 4) * n + beta));
-      row_add5_x = _mm256_add_ps(row_add5_x, _mm256_load_ps(people_repulsion_term + (p + 5) * n + beta));
-      row_add6_x = _mm256_add_ps(row_add6_x, _mm256_load_ps(people_repulsion_term + (p + 6) * n + beta));
-      row_add7_x = _mm256_add_ps(row_add7_x, _mm256_load_ps(people_repulsion_term + (p + 7) * n + beta));
-    }
+    row_add0_x = _mm256_load_ps(people_repulsion_term + 8 * p);
+    row_add1_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 1));
+    row_add2_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 2));
+    row_add3_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 3));
+    row_add4_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 4));
+    row_add5_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 5));
+    row_add6_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 6));
+    row_add7_x = _mm256_load_ps(people_repulsion_term + 8 * (p + 7));
 
     row_add0_x = _mm256_hadd_ps(row_add0_x, _mm256_permute2f128_ps(row_add0_x, row_add0_x, 3));
     row_add1_x = _mm256_hadd_ps(row_add1_x, _mm256_permute2f128_ps(row_add1_x, row_add1_x, 3));
@@ -636,23 +908,19 @@ void compute_social_force_vectorize_3(float *acceleration_term, float *people_re
     unpacked = _mm256_blend_ps(unpacked, row_add4_x, 0b00010000);
     unpacked = _mm256_blend_ps(unpacked, row_add5_x, 0b00100000);
     unpacked = _mm256_blend_ps(unpacked, row_add6_x, 0b01000000);
-    unpacked = _mm256_blend_ps(unpacked, row_add7_x, 0b10000000); 
+    unpacked = _mm256_blend_ps(unpacked, row_add7_x, 0b10000000);
 
     social_force_x = _mm256_add_ps(unpacked, social_force_x);
     _mm256_store_ps(social_force + p, social_force_x);
 
-    // add repulsive terms toward other people
-    for (int beta = 0; beta < n - 7; beta += 8)
-    {
-      row_add0_y = _mm256_add_ps(row_add0_y, _mm256_load_ps(people_repulsion_term + n * n + p * n + beta));
-      row_add1_y = _mm256_add_ps(row_add1_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 1) * n + beta));
-      row_add2_y = _mm256_add_ps(row_add2_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 2) * n + beta));
-      row_add3_y = _mm256_add_ps(row_add3_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 3) * n + beta));
-      row_add4_y = _mm256_add_ps(row_add4_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 4) * n + beta));
-      row_add5_y = _mm256_add_ps(row_add5_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 5) * n + beta));
-      row_add6_y = _mm256_add_ps(row_add6_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 6) * n + beta));
-      row_add7_y = _mm256_add_ps(row_add7_y, _mm256_load_ps(people_repulsion_term + n * n + (p + 7) * n + beta));
-    }
+    row_add0_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * p);
+    row_add1_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 1));
+    row_add2_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 2));
+    row_add3_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 3));
+    row_add4_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 4));
+    row_add5_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 5));
+    row_add6_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 6));
+    row_add7_y = _mm256_load_ps(people_repulsion_term + 8 * n + 8 * (p + 7));
 
     row_add0_y = _mm256_hadd_ps(row_add0_y, _mm256_permute2f128_ps(row_add0_y, row_add0_y, 3));
     row_add1_y = _mm256_hadd_ps(row_add1_y, _mm256_permute2f128_ps(row_add1_y, row_add1_y, 3));
@@ -689,7 +957,7 @@ void compute_social_force_vectorize_3(float *acceleration_term, float *people_re
     unpacked = _mm256_blend_ps(unpacked, row_add4_y, 0b00010000);
     unpacked = _mm256_blend_ps(unpacked, row_add5_y, 0b00100000);
     unpacked = _mm256_blend_ps(unpacked, row_add6_y, 0b01000000);
-    unpacked = _mm256_blend_ps(unpacked, row_add7_y, 0b10000000); 
+    unpacked = _mm256_blend_ps(unpacked, row_add7_y, 0b10000000);
 
     social_force_y = _mm256_add_ps(unpacked, social_force_y);
 
@@ -793,7 +1061,7 @@ void update_position_vectorize_3(float *position, float *desired_direction, floa
 
     // norm
     prefered_velocity_2_x = _mm256_mul_ps(prefered_velocity_x, prefered_velocity_x);
-    prefered_velocity_norm_inv = _mm256_rsqrt_ps(_mm256_fmadd_ps(prefered_velocity_y,prefered_velocity_y, prefered_velocity_2_x));
+    prefered_velocity_norm_inv = _mm256_rsqrt_ps(_mm256_fmadd_ps(prefered_velocity_y, prefered_velocity_y, prefered_velocity_2_x));
     prefered_velocity_norm = _mm256_rcp_ps(prefered_velocity_norm_inv);
 
     max_speed = _mm256_load_ps(desired_max_speed + i);
@@ -873,6 +1141,7 @@ void simulation_basic_vectorize_3(int number_of_people, int n_timesteps, float *
     update_border_repulsion_term_vectorize_3(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
     compute_social_force_vectorize_3(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position_vectorize_3(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
+
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
   }
 

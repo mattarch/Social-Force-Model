@@ -262,14 +262,14 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
   __m256d w;
   __m256d mask;
 
-  __m256d timestep_vec = _mm256_set1_pd(TIMESTEP);
-  __m256d sigma_vec = _mm256_set1_pd(SIGMA);
+  __m256d timestep_vec = _mm256_set1_pd(-TIMESTEP);
+  __m256d minus_sigma_inv_vec = _mm256_set1_pd(-1.0/SIGMA);
   __m256d div_factor_vec = _mm256_set1_pd(DIV_FACTOR);
   __m256d projection_factor_vec = _mm256_set1_pd(PROJECTION_FACTOR);
   __m256d influencer_vec = _mm256_set1_pd(INFLUENCE);
 
   __m256d one = _mm256_set1_pd(1);
-  __m256d two_vec = _mm256_set1_pd(2);
+  __m256d half_vec = _mm256_set1_pd(0.5);
   __m256d minus1_vec = _mm256_set1_pd(-1);
   __m256d eps = _mm256_set1_pd(1e-12);
   __m256d exp_constant = _mm256_set1_pd(0.00006103515); // 1 / 16384
@@ -298,32 +298,33 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
 
       // compute norm r_ab
       r_ab_2_x = _mm256_mul_pd(r_ab_x, r_ab_x);
-      r_ab_2_y = _mm256_mul_pd(r_ab_y, r_ab_y);
-      r_ab_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_2_x, r_ab_2_y));
+      r_ab_norm = _mm256_sqrt_pd(_mm256_fmadd_pd(r_ab_y, r_ab_y, r_ab_2_x));
 
-      r_ab_me_x = _mm256_sub_pd(r_ab_x, _mm256_mul_pd(delta_b, e_b_x));
-      r_ab_me_y = _mm256_sub_pd(r_ab_y, _mm256_mul_pd(delta_b, e_b_y));
+      r_ab_me_x = _mm256_fmadd_pd(delta_b, e_b_x, r_ab_x);
+      r_ab_me_y = _mm256_fmadd_pd(delta_b, e_b_y, r_ab_y);
 
       // compute norm r_ab_me
       r_ab_me_2_x = _mm256_mul_pd(r_ab_me_x, r_ab_me_x);
-      r_ab_me_2_y = _mm256_mul_pd(r_ab_me_y, r_ab_me_y);
-      r_ab_me_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_me_2_x, r_ab_me_2_y));
+      r_ab_me_norm = _mm256_sqrt_pd(_mm256_fmadd_pd(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
 
+      // sum up norms
       norm_sum = _mm256_add_pd(r_ab_norm, r_ab_me_norm);
 
-      repulsion_x = _mm256_div_pd(r_ab_x, r_ab_norm);
-      repulsion_x = _mm256_add_pd(repulsion_x, _mm256_div_pd(r_ab_me_x, r_ab_me_norm));
+      // invert norm to save divs
+      r_ab_norm = _mm256_div_pd(one, r_ab_norm);
+      r_ab_me_norm = _mm256_div_pd(one, r_ab_me_norm);
 
-      repulsion_y = _mm256_div_pd(r_ab_y, r_ab_norm);
-      repulsion_y = _mm256_add_pd(repulsion_y, _mm256_div_pd(r_ab_me_y, r_ab_me_norm));
+      repulsion_x = _mm256_mul_pd(r_ab_x, r_ab_norm);
+      repulsion_x = _mm256_fmadd_pd(r_ab_me_x, r_ab_me_norm, repulsion_x);
 
-      norm_sum_2 = _mm256_mul_pd(norm_sum, norm_sum);
+      repulsion_y = _mm256_mul_pd(r_ab_y, r_ab_norm);
+      repulsion_y = _mm256_fmadd_pd(r_ab_me_y, r_ab_me_norm, repulsion_y);
+
       delta_b_2 = _mm256_mul_pd(delta_b, delta_b);
-      b = _mm256_sqrt_pd(_mm256_sub_pd(norm_sum_2, delta_b_2));
-      b = _mm256_div_pd(b, two_vec);
+      b = _mm256_sqrt_pd(_mm256_fmsub_pd(norm_sum, norm_sum, delta_b_2));
+      b = _mm256_mul_pd(b, half_vec);
 
-      exp = _mm256_div_pd(b, sigma_vec);
-      exp = _mm256_mul_pd(exp, minus1_vec);
+      exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
       exp = exp_fast_vec_2_double(exp, one, exp_constant);
 
       common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
@@ -334,14 +335,11 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
       repulsion_y = _mm256_mul_pd(repulsion_y, common_factor);
 
       // compute norm r_ab
-      repulsion_2_x = _mm256_mul_pd(repulsion_x, repulsion_x);
       repulsion_2_y = _mm256_mul_pd(repulsion_y, repulsion_y);
-      threshold = _mm256_sqrt_pd(_mm256_add_pd(repulsion_2_x, repulsion_2_y));
+      threshold = _mm256_sqrt_pd(_mm256_fmadd_pd(repulsion_x,repulsion_x, repulsion_2_y));
 
-      check_x = _mm256_mul_pd(e_a_x, repulsion_x);
       check_y = _mm256_mul_pd(e_a_y, repulsion_y);
-
-      check = _mm256_add_pd(check_x, check_y);
+      check = _mm256_fmadd_pd(e_a_x, repulsion_x, check_y);
 
       threshold = _mm256_mul_pd(threshold, projection_factor_vec);
 
@@ -362,6 +360,7 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
     people_repulsion_term[i * n + i] = 0;
     people_repulsion_term[n * n + i * n + i] = 0;
   }
+
   /*
   for (int i = 0; i < n; i++)
   {
