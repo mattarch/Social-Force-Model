@@ -1,4 +1,8 @@
-
+/*
+  Code of the ASL project.
+  Topic: social force model
+  Group: Simon Zurfluh, Matthias Matti, Tommaso Pegolotti, Lino Telschow
+*/
 
 #include <math.h>
 #include <stdlib.h>

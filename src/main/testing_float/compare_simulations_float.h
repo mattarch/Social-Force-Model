@@ -1,3 +1,9 @@
+/*
+  Code of the ASL project.
+  Topic: social force model
+  Group: Simon Zurfluh, Matthias Matti, Tommaso Pegolotti, Lino Telschow
+*/
+
 #ifndef COMPARE_SIMULATIONS_FLOAT_H
 #define COMPARE_SIMULATIONS_FLOAT_H
 
