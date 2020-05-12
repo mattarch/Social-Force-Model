@@ -7,7 +7,6 @@
 #ifndef VECTORIZE_4_H_ /* Include guard */
 #define VECTORIZE_4_H_
 
-extern char fiename_global[80];
 #include <immintrin.h>
 
 __m256 exp_fast_vec_4(__m256 x, __m256 one, __m256 exp_constant);

@@ -482,8 +482,8 @@ void update_border_repulsion_term_vectorize_1(float *position, float *borders, f
 
       _mm256_store_ps(border_repulsion_term + (n + j * 2 * n + i), common_factor);
 
-    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
-  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+    } 
+  }   
 
   /*
   for (int j = 0; j < n_borders; j++)

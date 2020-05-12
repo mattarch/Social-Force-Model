@@ -176,7 +176,7 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
 
 void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)
 {
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE,compute_operational_intensity_0, "simplified_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE,compute_operational_intensity_0, "simplified_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_1_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_1_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_2_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_4_double");
@@ -419,7 +419,7 @@ void run_bench_float(sim_t sim)
     float *acceleration_term = (float *)aligned_malloc(number_of_people * 2 * sizeof(float), 32);
     set_zero(acceleration_term, number_of_people * 2);
     float *people_repulsion_term;
-    if (contains_substring(name, "simplified") || contains_substring(name, "vectorize_2") || contains_substring(name, "vectorize_3"))
+    if (contains_substring(name, "simplified") || contains_substring(name, "vectorize_1") || contains_substring(name, "vectorize_2"))
     {
         people_repulsion_term = (float *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(float), 32);
         set_zero(people_repulsion_term, number_of_people * number_of_people * 2);
@@ -679,6 +679,7 @@ long long unsigned compute_simplified_flops(int number_of_people)
     c = div_cost;
     d = sqrt_cost;
     fe = fast_exp_cost;
+    
     long long unsigned flops = n * (3 * a + 2 * b + 2 * c + d) +
                                n * (2 * a + 4 * b) +
                                (n * n - n) * (12 * a + 20 * b + 7 * c + 4 * d + fe) +

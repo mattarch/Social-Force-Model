@@ -570,92 +570,6 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
   /*
   for (int i = 0; i < n; i++)
   {
-    position_i_x = _mm256_broadcast_ss(position + i);
-    position_i_y = _mm256_broadcast_ss(position + n + i);
-    e_a_x = _mm256_broadcast_ss(desired_direction + i);
-    e_a_y = _mm256_broadcast_ss(desired_direction + n + i);
-
-    for (int j = 0; j < n - 7; j += 8)
-    {
-      position_j_x = _mm256_load_ps(position + j);
-      position_j_y = _mm256_load_ps(position + n + j);
-
-      r_ab_x = _mm256_sub_ps(position_i_x, position_j_x);
-      r_ab_y = _mm256_sub_ps(position_i_y, position_j_y);
-
-      e_b_x = _mm256_load_ps(desired_direction + j);
-      e_b_y = _mm256_load_ps(desired_direction + n + j);
-
-      vb = _mm256_load_ps(actual_speed + j);
-
-      delta_b = _mm256_mul_ps(vb, timestep_vec);
-
-      // compute norm r_ab
-      r_ab_2_x = _mm256_mul_ps(r_ab_x, r_ab_x);
-      r_ab_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_y, r_ab_y, r_ab_2_x));
-
-      r_ab_me_x = _mm256_fmadd_ps(delta_b, e_b_x, r_ab_x);
-      r_ab_me_y = _mm256_fmadd_ps(delta_b, e_b_y, r_ab_y);
-
-      // compute norm r_ab_me
-      r_ab_me_2_x = _mm256_mul_ps(r_ab_me_x, r_ab_me_x);
-      r_ab_me_norm = _mm256_rsqrt_ps(_mm256_fmadd_ps(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
-
-      // sum up norms
-      norm_sum = _mm256_add_ps(_mm256_rcp_ps(r_ab_norm), _mm256_rcp_ps(r_ab_me_norm));
-
-      repulsion_x = _mm256_mul_ps(r_ab_x, r_ab_norm);
-      repulsion_x = _mm256_fmadd_ps(r_ab_me_x, r_ab_me_norm, repulsion_x);
-
-      repulsion_y = _mm256_mul_ps(r_ab_y, r_ab_norm);
-      repulsion_y = _mm256_fmadd_ps(r_ab_me_y, r_ab_me_norm, repulsion_y);
-
-      delta_b_2 = _mm256_mul_ps(delta_b, delta_b);
-      b = _mm256_rsqrt_ps(_mm256_fmsub_ps(norm_sum, norm_sum, delta_b_2));
-      b = _mm256_rcp_ps(b);
-      b = _mm256_mul_ps(b, half_vec);
-
-      exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
-      exp = exp_fast_vec_3(exp, one, exp_constant);
-
-      common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
-      common_factor = _mm256_div_ps(common_factor, b);
-      common_factor = _mm256_mul_ps(exp, common_factor);
-
-      repulsion_x = _mm256_mul_ps(repulsion_x, common_factor);
-      repulsion_y = _mm256_mul_ps(repulsion_y, common_factor);
-
-      // compute norm r_ab
-      repulsion_2_y = _mm256_mul_ps(repulsion_y, repulsion_y);
-      threshold = _mm256_rsqrt_ps(_mm256_fmadd_ps(repulsion_x, repulsion_x, repulsion_2_y));
-      threshold = _mm256_rcp_ps(threshold);
-
-      check_y = _mm256_mul_ps(e_a_y, repulsion_y);
-      check = _mm256_fmadd_ps(e_a_x, repulsion_x, check_y);
-
-      threshold = _mm256_mul_ps(threshold, projection_factor_vec);
-
-      mask = _mm256_cmp_ps(_mm256_mul_ps(check, minus1_vec), threshold, _CMP_GE_OQ);
-
-      w = _mm256_blendv_ps(influencer_vec, one, mask);
-
-      repulsion_x = _mm256_mul_ps(w, repulsion_x);
-      repulsion_y = _mm256_mul_ps(w, repulsion_y);
-
-      _mm256_store_ps(people_repulsion_term + i * n + j, repulsion_x);
-      _mm256_store_ps(people_repulsion_term + n * n + i * n + j, repulsion_y);
-    }
-  }
-
-  for (int i = 0; i < n; i++)
-  {
-    people_repulsion_term[i * n + i] = 0;
-    people_repulsion_term[n * n + i * n + i] = 0;
-  }
-
-  /*
-  for (int i = 0; i < n; i++)
-  {
     for (int j = 0; j < n; j++)
     {
       if (i == j)
@@ -772,8 +686,8 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
 
       _mm256_store_ps(border_repulsion_term + (n + j * 2 * n + i), common_factor);
 
-    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
-  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+    }
+  }   
 
   /*
   for (int j = 0; j < n_borders; j++)
@@ -799,8 +713,8 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
       border_repulsion_term[IndexX_border(i, j, n)] = repulsion_x;
       border_repulsion_term[IndexY_border(i, j, n)] = repulsion_y;
 
-    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
-  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+    } 
+  }   
   */
 }
 

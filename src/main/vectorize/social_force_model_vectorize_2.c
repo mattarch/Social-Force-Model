@@ -476,8 +476,8 @@ void update_border_repulsion_term_vectorize_2(float *position, float *borders, f
 
       _mm256_store_ps(border_repulsion_term + (n + j * 2 * n + i), common_factor);
 
-    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
-  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+    } 
+  }   
 
   /*
   for (int j = 0; j < n_borders; j++)
@@ -502,9 +502,9 @@ void update_border_repulsion_term_vectorize_2(float *position, float *borders, f
       //       | xb0 | yb0 | xb1 | yb1 |
       border_repulsion_term[IndexX_border(i, j, n)] = repulsion_x;
       border_repulsion_term[IndexY_border(i, j, n)] = repulsion_y;
-
-    } // (1 add, 3 mult, 3 div, 1 exp) * n_borders
-  }   // (1 add, 3 mult, 3 div, 1 exp) * n_borders * n
+      
+    } 
+  }   
   */
 }
 
