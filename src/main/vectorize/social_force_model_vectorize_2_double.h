@@ -9,7 +9,7 @@
 
 extern char fiename_global[80];
 
-#include "immintrin.h"
+#include <immintrin.h>
 
 __m256d exp_fast_vec_2_double(__m256d x, __m256d one, __m256d exp_constant);
 void update_desired_direction_vectorize_2_double(double *position, double *final_destination, double *desired_direction, int n);

@@ -8,6 +8,7 @@
 #define VECTORIZE_3_H_
 
 extern char fiename_global[80];
+#include <immintrin.h>
 
 __m256 exp_fast_vec_3(__m256 x, __m256 one, __m256 exp_constant);
 void update_desired_direction_vectorize_3(float *position, float *final_destination, float *desired_direction, int n);

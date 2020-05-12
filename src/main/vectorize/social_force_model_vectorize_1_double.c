@@ -9,13 +9,13 @@
 #include <math.h>
 #include <immintrin.h>
 
-#include "social_force_model_vectorize_3_double.h"
+#include "social_force_model_vectorize_1_double.h"
 #include "../social_force.h"
 #include "../utility.h"
 
 extern char filename_global[80];
 
-__m256d exp_fast_vec_3_double(__m256d x, __m256d one, __m256d exp_constant)
+__m256d exp_fast_vec_1_double(__m256d x, __m256d one, __m256d exp_constant)
 {
   x = _mm256_fmadd_pd(x, exp_constant, one);
   x = _mm256_mul_pd(x, x);
@@ -53,7 +53,7 @@ __m256d exp_fast_vec_3_double(__m256d x, __m256d one, __m256d exp_constant)
                                 towards the corresponging final_destination
                      n: number of people
 */
-void update_desired_direction_vectorize_3_double(double *position, double *final_destination, double *desired_direction, int n)
+void update_desired_direction_vectorize_1_double(double *position, double *final_destination, double *desired_direction, int n)
 {
   __m256d current_x;
   __m256d current_y;
@@ -80,8 +80,8 @@ void update_desired_direction_vectorize_3_double(double *position, double *final
     target_y = _mm256_load_pd(final_destination + n + i);
 
     // compute differences
-    delta_x = target_x - current_x;
-    delta_y = target_y - current_y;
+    delta_x = _mm256_sub_pd(target_x, current_x);
+    delta_y = _mm256_sub_pd(target_y, current_y);
 
     // compute norm
     delta_x_2 = _mm256_mul_pd(delta_x, delta_x); // square each entry
@@ -141,7 +141,7 @@ void update_desired_direction_vectorize_3_double(double *position, double *final
                                 actual_velocity = actual_speed * desired_direction
                      n: number of people
 */
-void update_acceleration_term_vectorize_3_double(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n)
+void update_acceleration_term_vectorize_1_double(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n)
 {
   //!ATTENTION: function compute_actual_velocity and update_desired_direction have to be called befor this function in this order
 
@@ -214,7 +214,7 @@ void update_acceleration_term_vectorize_3_double(double *desired_direction, doub
         people_repulsion_term: (2n,2n) : matrix containing the force of repulsion between person i and j
                             n: number of people
 */
-void update_people_repulsion_term_vectorize_3_double(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
+void update_people_repulsion_term_vectorize_1_double(double *position, double *desired_direction, double *actual_speed, double *people_repulsion_term, int n)
 {
   __m256d position_i_x;
   __m256d position_i_y;
@@ -262,14 +262,14 @@ void update_people_repulsion_term_vectorize_3_double(double *position, double *d
   __m256d w;
   __m256d mask;
 
-  __m256d timestep_vec = _mm256_set1_pd(-TIMESTEP);
-  __m256d minus_sigma_inv_vec = _mm256_set1_pd(-1.0/SIGMA);
+  __m256d timestep_vec = _mm256_set1_pd(TIMESTEP);
+  __m256d sigma_vec = _mm256_set1_pd(SIGMA);
   __m256d div_factor_vec = _mm256_set1_pd(DIV_FACTOR);
   __m256d projection_factor_vec = _mm256_set1_pd(PROJECTION_FACTOR);
   __m256d influencer_vec = _mm256_set1_pd(INFLUENCE);
 
   __m256d one = _mm256_set1_pd(1);
-  __m256d half_vec = _mm256_set1_pd(0.5);
+  __m256d two_vec = _mm256_set1_pd(2);
   __m256d minus1_vec = _mm256_set1_pd(-1);
   __m256d eps = _mm256_set1_pd(1e-12);
   __m256d exp_constant = _mm256_set1_pd(0.00006103515); // 1 / 16384
@@ -298,34 +298,33 @@ void update_people_repulsion_term_vectorize_3_double(double *position, double *d
 
       // compute norm r_ab
       r_ab_2_x = _mm256_mul_pd(r_ab_x, r_ab_x);
-      r_ab_norm = _mm256_sqrt_pd(_mm256_fmadd_pd(r_ab_y, r_ab_y, r_ab_2_x));
+      r_ab_2_y = _mm256_mul_pd(r_ab_y, r_ab_y);
+      r_ab_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_2_x, r_ab_2_y));
 
-      r_ab_me_x = _mm256_fmadd_pd(delta_b, e_b_x, r_ab_x);
-      r_ab_me_y = _mm256_fmadd_pd(delta_b, e_b_y, r_ab_y);
+      r_ab_me_x = _mm256_sub_pd(r_ab_x, _mm256_mul_pd(delta_b, e_b_x));
+      r_ab_me_y = _mm256_sub_pd(r_ab_y, _mm256_mul_pd(delta_b, e_b_y));
 
       // compute norm r_ab_me
       r_ab_me_2_x = _mm256_mul_pd(r_ab_me_x, r_ab_me_x);
-      r_ab_me_norm = _mm256_sqrt_pd(_mm256_fmadd_pd(r_ab_me_y, r_ab_me_y, r_ab_me_2_x));
+      r_ab_me_2_y = _mm256_mul_pd(r_ab_me_y, r_ab_me_y);
+      r_ab_me_norm = _mm256_sqrt_pd(_mm256_add_pd(r_ab_me_2_x, r_ab_me_2_y));
 
-      // sum up norms
       norm_sum = _mm256_add_pd(r_ab_norm, r_ab_me_norm);
 
-      // invert norm to save divs
-      r_ab_norm = _mm256_div_pd(one, r_ab_norm);
-      r_ab_me_norm = _mm256_div_pd(one, r_ab_me_norm);
+      repulsion_x = _mm256_div_pd(r_ab_x, r_ab_norm);
+      repulsion_x = _mm256_add_pd(repulsion_x, _mm256_div_pd(r_ab_me_x, r_ab_me_norm));
 
-      repulsion_x = _mm256_mul_pd(r_ab_x, r_ab_norm);
-      repulsion_x = _mm256_fmadd_pd(r_ab_me_x, r_ab_me_norm, repulsion_x);
+      repulsion_y = _mm256_div_pd(r_ab_y, r_ab_norm);
+      repulsion_y = _mm256_add_pd(repulsion_y, _mm256_div_pd(r_ab_me_y, r_ab_me_norm));
 
-      repulsion_y = _mm256_mul_pd(r_ab_y, r_ab_norm);
-      repulsion_y = _mm256_fmadd_pd(r_ab_me_y, r_ab_me_norm, repulsion_y);
-
+      norm_sum_2 = _mm256_mul_pd(norm_sum, norm_sum);
       delta_b_2 = _mm256_mul_pd(delta_b, delta_b);
-      b = _mm256_sqrt_pd(_mm256_fmsub_pd(norm_sum, norm_sum, delta_b_2));
-      b = _mm256_mul_pd(b, half_vec);
+      b = _mm256_sqrt_pd(_mm256_sub_pd(norm_sum_2, delta_b_2));
+      b = _mm256_div_pd(b, two_vec);
 
-      exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-      exp = exp_fast_vec_3_double(exp, one, exp_constant);
+      exp = _mm256_div_pd(b, sigma_vec);
+      exp = _mm256_mul_pd(exp, minus1_vec);
+      exp = exp_fast_vec_1_double(exp, one, exp_constant);
 
       common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
       common_factor = _mm256_div_pd(common_factor, b);
@@ -335,11 +334,14 @@ void update_people_repulsion_term_vectorize_3_double(double *position, double *d
       repulsion_y = _mm256_mul_pd(repulsion_y, common_factor);
 
       // compute norm r_ab
+      repulsion_2_x = _mm256_mul_pd(repulsion_x, repulsion_x);
       repulsion_2_y = _mm256_mul_pd(repulsion_y, repulsion_y);
-      threshold = _mm256_sqrt_pd(_mm256_fmadd_pd(repulsion_x,repulsion_x, repulsion_2_y));
+      threshold = _mm256_sqrt_pd(_mm256_add_pd(repulsion_2_x, repulsion_2_y));
 
+      check_x = _mm256_mul_pd(e_a_x, repulsion_x);
       check_y = _mm256_mul_pd(e_a_y, repulsion_y);
-      check = _mm256_fmadd_pd(e_a_x, repulsion_x, check_y);
+
+      check = _mm256_add_pd(check_x, check_y);
 
       threshold = _mm256_mul_pd(threshold, projection_factor_vec);
 
@@ -360,7 +362,6 @@ void update_people_repulsion_term_vectorize_3_double(double *position, double *d
     people_repulsion_term[i * n + i] = 0;
     people_repulsion_term[n * n + i * n + i] = 0;
   }
-
   /*
   for (int i = 0; i < n; i++)
   {
@@ -427,7 +428,7 @@ void update_people_repulsion_term_vectorize_3_double(double *position, double *d
                         n: number of people
                 n_borders: number of borders
 */
-void update_border_repulsion_term_vectorize_3_double(double *position, double *borders, double *border_repulsion_term, int n, int n_borders)
+void update_border_repulsion_term_vectorize_1_double(double *position, double *borders, double *border_repulsion_term, int n, int n_borders)
 {
 
   __m256d border;
@@ -471,7 +472,7 @@ void update_border_repulsion_term_vectorize_3_double(double *position, double *b
 
       exp = _mm256_div_pd(r_aB_norm, r_vec);
       exp = _mm256_mul_pd(exp, minus1);
-      exp = exp_fast_vec_3_double(exp, one, exp_constant);
+      exp = exp_fast_vec_1_double(exp, one, exp_constant);
 
       common_factor = _mm256_div_pd(u_alpha_b_vec, r_vec);
       common_factor = _mm256_div_pd(common_factor, r_aB_norm);
@@ -527,7 +528,7 @@ void update_border_repulsion_term_vectorize_3_double(double *position, double *b
                              n: number of people
                      n_borders: number of borders
 */
-void compute_social_force_vectorize_3_double(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
+void compute_social_force_vectorize_1_double(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders)
 {
 
   __m256d social_force_x;
@@ -684,7 +685,7 @@ void compute_social_force_vectorize_3_double(double *acceleration_term, double *
                                      actual_velocity = actual_speed * desired_direction
                           n: number of people
 */
-void update_position_vectorize_3_double(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
+void update_position_vectorize_1_double(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n)
 {
 
   __m256d prefered_velocity_x;
@@ -790,7 +791,7 @@ void update_position_vectorize_3_double(double *position, double *desired_direct
   */
 }
 
-void simulation_basic_vectorize_3_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+void simulation_basic_vectorize_1_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
                                   double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
@@ -800,12 +801,12 @@ void simulation_basic_vectorize_3_double(int number_of_people, int n_timesteps, 
   for (int step = 0; step < n_timesteps; step++)
   {
     // update variables
-    update_desired_direction_vectorize_3_double(position, final_destination, desired_direction, number_of_people);
-    update_acceleration_term_vectorize_3_double(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
-    update_people_repulsion_term_vectorize_3_double(position, desired_direction, speed, people_repulsion_term, number_of_people);
-    update_border_repulsion_term_vectorize_3_double(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
-    compute_social_force_vectorize_3_double(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
-    update_position_vectorize_3_double(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
+    update_desired_direction_vectorize_1_double(position, final_destination, desired_direction, number_of_people);
+    update_acceleration_term_vectorize_1_double(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
+    update_people_repulsion_term_vectorize_1_double(position, desired_direction, speed, people_repulsion_term, number_of_people);
+    update_border_repulsion_term_vectorize_1_double(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
+    compute_social_force_vectorize_1_double(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
+    update_position_vectorize_1_double(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
     CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
   }
 

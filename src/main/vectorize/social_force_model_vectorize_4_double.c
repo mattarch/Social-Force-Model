@@ -9,13 +9,13 @@
 #include <math.h>
 #include <immintrin.h>
 
-#include "social_force_model_vectorize_5.h"
+#include "social_force_model_vectorize_4.h"
 #include "../social_force.h"
 #include "../utility.h"
 
 extern char filename_global[80];
 
-__m256d exp_fast_vec_5_double(__m256d x, __m256d one, __m256d exp_constant)
+__m256d exp_fast_vec_4_double(__m256d x, __m256d one, __m256d exp_constant)
 {
   x = _mm256_fmadd_pd(x, exp_constant, one);
   x = _mm256_mul_pd(x, x);
@@ -35,7 +35,7 @@ __m256d exp_fast_vec_5_double(__m256d x, __m256d one, __m256d exp_constant)
   return x;
 }
 
-void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+void simulation_basic_vectorize_4_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
                                          double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
@@ -196,7 +196,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
           b = _mm256_mul_pd(b, half_vec);
 
           exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-          exp = exp_fast_vec_5_double(exp, one, exp_constant);
+          exp = exp_fast_vec_4_double(exp, one, exp_constant);
 
           common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
           common_factor = _mm256_div_pd(common_factor, b);
@@ -300,7 +300,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
             b = _mm256_mul_pd(b, half_vec);
 
             exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-            exp = exp_fast_vec_5_double(exp, one, exp_constant);
+            exp = exp_fast_vec_4_double(exp, one, exp_constant);
 
             common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
             common_factor = _mm256_div_pd(common_factor, b);
@@ -387,7 +387,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
             b = _mm256_mul_pd(b, half_vec);
 
             exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-            exp = exp_fast_vec_5_double(exp, one, exp_constant);
+            exp = exp_fast_vec_4_double(exp, one, exp_constant);
 
             common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
             common_factor = _mm256_div_pd(common_factor, b);
@@ -456,7 +456,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
             b = _mm256_mul_pd(b, half_vec);
 
             exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-            exp = exp_fast_vec_5_double(exp, one, exp_constant);
+            exp = exp_fast_vec_4_double(exp, one, exp_constant);
 
             common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
             common_factor = _mm256_div_pd(common_factor, b);
@@ -542,7 +542,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
             b = _mm256_mul_pd(b, half_vec);
 
             exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-            exp = exp_fast_vec_5_double(exp, one, exp_constant);
+            exp = exp_fast_vec_4_double(exp, one, exp_constant);
 
             common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
             common_factor = _mm256_div_pd(common_factor, b);
@@ -727,7 +727,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
         r_aB_norm = _mm256_blendv_pd(r_aB_minus_y, r_aB_y, mask_y);
 
         exp = _mm256_mul_pd(r_aB_norm, minus_r_vec_inv);
-        exp = exp_fast_vec_5_double(exp, one, exp_constant);
+        exp = exp_fast_vec_4_double(exp, one, exp_constant);
 
         common_factor = _mm256_div_pd(u_alpha_b_vec, (r_aB_norm));
         common_factor = _mm256_mul_pd(exp, common_factor);
@@ -742,7 +742,7 @@ void simulation_basic_vectorize_5_double(int number_of_people, int n_timesteps, 
         r_aB_norm_1 = _mm256_blendv_pd(r_aB_minus_y_1, r_aB_y_1, mask_y_1);
 
         exp_1 = _mm256_mul_pd(r_aB_norm_1, minus_r_vec_inv);
-        exp_1 = exp_fast_vec_5_double(exp_1, one, exp_constant);
+        exp_1 = exp_fast_vec_4_double(exp_1, one, exp_constant);
 
         common_factor_1 = _mm256_div_pd(u_alpha_b_vec, (r_aB_norm_1));
         common_factor_1 = _mm256_mul_pd(exp_1, common_factor_1);
