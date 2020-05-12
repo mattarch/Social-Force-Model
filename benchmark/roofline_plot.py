@@ -25,6 +25,11 @@ flops_bound = MAX_FLOPS_PER_CYCLE * np.ones(SAMPLES)
 simd_double_bound = 4 * MAX_FLOPS_PER_CYCLE * np.ones(SAMPLES)
 simd_float_bound = 8 * MAX_FLOPS_PER_CYCLE * np.ones(SAMPLES)
 
+memory_bound_str = "y = "+str(BANDWIDTH)+" x"
+scalar_flops_bound_str = "y = "+str(MAX_FLOPS_PER_CYCLE)
+simd_double_flops_bound_str = "y = "+str(MAX_FLOPS_PER_CYCLE * 4)
+simd_float_flops_bound_str = "y = "+str(MAX_FLOPS_PER_CYCLE * 8)
+
 ################################################################
 ################################################################
 
@@ -111,9 +116,16 @@ for i in range(num_lines):
 plot_setup()
 
 plt.plot(x_samples, bandwidth_bound, '-', color='black')
-plt.plot(x_samples, flops_bound, '-', color='red')
-plt.plot(x_samples, simd_double_bound, '-', color='blue')
-plt.plot(x_samples, simd_float_bound, '-', color='green')
+plt.text(END_PLOT/4/BANDWIDTH*2,END_PLOT/4, memory_bound_str, weight='bold')
+
+plt.plot(x_samples, flops_bound, '-', color='black')
+plt.text(END_PLOT / 4, MAX_FLOPS_PER_CYCLE+1, scalar_flops_bound_str, weight='bold')
+
+plt.plot(x_samples, simd_double_bound, '-', color='black')
+plt.text(END_PLOT / 4, (MAX_FLOPS_PER_CYCLE*4)+2, simd_double_flops_bound_str, weight='bold')
+
+plt.plot(x_samples, simd_float_bound, '-', color='black')
+plt.text(END_PLOT / 4, (MAX_FLOPS_PER_CYCLE*8)+4, simd_float_flops_bound_str, weight='bold')
 
 for version in versions:
     points = myDict[version]
