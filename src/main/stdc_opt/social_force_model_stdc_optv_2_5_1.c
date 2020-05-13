@@ -12,8 +12,8 @@
 #include "../utility.h"
 
 void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination,
-                               double *borders, double *actual_velocity, double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term,
-                               double *social_force, double *desired_speed, double *desired_max_speed)
+                                 double *borders, double *actual_velocity, double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term,
+                                 double *social_force, double *desired_speed, double *desired_max_speed)
 {
   const double inv_sigma = 1 / SIGMA; // 1 div -> 1 flop
   const double cospsi = cos(PSI);
@@ -38,72 +38,72 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       // LOADS
       /************************************************/
       double sfx0 = social_force[IndexX(i)];
-      double sfy0 = social_force[IndexY(i,n)];
-      double sfx1 = social_force[IndexX(i +1)];
-      double sfy1 = social_force[IndexY(i +1,n)];
-      double sfx2 = social_force[IndexX(i +2)];
-      double sfy2 = social_force[IndexY(i +2,n)];
-      double sfx3 = social_force[IndexX(i +3)];
-      double sfy3 = social_force[IndexY(i +3,n)];
-      double sfx4 = social_force[IndexX(i +4)];
-      double sfy4 = social_force[IndexY(i +4,n)];
-      double sfx5 = social_force[IndexX(i +5)];
-      double sfy5 = social_force[IndexY(i +5,n)];
-      double sfx6 = social_force[IndexX(i +6)];
-      double sfy6 = social_force[IndexY(i +6,n)];
-      double sfx7 = social_force[IndexX(i +7)];
-      double sfy7 = social_force[IndexY(i +7,n)];
+      double sfy0 = social_force[IndexY(i, n)];
+      double sfx1 = social_force[IndexX(i + 1)];
+      double sfy1 = social_force[IndexY(i + 1, n)];
+      double sfx2 = social_force[IndexX(i + 2)];
+      double sfy2 = social_force[IndexY(i + 2, n)];
+      double sfx3 = social_force[IndexX(i + 3)];
+      double sfy3 = social_force[IndexY(i + 3, n)];
+      double sfx4 = social_force[IndexX(i + 4)];
+      double sfy4 = social_force[IndexY(i + 4, n)];
+      double sfx5 = social_force[IndexX(i + 5)];
+      double sfy5 = social_force[IndexY(i + 5, n)];
+      double sfx6 = social_force[IndexX(i + 6)];
+      double sfy6 = social_force[IndexY(i + 6, n)];
+      double sfx7 = social_force[IndexX(i + 7)];
+      double sfy7 = social_force[IndexY(i + 7, n)];
 
       double rxa0 = position[IndexX(i)];
-      double rya0 = position[IndexY(i,n)];
-      double rxa1 = position[IndexX(i +1)];
-      double rya1 = position[IndexY(i +1,n)];
-      double rxa2 = position[IndexX(i +2)];
-      double rya2 = position[IndexY(i +2,n)];
-      double rxa3 = position[IndexX(i +3)];
-      double rya3 = position[IndexY(i +3,n)];
-      double rxa4 = position[IndexX(i +4)];
-      double rya4 = position[IndexY(i +4,n)];
-      double rxa5 = position[IndexX(i +5)];
-      double rya5 = position[IndexY(i +5,n)];
-      double rxa6 = position[IndexX(i +6)];
-      double rya6 = position[IndexY(i +6,n)];
-      double rxa7 = position[IndexX(i +7)];
-      double rya7 = position[IndexY(i +7,n)];
+      double rya0 = position[IndexY(i, n)];
+      double rxa1 = position[IndexX(i + 1)];
+      double rya1 = position[IndexY(i + 1, n)];
+      double rxa2 = position[IndexX(i + 2)];
+      double rya2 = position[IndexY(i + 2, n)];
+      double rxa3 = position[IndexX(i + 3)];
+      double rya3 = position[IndexY(i + 3, n)];
+      double rxa4 = position[IndexX(i + 4)];
+      double rya4 = position[IndexY(i + 4, n)];
+      double rxa5 = position[IndexX(i + 5)];
+      double rya5 = position[IndexY(i + 5, n)];
+      double rxa6 = position[IndexX(i + 6)];
+      double rya6 = position[IndexY(i + 6, n)];
+      double rxa7 = position[IndexX(i + 7)];
+      double rya7 = position[IndexY(i + 7, n)];
 
       double exa0 = desired_direction[IndexX(i)];
-      double eya0 = desired_direction[IndexY(i,n)];
-      double exa1 = desired_direction[IndexX(i +1)];
-      double eya1 = desired_direction[IndexY(i +1,n)];
-      double exa2 = desired_direction[IndexX(i +2)];
-      double eya2 = desired_direction[IndexY(i +2,n)];
-      double exa3 = desired_direction[IndexX(i +3)];
-      double eya3 = desired_direction[IndexY(i +3,n)];
-      double exa4 = desired_direction[IndexX(i +4)];
-      double eya4 = desired_direction[IndexY(i +4,n)];
-      double exa5 = desired_direction[IndexX(i +5)];
-      double eya5 = desired_direction[IndexY(i +5,n)];
-      double exa6 = desired_direction[IndexX(i +6)];
-      double eya6 = desired_direction[IndexY(i +6,n)];
-      double exa7 = desired_direction[IndexX(i +7)];
-      double eya7 = desired_direction[IndexY(i +7,n)];
+      double eya0 = desired_direction[IndexY(i, n)];
+      double exa1 = desired_direction[IndexX(i + 1)];
+      double eya1 = desired_direction[IndexY(i + 1, n)];
+      double exa2 = desired_direction[IndexX(i + 2)];
+      double eya2 = desired_direction[IndexY(i + 2, n)];
+      double exa3 = desired_direction[IndexX(i + 3)];
+      double eya3 = desired_direction[IndexY(i + 3, n)];
+      double exa4 = desired_direction[IndexX(i + 4)];
+      double eya4 = desired_direction[IndexY(i + 4, n)];
+      double exa5 = desired_direction[IndexX(i + 5)];
+      double eya5 = desired_direction[IndexY(i + 5, n)];
+      double exa6 = desired_direction[IndexX(i + 6)];
+      double eya6 = desired_direction[IndexY(i + 6, n)];
+      double exa7 = desired_direction[IndexX(i + 7)];
+      double eya7 = desired_direction[IndexY(i + 7, n)];
 
       double avx0 = actual_velocity[IndexX(i)];
-      double avy0 = actual_velocity[IndexY(i,n)];
-      double avx1 = actual_velocity[IndexX(i +1)];
-      double avy1 = actual_velocity[IndexY(i +1,n)];
-      double avx2 = actual_velocity[IndexX(i +2)];
-      double avy2 = actual_velocity[IndexY(i +2,n)];
-      double avx3 = actual_velocity[IndexX(i +3)];
-      double avy3 = actual_velocity[IndexY(i +3,n)];
-      double avx4 = actual_velocity[IndexX(i +4)];
-      double avy4 = actual_velocity[IndexY(i +4,n)];
-      double avx5 = actual_velocity[IndexX(i +5)];
-      double avy5 = actual_velocity[IndexY(i +5,n)];
-      double avx6 = actual_velocity[IndexX(i +6)];
-      double avy6 = actual_velocity[IndexY(i +6,n)];
-      double avx7 = actual_velocity[IndexX(i +7)];
-      double avy7 = actual_velocity[IndexY(i +7,n)];
+      double avy0 = actual_velocity[IndexY(i, n)];
+      double avx1 = actual_velocity[IndexX(i + 1)];
+      double avy1 = actual_velocity[IndexY(i + 1, n)];
+      double avx2 = actual_velocity[IndexX(i + 2)];
+      double avy2 = actual_velocity[IndexY(i + 2, n)];
+      double avx3 = actual_velocity[IndexX(i + 3)];
+      double avy3 = actual_velocity[IndexY(i + 3, n)];
+      double avx4 = actual_velocity[IndexX(i + 4)];
+      double avy4 = actual_velocity[IndexY(i + 4, n)];
+      double avx5 = actual_velocity[IndexX(i + 5)];
+      double avy5 = actual_velocity[IndexY(i + 5, n)];
+      double avx6 = actual_velocity[IndexX(i + 6)];
+      double avy6 = actual_velocity[IndexY(i + 6, n)];
+      double avx7 = actual_velocity[IndexX(i + 7)];
+      double avy7 = actual_velocity[IndexY(i + 7, n)];
 
       double dsv0 = desired_speed[i];     //desired speed value
       double dsv1 = desired_speed[i + 1]; //desired speed value
@@ -127,14 +127,14 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       // UPDATE BORDER REPULSION TERM
       /************************************************/
 
-      double ryaB00 = rya0 - fb; //1 add
-      double ryaB10 = rya1 - fb; //1 add
-      double ryaB20 = rya2 - fb; //1 add
-      double ryaB30 = rya3 - fb; //1 add
-      double ryaB40 = rya4 - fb; //1 add
-      double ryaB50 = rya5 - fb; //1 add
-      double ryaB60 = rya6 - fb; //1 add
-      double ryaB70 = rya7 - fb; //1 add
+      double ryaB00 = rya0 - fb; 
+      double ryaB10 = rya1 - fb; 
+      double ryaB20 = rya2 - fb; 
+      double ryaB30 = rya3 - fb; 
+      double ryaB40 = rya4 - fb; 
+      double ryaB50 = rya5 - fb; 
+      double ryaB60 = rya6 - fb; 
+      double ryaB70 = rya7 - fb; 
 
       double se00 = exp_fast(ryaB00 * INV_R) * UTIMESR / (-ryaB00); //1 exp, 2 mult, 1 div
       double se10 = exp_fast(ryaB10 * INV_R) * UTIMESR / (-ryaB10); //1 exp, 2 mult, 1 div
@@ -1360,9 +1360,9 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       for (int j = i + 8; j < n; j++) // for (int j = i + 1; j < n; j++)
       {
         double rxb = position[IndexX(j)];
-        double ryb = position[IndexY(j,n)];
+        double ryb = position[IndexY(j, n)];
         double exb0 = desired_direction[IndexX(j)];
-        double eyb0 = desired_direction[IndexY(j,n)];
+        double eyb0 = desired_direction[IndexY(j, n)];
         double db0 = speed[j];
 
         double rxab0 = rxa0 - rxb;
@@ -1391,50 +1391,50 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
         double rab6 = rxab6 * rxab6 + ryab6 * ryab6;
         double rab7 = rxab7 * rxab7 + ryab7 * ryab7;
 
-        double rabnorm0 = sqrt(rab0); 
-        double rabnorm1 = sqrt(rab1); 
-        double rabnorm2 = sqrt(rab2); 
-        double rabnorm3 = sqrt(rab3); 
-        double rabnorm4 = sqrt(rab4); 
-        double rabnorm5 = sqrt(rab5); 
-        double rabnorm6 = sqrt(rab6); 
-        double rabnorm7 = sqrt(rab7); 
+        double rabnorm0 = sqrt(rab0);
+        double rabnorm1 = sqrt(rab1);
+        double rabnorm2 = sqrt(rab2);
+        double rabnorm3 = sqrt(rab3);
+        double rabnorm4 = sqrt(rab4);
+        double rabnorm5 = sqrt(rab5);
+        double rabnorm6 = sqrt(rab6);
+        double rabnorm7 = sqrt(rab7);
 
         //double everything
 
-        double rxabmex0 = rxab0 - db0 * exb0; 
-        double ryabmey0 = ryab0 - db0 * eyb0; 
-        double rxabmex1 = rxab1 - db0 * exb0; 
-        double ryabmey1 = ryab1 - db0 * eyb0; 
-        double rxabmex2 = rxab2 - db0 * exb0; 
-        double ryabmey2 = ryab2 - db0 * eyb0; 
-        double rxabmex3 = rxab3 - db0 * exb0; 
-        double ryabmey3 = ryab3 - db0 * eyb0; 
-        double rxabmex4 = rxab4 - db0 * exb0; 
-        double ryabmey4 = ryab4 - db0 * eyb0; 
-        double rxabmex5 = rxab5 - db0 * exb0; 
-        double ryabmey5 = ryab5 - db0 * eyb0; 
-        double rxabmex6 = rxab6 - db0 * exb0; 
-        double ryabmey6 = ryab6 - db0 * eyb0; 
-        double rxabmex7 = rxab7 - db0 * exb0; 
-        double ryabmey7 = ryab7 - db0 * eyb0; 
+        double rxabmex0 = rxab0 - db0 * exb0;
+        double ryabmey0 = ryab0 - db0 * eyb0;
+        double rxabmex1 = rxab1 - db0 * exb0;
+        double ryabmey1 = ryab1 - db0 * eyb0;
+        double rxabmex2 = rxab2 - db0 * exb0;
+        double ryabmey2 = ryab2 - db0 * eyb0;
+        double rxabmex3 = rxab3 - db0 * exb0;
+        double ryabmey3 = ryab3 - db0 * eyb0;
+        double rxabmex4 = rxab4 - db0 * exb0;
+        double ryabmey4 = ryab4 - db0 * eyb0;
+        double rxabmex5 = rxab5 - db0 * exb0;
+        double ryabmey5 = ryab5 - db0 * eyb0;
+        double rxabmex6 = rxab6 - db0 * exb0;
+        double ryabmey6 = ryab6 - db0 * eyb0;
+        double rxabmex7 = rxab7 - db0 * exb0;
+        double ryabmey7 = ryab7 - db0 * eyb0;
 
-        double rxbamex0 = -rxab0 - da0 * exa0; 
-        double rybamey0 = -ryab0 - da0 * eya0; 
-        double rxbamex1 = -rxab1 - da1 * exa1; 
-        double rybamey1 = -ryab1 - da1 * eya1; 
-        double rxbamex2 = -rxab2 - da2 * exa2; 
-        double rybamey2 = -ryab2 - da2 * eya2; 
-        double rxbamex3 = -rxab3 - da3 * exa3; 
-        double rybamey3 = -ryab3 - da3 * eya3; 
-        double rxbamex4 = -rxab4 - da4 * exa4; 
-        double rybamey4 = -ryab4 - da4 * eya4; 
-        double rxbamex5 = -rxab5 - da5 * exa5; 
-        double rybamey5 = -ryab5 - da5 * eya5; 
-        double rxbamex6 = -rxab6 - da6 * exa6; 
-        double rybamey6 = -ryab6 - da6 * eya6; 
-        double rxbamex7 = -rxab7 - da7 * exa7; 
-        double rybamey7 = -ryab7 - da7 * eya7; 
+        double rxbamex0 = -rxab0 - da0 * exa0;
+        double rybamey0 = -ryab0 - da0 * eya0;
+        double rxbamex1 = -rxab1 - da1 * exa1;
+        double rybamey1 = -ryab1 - da1 * eya1;
+        double rxbamex2 = -rxab2 - da2 * exa2;
+        double rybamey2 = -ryab2 - da2 * eya2;
+        double rxbamex3 = -rxab3 - da3 * exa3;
+        double rybamey3 = -ryab3 - da3 * eya3;
+        double rxbamex4 = -rxab4 - da4 * exa4;
+        double rybamey4 = -ryab4 - da4 * eya4;
+        double rxbamex5 = -rxab5 - da5 * exa5;
+        double rybamey5 = -ryab5 - da5 * eya5;
+        double rxbamex6 = -rxab6 - da6 * exa6;
+        double rybamey6 = -ryab6 - da6 * eya6;
+        double rxbamex7 = -rxab7 - da7 * exa7;
+        double rybamey7 = -ryab7 - da7 * eya7;
 
         double rabme0 = rxabmex0 * rxabmex0 + ryabmey0 * ryabmey0;
         double rabme1 = rxabmex1 * rxabmex1 + ryabmey1 * ryabmey1;
@@ -1454,111 +1454,111 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
         double rbame6 = rxbamex6 * rxbamex6 + rybamey6 * rybamey6;
         double rbame7 = rxbamex7 * rxbamex7 + rybamey7 * rybamey7;
 
-        double rabmenorm0 = sqrt(rabme0); 
-        double rabmenorm1 = sqrt(rabme1); 
-        double rabmenorm2 = sqrt(rabme2); 
-        double rabmenorm3 = sqrt(rabme3); 
-        double rabmenorm4 = sqrt(rabme4); 
-        double rabmenorm5 = sqrt(rabme5); 
-        double rabmenorm6 = sqrt(rabme6); 
-        double rabmenorm7 = sqrt(rabme7); 
+        double rabmenorm0 = sqrt(rabme0);
+        double rabmenorm1 = sqrt(rabme1);
+        double rabmenorm2 = sqrt(rabme2);
+        double rabmenorm3 = sqrt(rabme3);
+        double rabmenorm4 = sqrt(rabme4);
+        double rabmenorm5 = sqrt(rabme5);
+        double rabmenorm6 = sqrt(rabme6);
+        double rabmenorm7 = sqrt(rabme7);
 
-        double rbamenorm0 = sqrt(rbame0); 
-        double rbamenorm1 = sqrt(rbame1); 
-        double rbamenorm2 = sqrt(rbame2); 
-        double rbamenorm3 = sqrt(rbame3); 
-        double rbamenorm4 = sqrt(rbame4); 
-        double rbamenorm5 = sqrt(rbame5); 
-        double rbamenorm6 = sqrt(rbame6); 
-        double rbamenorm7 = sqrt(rbame7); 
+        double rbamenorm0 = sqrt(rbame0);
+        double rbamenorm1 = sqrt(rbame1);
+        double rbamenorm2 = sqrt(rbame2);
+        double rbamenorm3 = sqrt(rbame3);
+        double rbamenorm4 = sqrt(rbame4);
+        double rbamenorm5 = sqrt(rbame5);
+        double rbamenorm6 = sqrt(rbame6);
+        double rbamenorm7 = sqrt(rbame7);
 
-        double normsumab0 = rabnorm0 + rabmenorm0; 
-        double normsumab1 = rabnorm1 + rabmenorm1; 
-        double normsumab2 = rabnorm2 + rabmenorm2; 
-        double normsumab3 = rabnorm3 + rabmenorm3; 
-        double normsumab4 = rabnorm4 + rabmenorm4; 
-        double normsumab5 = rabnorm5 + rabmenorm5; 
-        double normsumab6 = rabnorm6 + rabmenorm6; 
-        double normsumab7 = rabnorm7 + rabmenorm7; 
+        double normsumab0 = rabnorm0 + rabmenorm0;
+        double normsumab1 = rabnorm1 + rabmenorm1;
+        double normsumab2 = rabnorm2 + rabmenorm2;
+        double normsumab3 = rabnorm3 + rabmenorm3;
+        double normsumab4 = rabnorm4 + rabmenorm4;
+        double normsumab5 = rabnorm5 + rabmenorm5;
+        double normsumab6 = rabnorm6 + rabmenorm6;
+        double normsumab7 = rabnorm7 + rabmenorm7;
 
-        double normsumba0 = rabnorm0 + rbamenorm0; 
-        double normsumba1 = rabnorm1 + rbamenorm1; 
-        double normsumba2 = rabnorm2 + rbamenorm2; 
-        double normsumba3 = rabnorm3 + rbamenorm3; 
-        double normsumba4 = rabnorm4 + rbamenorm4; 
-        double normsumba5 = rabnorm5 + rbamenorm5; 
-        double normsumba6 = rabnorm6 + rbamenorm6; 
-        double normsumba7 = rabnorm7 + rbamenorm7; 
+        double normsumba0 = rabnorm0 + rbamenorm0;
+        double normsumba1 = rabnorm1 + rbamenorm1;
+        double normsumba2 = rabnorm2 + rbamenorm2;
+        double normsumba3 = rabnorm3 + rbamenorm3;
+        double normsumba4 = rabnorm4 + rbamenorm4;
+        double normsumba5 = rabnorm5 + rbamenorm5;
+        double normsumba6 = rabnorm6 + rbamenorm6;
+        double normsumba7 = rabnorm7 + rbamenorm7;
 
-        double repxab00 = rxab0 / rabnorm0 + rxabmex0 / rabmenorm0; 
-        double repyab00 = ryab0 / rabnorm0 + ryabmey0 / rabmenorm0; 
-        double repxab01 = rxab1 / rabnorm1 + rxabmex1 / rabmenorm1; 
-        double repyab01 = ryab1 / rabnorm1 + ryabmey1 / rabmenorm1; 
-        double repxab02 = rxab2 / rabnorm2 + rxabmex2 / rabmenorm2; 
-        double repyab02 = ryab2 / rabnorm2 + ryabmey2 / rabmenorm2; 
-        double repxab03 = rxab3 / rabnorm3 + rxabmex3 / rabmenorm3; 
-        double repyab03 = ryab3 / rabnorm3 + ryabmey3 / rabmenorm3; 
-        double repxab04 = rxab4 / rabnorm4 + rxabmex4 / rabmenorm4; 
-        double repyab04 = ryab4 / rabnorm4 + ryabmey4 / rabmenorm4; 
-        double repxab05 = rxab5 / rabnorm5 + rxabmex5 / rabmenorm5; 
-        double repyab05 = ryab5 / rabnorm5 + ryabmey5 / rabmenorm5; 
-        double repxab06 = rxab6 / rabnorm6 + rxabmex6 / rabmenorm6; 
-        double repyab06 = ryab6 / rabnorm6 + ryabmey6 / rabmenorm6; 
-        double repxab07 = rxab7 / rabnorm7 + rxabmex7 / rabmenorm7; 
-        double repyab07 = ryab7 / rabnorm7 + ryabmey7 / rabmenorm7; 
+        double repxab00 = rxab0 / rabnorm0 + rxabmex0 / rabmenorm0;
+        double repyab00 = ryab0 / rabnorm0 + ryabmey0 / rabmenorm0;
+        double repxab01 = rxab1 / rabnorm1 + rxabmex1 / rabmenorm1;
+        double repyab01 = ryab1 / rabnorm1 + ryabmey1 / rabmenorm1;
+        double repxab02 = rxab2 / rabnorm2 + rxabmex2 / rabmenorm2;
+        double repyab02 = ryab2 / rabnorm2 + ryabmey2 / rabmenorm2;
+        double repxab03 = rxab3 / rabnorm3 + rxabmex3 / rabmenorm3;
+        double repyab03 = ryab3 / rabnorm3 + ryabmey3 / rabmenorm3;
+        double repxab04 = rxab4 / rabnorm4 + rxabmex4 / rabmenorm4;
+        double repyab04 = ryab4 / rabnorm4 + ryabmey4 / rabmenorm4;
+        double repxab05 = rxab5 / rabnorm5 + rxabmex5 / rabmenorm5;
+        double repyab05 = ryab5 / rabnorm5 + ryabmey5 / rabmenorm5;
+        double repxab06 = rxab6 / rabnorm6 + rxabmex6 / rabmenorm6;
+        double repyab06 = ryab6 / rabnorm6 + ryabmey6 / rabmenorm6;
+        double repxab07 = rxab7 / rabnorm7 + rxabmex7 / rabmenorm7;
+        double repyab07 = ryab7 / rabnorm7 + ryabmey7 / rabmenorm7;
 
-        double repxba00 = -rxab0 / rabnorm0 + rxbamex0 / rbamenorm0; 
-        double repyba00 = -ryab0 / rabnorm0 + rybamey0 / rbamenorm0; 
-        double repxba01 = -rxab1 / rabnorm1 + rxbamex1 / rbamenorm1; 
-        double repyba01 = -ryab1 / rabnorm1 + rybamey1 / rbamenorm1; 
-        double repxba02 = -rxab2 / rabnorm2 + rxbamex2 / rbamenorm2; 
-        double repyba02 = -ryab2 / rabnorm2 + rybamey2 / rbamenorm2; 
-        double repxba03 = -rxab3 / rabnorm3 + rxbamex3 / rbamenorm3; 
-        double repyba03 = -ryab3 / rabnorm3 + rybamey3 / rbamenorm3; 
-        double repxba04 = -rxab4 / rabnorm4 + rxbamex4 / rbamenorm4; 
-        double repyba04 = -ryab4 / rabnorm4 + rybamey4 / rbamenorm4; 
-        double repxba05 = -rxab5 / rabnorm5 + rxbamex5 / rbamenorm5; 
-        double repyba05 = -ryab5 / rabnorm5 + rybamey5 / rbamenorm5; 
-        double repxba06 = -rxab6 / rabnorm6 + rxbamex6 / rbamenorm6; 
-        double repyba06 = -ryab6 / rabnorm6 + rybamey6 / rbamenorm6; 
-        double repxba07 = -rxab7 / rabnorm7 + rxbamex7 / rbamenorm7; 
-        double repyba07 = -ryab7 / rabnorm7 + rybamey7 / rbamenorm7; 
+        double repxba00 = -rxab0 / rabnorm0 + rxbamex0 / rbamenorm0;
+        double repyba00 = -ryab0 / rabnorm0 + rybamey0 / rbamenorm0;
+        double repxba01 = -rxab1 / rabnorm1 + rxbamex1 / rbamenorm1;
+        double repyba01 = -ryab1 / rabnorm1 + rybamey1 / rbamenorm1;
+        double repxba02 = -rxab2 / rabnorm2 + rxbamex2 / rbamenorm2;
+        double repyba02 = -ryab2 / rabnorm2 + rybamey2 / rbamenorm2;
+        double repxba03 = -rxab3 / rabnorm3 + rxbamex3 / rbamenorm3;
+        double repyba03 = -ryab3 / rabnorm3 + rybamey3 / rbamenorm3;
+        double repxba04 = -rxab4 / rabnorm4 + rxbamex4 / rbamenorm4;
+        double repyba04 = -ryab4 / rabnorm4 + rybamey4 / rbamenorm4;
+        double repxba05 = -rxab5 / rabnorm5 + rxbamex5 / rbamenorm5;
+        double repyba05 = -ryab5 / rabnorm5 + rybamey5 / rbamenorm5;
+        double repxba06 = -rxab6 / rabnorm6 + rxbamex6 / rbamenorm6;
+        double repyba06 = -ryab6 / rabnorm6 + rybamey6 / rbamenorm6;
+        double repxba07 = -rxab7 / rabnorm7 + rxbamex7 / rbamenorm7;
+        double repyba07 = -ryab7 / rabnorm7 + rybamey7 / rbamenorm7;
 
-        double bab0 = normsumab0 * normsumab0 - db0 * db0; 
-        double bab1 = normsumab1 * normsumab1 - db0 * db0; 
-        double bab2 = normsumab2 * normsumab2 - db0 * db0; 
-        double bab3 = normsumab3 * normsumab3 - db0 * db0; 
-        double bab4 = normsumab4 * normsumab4 - db0 * db0; 
-        double bab5 = normsumab5 * normsumab5 - db0 * db0; 
-        double bab6 = normsumab6 * normsumab6 - db0 * db0; 
-        double bab7 = normsumab7 * normsumab7 - db0 * db0; 
+        double bab0 = normsumab0 * normsumab0 - db0 * db0;
+        double bab1 = normsumab1 * normsumab1 - db0 * db0;
+        double bab2 = normsumab2 * normsumab2 - db0 * db0;
+        double bab3 = normsumab3 * normsumab3 - db0 * db0;
+        double bab4 = normsumab4 * normsumab4 - db0 * db0;
+        double bab5 = normsumab5 * normsumab5 - db0 * db0;
+        double bab6 = normsumab6 * normsumab6 - db0 * db0;
+        double bab7 = normsumab7 * normsumab7 - db0 * db0;
 
-        double bba0 = normsumba0 * normsumba0 - da0 * da0; 
-        double bba1 = normsumba1 * normsumba1 - da1 * da1; 
-        double bba2 = normsumba2 * normsumba2 - da2 * da2; 
-        double bba3 = normsumba3 * normsumba3 - da3 * da3; 
-        double bba4 = normsumba4 * normsumba4 - da4 * da4; 
-        double bba5 = normsumba5 * normsumba5 - da5 * da5; 
-        double bba6 = normsumba6 * normsumba6 - da6 * da6; 
-        double bba7 = normsumba7 * normsumba7 - da7 * da7; 
+        double bba0 = normsumba0 * normsumba0 - da0 * da0;
+        double bba1 = normsumba1 * normsumba1 - da1 * da1;
+        double bba2 = normsumba2 * normsumba2 - da2 * da2;
+        double bba3 = normsumba3 * normsumba3 - da3 * da3;
+        double bba4 = normsumba4 * normsumba4 - da4 * da4;
+        double bba5 = normsumba5 * normsumba5 - da5 * da5;
+        double bba6 = normsumba6 * normsumba6 - da6 * da6;
+        double bba7 = normsumba7 * normsumba7 - da7 * da7;
 
-        double babnorm0 = sqrt(bab0) * 0.5; 
-        double babnorm1 = sqrt(bab1) * 0.5; 
-        double babnorm2 = sqrt(bab2) * 0.5; 
-        double babnorm3 = sqrt(bab3) * 0.5; 
-        double babnorm4 = sqrt(bab4) * 0.5; 
-        double babnorm5 = sqrt(bab5) * 0.5; 
-        double babnorm6 = sqrt(bab6) * 0.5; 
-        double babnorm7 = sqrt(bab7) * 0.5; 
+        double babnorm0 = sqrt(bab0) * 0.5;
+        double babnorm1 = sqrt(bab1) * 0.5;
+        double babnorm2 = sqrt(bab2) * 0.5;
+        double babnorm3 = sqrt(bab3) * 0.5;
+        double babnorm4 = sqrt(bab4) * 0.5;
+        double babnorm5 = sqrt(bab5) * 0.5;
+        double babnorm6 = sqrt(bab6) * 0.5;
+        double babnorm7 = sqrt(bab7) * 0.5;
 
-        double bbanorm0 = sqrt(bba0) * 0.5; 
-        double bbanorm1 = sqrt(bba1) * 0.5; 
-        double bbanorm2 = sqrt(bba2) * 0.5; 
-        double bbanorm3 = sqrt(bba3) * 0.5; 
-        double bbanorm4 = sqrt(bba4) * 0.5; 
-        double bbanorm5 = sqrt(bba5) * 0.5; 
-        double bbanorm6 = sqrt(bba6) * 0.5; 
-        double bbanorm7 = sqrt(bba7) * 0.5; 
+        double bbanorm0 = sqrt(bba0) * 0.5;
+        double bbanorm1 = sqrt(bba1) * 0.5;
+        double bbanorm2 = sqrt(bba2) * 0.5;
+        double bbanorm3 = sqrt(bba3) * 0.5;
+        double bbanorm4 = sqrt(bba4) * 0.5;
+        double bbanorm5 = sqrt(bba5) * 0.5;
+        double bbanorm6 = sqrt(bba6) * 0.5;
+        double bbanorm7 = sqrt(bba7) * 0.5;
 
         double cfab0 = exp_fast(-babnorm0 * inv_sigma) * normsumab0 * DIV_FACTOR / babnorm0;
         double cfab1 = exp_fast(-babnorm1 * inv_sigma) * normsumab1 * DIV_FACTOR / babnorm1;
@@ -1693,7 +1693,7 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
         double sfybeta3 = (repyba16 * wba6) + (repyba17 * wba7);
 
         social_force[IndexX(j)] += (sfxbeta0 + sfxbeta1) + (sfxbeta2 + sfxbeta3);
-        social_force[IndexY(j,n)] += (sfybeta0 + sfybeta1) + (sfybeta2 + sfybeta3);
+        social_force[IndexY(j, n)] += (sfybeta0 + sfybeta1) + (sfybeta2 + sfybeta3);
       } // n-1 * (12 adds, 18 mults, 6 divs, 1 exp, 4 sqrts)
 
       /************************************************/
@@ -1755,47 +1755,48 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       sfy7 += INV_RELAX_TIME * vdy17; // 1 mul => 1 flops
 
       social_force[IndexX(i)] = sfx0;
-      social_force[IndexY(i,n)] = sfy0;
-      social_force[IndexX(i +1)] = sfx1;
-      social_force[IndexY(i +1,n)] = sfy1;
-      social_force[IndexX(i +2)] = sfx2;
-      social_force[IndexY(i +2,n)] = sfy2;
-      social_force[IndexX(i +3)] = sfx3;
-      social_force[IndexY(i +3,n)] = sfy3;
-      social_force[IndexX(i +4)] = sfx4;
-      social_force[IndexY(i +4,n)] = sfy4;
-      social_force[IndexX(i +5)] = sfx5;
-      social_force[IndexY(i +5,n)] = sfy5;
-      social_force[IndexX(i +6)] = sfx6;
-      social_force[IndexY(i +6,n)] = sfy6;
-      social_force[IndexX(i +7)] = sfx7;
-      social_force[IndexY(i +7,n)] = sfy7;
-    } //n * (12*(n-1) + 3*(n_borders) + 2) ADDS
-    //n * (18*(n-1) + 8*(n_borders) + 4) MULTS
-    //n * (6*(n-1) + n_borders )         DIVS
-    //n * (n-1 + n_borders )             EXPS
-    //n * (4*(n-1))                      SQRTS
+      social_force[IndexY(i, n)] = sfy0;
+      social_force[IndexX(i + 1)] = sfx1;
+      social_force[IndexY(i + 1, n)] = sfy1;
+      social_force[IndexX(i + 2)] = sfx2;
+      social_force[IndexY(i + 2, n)] = sfy2;
+      social_force[IndexX(i + 3)] = sfx3;
+      social_force[IndexY(i + 3, n)] = sfy3;
+      social_force[IndexX(i + 4)] = sfx4;
+      social_force[IndexY(i + 4, n)] = sfy4;
+      social_force[IndexX(i + 5)] = sfx5;
+      social_force[IndexY(i + 5, n)] = sfy5;
+      social_force[IndexX(i + 6)] = sfx6;
+      social_force[IndexY(i + 6, n)] = sfy6;
+      social_force[IndexX(i + 7)] = sfx7;
+      social_force[IndexY(i + 7, n)] = sfy7;
+      //n/8 * 
+      // ( 689 add, 1106 mult, 280 div, 140 sqrt, 56 exp_fast +
+      //   (n-(i+8))*(200 add, 320 mult, 80 div, 56 sqrt, 16 exp_fast) + 
+      //   32 add, 32 mult 
+      // )
+    }
     for (int i = 0; i < n - 3; i += 8)
     {
-    /************************************************/
+      /************************************************/
       // LOADS
       /************************************************/
       double cx0 = position[IndexX(i)];
-      double cy0 = position[IndexY(i,n)];
-      double cx1 = position[IndexX(i +1)];
-      double cy1 = position[IndexY(i +1,n)];
-      double cx2 = position[IndexX(i +2)];
-      double cy2 = position[IndexY(i +2,n)];
-      double cx3 = position[IndexX(i +3)];
-      double cy3 = position[IndexY(i +3,n)];
-      double cx4 = position[IndexX(i +4)];
-      double cy4 = position[IndexY(i +4,n)];
-      double cx5 = position[IndexX(i +5)];
-      double cy5 = position[IndexY(i +5,n)];
-      double cx6 = position[IndexX(i +6)];
-      double cy6 = position[IndexY(i +6,n)];
-      double cx7 = position[IndexX(i +7)];
-      double cy7 = position[IndexY(i +7,n)];
+      double cy0 = position[IndexY(i, n)];
+      double cx1 = position[IndexX(i + 1)];
+      double cy1 = position[IndexY(i + 1, n)];
+      double cx2 = position[IndexX(i + 2)];
+      double cy2 = position[IndexY(i + 2, n)];
+      double cx3 = position[IndexX(i + 3)];
+      double cy3 = position[IndexY(i + 3, n)];
+      double cx4 = position[IndexX(i + 4)];
+      double cy4 = position[IndexY(i + 4, n)];
+      double cx5 = position[IndexX(i + 5)];
+      double cy5 = position[IndexY(i + 5, n)];
+      double cx6 = position[IndexX(i + 6)];
+      double cy6 = position[IndexY(i + 6, n)];
+      double cx7 = position[IndexX(i + 7)];
+      double cy7 = position[IndexY(i + 7, n)];
 
       double max0 = desired_max_speed[i];
       double max1 = desired_max_speed[i + 1];
@@ -1807,22 +1808,22 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       double max7 = desired_max_speed[i + 7];
 
       //compute prefered velocity by integrating over the social force for the timestep, assuming the social force is constant over \delta t
-      double pvx0 = actual_velocity[IndexX(i)] + social_force[IndexX(i)] * TIMESTEP;           // 1 add, 1 mult => 2 flops
-      double pvy0 = actual_velocity[IndexY(i,n)] + social_force[IndexY(i,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvx1 = actual_velocity[IndexX(i +1)] + social_force[IndexX(i +1)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvy1 = actual_velocity[IndexY(i +1,n)] + social_force[IndexY(i +1,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvx2 = actual_velocity[IndexX(i +2)] + social_force[IndexX(i +2)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvy2 = actual_velocity[IndexY(i +2,n)] + social_force[IndexY(i +2,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvx3 = actual_velocity[IndexX(i +3)] + social_force[IndexX(i +3)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvy3 = actual_velocity[IndexY(i +3,n)] + social_force[IndexY(i +3,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvx4 = actual_velocity[IndexX(i +4)] + social_force[IndexX(i +4)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvy4 = actual_velocity[IndexY(i +4,n)] + social_force[IndexY(i +4,n)] * TIMESTEP;   // 1 add, 1 mult => 2 flops
-      double pvx5 = actual_velocity[IndexX(i +5)] + social_force[IndexX(i +5)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      double pvy5 = actual_velocity[IndexY(i +5,n)] + social_force[IndexY(i +5,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      double pvx6 = actual_velocity[IndexX(i +6)] + social_force[IndexX(i +6)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      double pvy6 = actual_velocity[IndexY(i +6,n)] + social_force[IndexY(i +6,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      double pvx7 = actual_velocity[IndexX(i +7)] + social_force[IndexX(i +7)] * TIMESTEP; // 1 add, 1 mult => 2 flops
-      double pvy7 = actual_velocity[IndexY(i +7,n)] + social_force[IndexY(i +7,n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx0 = actual_velocity[IndexX(i)] + social_force[IndexX(i)] * TIMESTEP;               // 1 add, 1 mult => 2 flops
+      double pvy0 = actual_velocity[IndexY(i, n)] + social_force[IndexY(i, n)] * TIMESTEP;         // 1 add, 1 mult => 2 flops
+      double pvx1 = actual_velocity[IndexX(i + 1)] + social_force[IndexX(i + 1)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy1 = actual_velocity[IndexY(i + 1, n)] + social_force[IndexY(i + 1, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx2 = actual_velocity[IndexX(i + 2)] + social_force[IndexX(i + 2)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy2 = actual_velocity[IndexY(i + 2, n)] + social_force[IndexY(i + 2, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx3 = actual_velocity[IndexX(i + 3)] + social_force[IndexX(i + 3)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy3 = actual_velocity[IndexY(i + 3, n)] + social_force[IndexY(i + 3, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx4 = actual_velocity[IndexX(i + 4)] + social_force[IndexX(i + 4)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy4 = actual_velocity[IndexY(i + 4, n)] + social_force[IndexY(i + 4, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx5 = actual_velocity[IndexX(i + 5)] + social_force[IndexX(i + 5)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy5 = actual_velocity[IndexY(i + 5, n)] + social_force[IndexY(i + 5, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx6 = actual_velocity[IndexX(i + 6)] + social_force[IndexX(i + 6)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy6 = actual_velocity[IndexY(i + 6, n)] + social_force[IndexY(i + 6, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
+      double pvx7 = actual_velocity[IndexX(i + 7)] + social_force[IndexX(i + 7)] * TIMESTEP;       // 1 add, 1 mult => 2 flops
+      double pvy7 = actual_velocity[IndexY(i + 7, n)] + social_force[IndexY(i + 7, n)] * TIMESTEP; // 1 add, 1 mult => 2 flops
 
       /************************************************/
       // UPDATE POSITION
@@ -1906,22 +1907,22 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       // get current position and target
 
       // compute differences
-      double dx0 = final_destination[IndexX(i)] - cx0;      // 1 add => 1 flop
-      double dy0 = final_destination[IndexY(i,n)] - cy0;  // 1 add => 1 flop
-      double dx1 = final_destination[IndexX(i +1)] - cx1;  // 1 add => 1 flop
-      double dy1 = final_destination[IndexY(i +1,n)] - cy1;  // 1 add => 1 flop
-      double dx2 = final_destination[IndexX(i +2)] - cx2;  // 1 add => 1 flop
-      double dy2 = final_destination[IndexY(i +2,n)] - cy2;  // 1 add => 1 flop
-      double dx3 = final_destination[IndexX(i +3)] - cx3;  // 1 add => 1 flop
-      double dy3 = final_destination[IndexY(i +3,n)] - cy3;  // 1 add => 1 flop
-      double dx4 = final_destination[IndexX(i +4)] - cx4;  // 1 add => 1 flop
-      double dy4 = final_destination[IndexY(i +4,n)] - cy4;  // 1 add => 1 flop
-      double dx5 = final_destination[IndexX(i +5)] - cx5; // 1 add => 1 flop
-      double dy5 = final_destination[IndexY(i +5,n)] - cy5; // 1 add => 1 flop
-      double dx6 = final_destination[IndexX(i +6)] - cx6; // 1 add => 1 flop
-      double dy6 = final_destination[IndexY(i +6,n)] - cy6; // 1 add => 1 flop
-      double dx7 = final_destination[IndexX(i +7)] - cx7; // 1 add => 1 flop
-      double dy7 = final_destination[IndexY(i +7,n)] - cy7; // 1 add => 1 flop
+      double dx0 = final_destination[IndexX(i)] - cx0;        // 1 add => 1 flop
+      double dy0 = final_destination[IndexY(i, n)] - cy0;     // 1 add => 1 flop
+      double dx1 = final_destination[IndexX(i + 1)] - cx1;    // 1 add => 1 flop
+      double dy1 = final_destination[IndexY(i + 1, n)] - cy1; // 1 add => 1 flop
+      double dx2 = final_destination[IndexX(i + 2)] - cx2;    // 1 add => 1 flop
+      double dy2 = final_destination[IndexY(i + 2, n)] - cy2; // 1 add => 1 flop
+      double dx3 = final_destination[IndexX(i + 3)] - cx3;    // 1 add => 1 flop
+      double dy3 = final_destination[IndexY(i + 3, n)] - cy3; // 1 add => 1 flop
+      double dx4 = final_destination[IndexX(i + 4)] - cx4;    // 1 add => 1 flop
+      double dy4 = final_destination[IndexY(i + 4, n)] - cy4; // 1 add => 1 flop
+      double dx5 = final_destination[IndexX(i + 5)] - cx5;    // 1 add => 1 flop
+      double dy5 = final_destination[IndexY(i + 5, n)] - cy5; // 1 add => 1 flop
+      double dx6 = final_destination[IndexX(i + 6)] - cx6;    // 1 add => 1 flop
+      double dy6 = final_destination[IndexY(i + 6, n)] - cy6; // 1 add => 1 flop
+      double dx7 = final_destination[IndexX(i + 7)] - cx7;    // 1 add => 1 flop
+      double dy7 = final_destination[IndexY(i + 7, n)] - cy7; // 1 add => 1 flop
 
       double d0_0 = dx0 * dx0; // 1 add, 2 mult => 3 flops
       double d1_0 = dx1 * dx1; // 1 add, 2 mult => 3 flops
@@ -1951,38 +1952,38 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       double n7 = sqrt(d7_1); // 1 sqrt => 1 flop
 
       social_force[IndexX(i)] = 0.0;
-      social_force[IndexY(i,n)] = 0.0;
-      social_force[IndexX(i +1)] = 0.0;
-      social_force[IndexY(i +1,n)] = 0.0;
-      social_force[IndexX(i +2)] = 0.0;
-      social_force[IndexY(i +2,n)] = 0.0;
-      social_force[IndexX(i +3)] = 0.0;
-      social_force[IndexY(i +3,n)] = 0.0;
-      social_force[IndexX(i +4)] = 0.0;
-      social_force[IndexY(i +4,n)] = 0.0;
-      social_force[IndexX(i +5)] = 0.0;
-      social_force[IndexY(i +5,n)] = 0.0;
-      social_force[IndexX(i +6)] = 0.0;
-      social_force[IndexY(i +6,n)] = 0.0;
-      social_force[IndexX(i +7)] = 0.0;
-      social_force[IndexY(i +7,n)] = 0.0;
+      social_force[IndexY(i, n)] = 0.0;
+      social_force[IndexX(i + 1)] = 0.0;
+      social_force[IndexY(i + 1, n)] = 0.0;
+      social_force[IndexX(i + 2)] = 0.0;
+      social_force[IndexY(i + 2, n)] = 0.0;
+      social_force[IndexX(i + 3)] = 0.0;
+      social_force[IndexY(i + 3, n)] = 0.0;
+      social_force[IndexX(i + 4)] = 0.0;
+      social_force[IndexY(i + 4, n)] = 0.0;
+      social_force[IndexX(i + 5)] = 0.0;
+      social_force[IndexY(i + 5, n)] = 0.0;
+      social_force[IndexX(i + 6)] = 0.0;
+      social_force[IndexY(i + 6, n)] = 0.0;
+      social_force[IndexX(i + 7)] = 0.0;
+      social_force[IndexY(i + 7, n)] = 0.0;
       //update position
       position[IndexX(i)] = cx0;
-      position[IndexY(i,n)] = cy0;
-      position[IndexX(i +1)] = cx1;
-      position[IndexY(i +1,n)] = cy1;
-      position[IndexX(i +2)] = cx2;
-      position[IndexY(i +2,n)] = cy2;
-      position[IndexX(i +3)] = cx3;
-      position[IndexY(i +3,n)] = cy3;
-      position[IndexX(i +4)] = cx4;
-      position[IndexY(i +4,n)] = cy4;
-      position[IndexX(i +5)] = cx5;
-      position[IndexY(i +5,n)] = cy5;
-      position[IndexX(i +6)] = cx6;
-      position[IndexY(i +6,n)] = cy6;
-      position[IndexX(i +7)] = cx7;
-      position[IndexY(i +7,n)] = cy7;
+      position[IndexY(i, n)] = cy0;
+      position[IndexX(i + 1)] = cx1;
+      position[IndexY(i + 1, n)] = cy1;
+      position[IndexX(i + 2)] = cx2;
+      position[IndexY(i + 2, n)] = cy2;
+      position[IndexX(i + 3)] = cx3;
+      position[IndexY(i + 3, n)] = cy3;
+      position[IndexX(i + 4)] = cx4;
+      position[IndexY(i + 4, n)] = cy4;
+      position[IndexX(i + 5)] = cx5;
+      position[IndexY(i + 5, n)] = cy5;
+      position[IndexX(i + 6)] = cx6;
+      position[IndexY(i + 6, n)] = cy6;
+      position[IndexX(i + 7)] = cx7;
+      position[IndexY(i + 7, n)] = cy7;
       //update speed value, desire direction, actual_velocity
       speed[i] = cv0 * nv0;     // 1 mul, 1 flop
       speed[i + 1] = cv1 * nv1; // 1 mul, 1 flop
@@ -1993,47 +1994,40 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       speed[i + 6] = cv6 * nv6; // 1 mul, 1 flop
       speed[i + 7] = cv7 * nv7; // 1 mul, 1 flop
       actual_velocity[IndexX(i)] = pvx0;
-      actual_velocity[IndexY(i,n)] = pvy0;
-      actual_velocity[IndexX(i +1)] = pvx1;
-      actual_velocity[IndexY(i +1,n)] = pvy1;
-      actual_velocity[IndexX(i +2)] = pvx2;
-      actual_velocity[IndexY(i +2,n)] = pvy2;
-      actual_velocity[IndexX(i +3)] = pvx3;
-      actual_velocity[IndexY(i +3,n)] = pvy3;
-      actual_velocity[IndexX(i +4)] = pvx4;
-      actual_velocity[IndexY(i +4,n)] = pvy4;
-      actual_velocity[IndexX(i +5)] = pvx5;
-      actual_velocity[IndexY(i +5,n)] = pvy5;
-      actual_velocity[IndexX(i +6)] = pvx6;
-      actual_velocity[IndexY(i +6,n)] = pvy6;
-      actual_velocity[IndexX(i +7)] = pvx7;
-      actual_velocity[IndexY(i +7,n)] = pvy7;
+      actual_velocity[IndexY(i, n)] = pvy0;
+      actual_velocity[IndexX(i + 1)] = pvx1;
+      actual_velocity[IndexY(i + 1, n)] = pvy1;
+      actual_velocity[IndexX(i + 2)] = pvx2;
+      actual_velocity[IndexY(i + 2, n)] = pvy2;
+      actual_velocity[IndexX(i + 3)] = pvx3;
+      actual_velocity[IndexY(i + 3, n)] = pvy3;
+      actual_velocity[IndexX(i + 4)] = pvx4;
+      actual_velocity[IndexY(i + 4, n)] = pvy4;
+      actual_velocity[IndexX(i + 5)] = pvx5;
+      actual_velocity[IndexY(i + 5, n)] = pvy5;
+      actual_velocity[IndexX(i + 6)] = pvx6;
+      actual_velocity[IndexY(i + 6, n)] = pvy6;
+      actual_velocity[IndexX(i + 7)] = pvx7;
+      actual_velocity[IndexY(i + 7, n)] = pvy7;
       // update desired_direction
-      desired_direction[IndexX(i)] = dx0 / n0;      // 1 div => 1 flop
-      desired_direction[IndexY(i,n)] = dy0 / n0;  // 1 div => 1 flop
-      desired_direction[IndexX(i +1)] = dx1 / n1;  // 1 div => 1 flop
-      desired_direction[IndexY(i +1,n)] = dy1 / n1;  // 1 div => 1 flop
-      desired_direction[IndexX(i +2)] = dx2 / n2;  // 1 div => 1 flop
-      desired_direction[IndexY(i +2,n)] = dy2 / n2;  // 1 div => 1 flop
-      desired_direction[IndexX(i +3)] = dx3 / n3;  // 1 div => 1 flop
-      desired_direction[IndexY(i +3,n)] = dy3 / n3;  // 1 div => 1 flop
-      desired_direction[IndexX(i +4)] = dx4 / n4;  // 1 div => 1 flop
-      desired_direction[IndexY(i +4,n)] = dy4 / n4;  // 1 div => 1 flop
-      desired_direction[IndexX(i +5)] = dx5 / n5; // 1 div => 1 flop
-      desired_direction[IndexY(i +5,n)] = dy5 / n5; // 1 div => 1 flop
-      desired_direction[IndexX(i +6)] = dx6 / n6; // 1 div => 1 flop
-      desired_direction[IndexY(i +6,n)] = dy6 / n6; // 1 div => 1 flop
-      desired_direction[IndexX(i +7)] = dx7 / n7; // 1 div => 1 flop
-      desired_direction[IndexY(i +7,n)] = dy7 / n7; // 1 div => 1 flop
-    }                                           // n * 8    ADDS
-                                                // n * 11   MULTS
-                                                // n * 3    DIVS
-                                                // n * 2    SQRTS
-  }                                             // n_timesteps * [n * (12*(n-1) + 3*(n_borders) + 2) + n * 8]         ADDS
-                                                // n_timesteps * [n * (18*(n-1) + 8*(n_borders) + 4) + n + n * 11]    MULTS
-                                                // n_timesteps * [n * (6*(n-1) + n_borders) + n * 3]                  DIVS
-                                                // n_timesteps * [n * (n-1 + n_borders)]                              EXPS
-                                                // n_timesteps * [n * (4*(n-1)) + (n * 2)]                            SQRTD
-  // printf("fma cycles 1: %llu  -  sqrt cycles 1: %llu\n",fma_cycles_1, sqrt_cycles_1);
-  // printf("fma cycles 2: %llu  -  sqrt cycles 2: %llu\n",fma_cycles_2, sqrt_cycles_2);
+      desired_direction[IndexX(i)] = dx0 / n0;        
+      desired_direction[IndexY(i, n)] = dy0 / n0;     
+      desired_direction[IndexX(i + 1)] = dx1 / n1;    
+      desired_direction[IndexY(i + 1, n)] = dy1 / n1; 
+      desired_direction[IndexX(i + 2)] = dx2 / n2;    
+      desired_direction[IndexY(i + 2, n)] = dy2 / n2; 
+      desired_direction[IndexX(i + 3)] = dx3 / n3;    
+      desired_direction[IndexY(i + 3, n)] = dy3 / n3; 
+      desired_direction[IndexX(i + 4)] = dx4 / n4;    
+      desired_direction[IndexY(i + 4, n)] = dy4 / n4; 
+      desired_direction[IndexX(i + 5)] = dx5 / n5;    
+      desired_direction[IndexY(i + 5, n)] = dy5 / n5; 
+      desired_direction[IndexX(i + 6)] = dx6 / n6;    
+      desired_direction[IndexY(i + 6, n)] = dy6 / n6; 
+      desired_direction[IndexX(i + 7)] = dx7 / n7;    
+      desired_direction[IndexY(i + 7, n)] = dy7 / n7; 
+      
+      //n/8 * (64 add, 88 mult, 16 div, 16 sqrt)
+    }
+  }
 }

@@ -32,8 +32,6 @@
 #include "vectorize/social_force_model_vectorize_2_double.h"
 #include "vectorize/social_force_model_vectorize_4_double.h"
 
-
-
 #include "vectorize/social_force_model_vectorize_2_5_1.h"
 
 // standard C versions
@@ -165,24 +163,24 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
 {
     // add_function(sim_list, sim_counter, simulation_basic_simplified, NULL, compute_simplified_flops, IS_FLOAT,compute_operational_intensity_0, "simplified_float");
 
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_1");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_2, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_2");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_3, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_3");
+    // add_function(sim_list, sim_counter, simulation_basic_vectorize_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_1");
+    // add_function(sim_list, sim_counter, simulation_basic_vectorize_2, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_2");
+    // add_function(sim_list, sim_counter, simulation_basic_vectorize_3, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_3");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_4, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_4");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT,compute_operational_intensity_251, "vectorize_2_5_1");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_251, "vectorize_2_5_1");
 
     add_test_function(test_functions_list, test_simulation_basic_simplified, NULL, IS_FLOAT, test_func_counter);
 }
 
 void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)
 {
-    add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE,compute_operational_intensity_0, "simplified_double");
-    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_1_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_1_double");
-    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_2_double");
+    // add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "simplified_double");
+    // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_1_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_1_double");
+    // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_2_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_4_double");
 
-    add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_simplified_flops, IS_DOUBLE,compute_operational_intensity_251, "stdc_optv_2_5_1_double");
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_4, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_2_4_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double");
+    // add_function(sim_list, sim_counter, NULL, simulation_basic_optv_3_2, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_3_2_double");
 
     add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
 }
@@ -679,7 +677,7 @@ long long unsigned compute_simplified_flops(int number_of_people)
     c = div_cost;
     d = sqrt_cost;
     fe = fast_exp_cost;
-    
+
     long long unsigned flops = n * (3 * a + 2 * b + 2 * c + d) +
                                n * (2 * a + 4 * b) +
                                (n * n - n) * (12 * a + 20 * b + 7 * c + 4 * d + fe) +
@@ -687,4 +685,25 @@ long long unsigned compute_simplified_flops(int number_of_people)
                                n * (n + nb) * 2 * a +
                                n * (5 * a + 9 * b + 3 * c + d);
     return flops;
+}
+
+long long unsigned compute_251_flops(int number_of_people)
+{
+    long long unsigned n = number_of_people / 8;
+    long long unsigned inner_loop_iterations = 8 * (n * (n - 1)) / 2;
+    // printf("ecco qua porca troia ---> %llu\n", inner_loop_iterations);
+    long long unsigned a, b, c, d, fe, res;
+    a = add_cost;
+    b = mult_cost;
+    c = div_cost;
+    d = sqrt_cost;
+    fe = fast_exp_cost;
+
+    res = n * 8 * b +
+          n * (64 * a + 88 * b + 16 * c + 16 * d) +
+          n * (689 * a + 1106 * b + 280 * c + 140 * d + 56 * fe) +
+          n * (32 * a + 32 * b) +
+          inner_loop_iterations * (200 * a + 320 * b + 80 * c + 56 * d + 16 * fe);
+
+    return res;
 }
