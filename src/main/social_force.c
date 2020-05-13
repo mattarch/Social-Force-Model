@@ -38,7 +38,7 @@
 
 // standard C versions
 #include "stdc_opt/social_force_model_stdc_optv_2_5_1.h"
-#include "stdc_opt/social_force_model_stdc_optv_3_2.h"
+#include "stdc_opt/social_force_model_stdc_optv_2_4.h"
 
 // testing
 #include "testing_float/test_sets_float.h"
@@ -182,7 +182,7 @@ void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_4_double");
 
     add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_simplified_flops, IS_DOUBLE,compute_operational_intensity_251, "stdc_optv_2_5_1_double");
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_optv_3_2, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_3_2_double");
+    // add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_4, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_2_4_double");
 
     add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
 }

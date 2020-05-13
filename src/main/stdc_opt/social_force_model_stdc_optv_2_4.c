@@ -7,14 +7,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "social_force_model_stdc_optv_3_2.h"
+#include "social_force_model_stdc_optv_2_4.h"
 #include "../social_force.h"
 #include "../utility.h"
 
 extern char filename_global[80];
 extern struct arguments arguments;
 
-void simulation_basic_optv_3_2(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *position_temp,
+void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *position_temp,
                                double *speed_temp, double *desired_direction_temp, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
