@@ -107,5 +107,6 @@ long long unsigned int compute_simplified_flops(int number_of_people);
 double compute_operational_intensity_251(int number_of_people);
 double compute_operational_intensity_0(int n);
 long long unsigned compute_251_flops(int number_of_people);
+unsigned int flush_cache(int n);
 
 #endif

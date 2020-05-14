@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     int test_func_counter = 0;
 
     // default values for arguments
-    arguments.n_people = 300;
+    arguments.n_people = 512;
     arguments.n_timesteps = 300;
     arguments.test = false;
     arguments.walkway_width = 4;
@@ -469,8 +469,10 @@ void run_bench_float(sim_t sim)
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
     double total_cycles = 0;
+    unsigned long useless_sum = 0; 
     for (size_t j = 0; j < REP; j++)
     {
+        //useless_sum += flush_cache(j);
         start = start_tsc();
         f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
@@ -499,7 +501,8 @@ void run_bench_float(sim_t sim)
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
     double performance = (double)flops / cycles;
-    printf("%s %d %llu %.2f %.3f %.2f\n", name, number_of_people, flops, cycles, performance, op_intensity);
+    //Useless sum is used to create a dependency for the flush cache function
+    printf("%s %d %llu %.2f %.3f %.2f %lu\n", name, number_of_people, flops, cycles, performance, op_intensity, useless_sum);
 }
 
 /*
@@ -588,9 +591,10 @@ void run_bench_double(sim_t sim)
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
     double total_cycles = 0;
+    unsigned long useless_sum = 0; 
     for (size_t j = 0; j < REP; j++)
     {
-
+        //useless_sum += flush_cache(j);
         start = start_tsc();
         f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
         end = stop_tsc(start);
@@ -619,7 +623,8 @@ void run_bench_double(sim_t sim)
     cycles = cycles_list[REP / 2]; //total_cycles;
     free(cycles_list);
     double performance = (double)flops / cycles;
-    printf("%s %d %llu %.2f %.3f %.2f\n", name, number_of_people, flops, cycles, performance, op_intensity);
+    //Useless sum is used to create a dependency for the flush cache function
+    printf("%s %d %llu %.2f %.3f %.2f %lu\n", name, number_of_people, flops, cycles, performance, op_intensity, useless_sum);
 }
 
 /*
@@ -705,5 +710,23 @@ long long unsigned compute_251_flops(int number_of_people)
           n * (32 * a + 32 * b) +
           inner_loop_iterations * (200 * a + 320 * b + 80 * c + 56 * d + 16 * fe);
 
+    return res;
+}
+
+unsigned int flush_cache(int n)
+{
+    size_t size_L3_cache = 1<<20;
+    unsigned int res = 0;
+    int* arr = malloc(sizeof(int) * size_L3_cache);
+    for(size_t i = 0; i < size_L3_cache; i++)
+    {
+        arr[i] = i + n;
+    }
+
+    for(size_t i = 0; i < size_L3_cache; i++)
+    {
+        res += i;
+    }
+    free(arr);
     return res;
 }
