@@ -102,11 +102,18 @@ void initialize_borders_double(double *borders, int n_borders);
 void run_bench_float(sim_t sim);
 void run_bench_double(sim_t sim);
 int compare(const void *a, const void *b);
-long long unsigned int compute_basic_flops(int number_of_people);
 long long unsigned int compute_simplified_flops(int number_of_people);
+long long unsigned compute_251_flops(int number_of_people);
 double compute_operational_intensity_251(int number_of_people);
 double compute_operational_intensity_0(int n);
-long long unsigned compute_251_flops(int number_of_people);
+double compute_operational_intensity_float(int n);
+double compute_operational_intensity_optimized_float(int n);
+double compute_operational_intensity_double(int n);
+double compute_operational_intensity_optimized_double(int n);
+long long unsigned lower_memory_bound_float(int number_of_people);
+long long unsigned lower_memory_bound_optimized_float(int number_of_people);
+long long unsigned lower_memory_bound_double(int number_of_people);
+long long unsigned lower_memory_bound_optimized_double(int number_of_people);
 unsigned int flush_cache(int n);
 
 #endif

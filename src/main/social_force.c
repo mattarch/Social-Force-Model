@@ -166,7 +166,7 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
     // add_function(sim_list, sim_counter, simulation_basic_vectorize_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_1");
     // add_function(sim_list, sim_counter, simulation_basic_vectorize_2, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_2");
     // add_function(sim_list, sim_counter, simulation_basic_vectorize_3, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_3");
-    add_function(sim_list, sim_counter, simulation_basic_vectorize_4, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_4");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_4, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_optimized_float, "vectorize_4");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_251, "vectorize_2_5_1");
 
     add_test_function(test_functions_list, test_simulation_basic_simplified, NULL, IS_FLOAT, test_func_counter);
@@ -177,7 +177,7 @@ void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test
     // add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "simplified_double");
     // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_1_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_1_double");
     // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_2_double");
-    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_4_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_optimized_double, "vectorize_4_double");
 
     add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double");
     // add_function(sim_list, sim_counter, NULL, simulation_basic_optv_3_2, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_3_2_double");
@@ -469,7 +469,7 @@ void run_bench_float(sim_t sim)
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
     double total_cycles = 0;
-    unsigned long useless_sum = 0; 
+    unsigned long useless_sum = 0;
     for (size_t j = 0; j < REP; j++)
     {
         //useless_sum += flush_cache(j);
@@ -591,7 +591,7 @@ void run_bench_double(sim_t sim)
     // Actual performance measurements repeated REP times.
     // We simply store all results and compute medians during post-processing.
     double total_cycles = 0;
-    unsigned long useless_sum = 0; 
+    unsigned long useless_sum = 0;
     for (size_t j = 0; j < REP; j++)
     {
         //useless_sum += flush_cache(j);
@@ -645,28 +645,26 @@ double compute_operational_intensity_0(int n)
     return 0.0;
 }
 
-/*
-*   Function that returns the number of flops. Computed useing wxMaxima.
-*/
-long long unsigned compute_basic_flops(int number_of_people)
+double compute_operational_intensity_float(int n)
 {
-    long long unsigned n = number_of_people;
-    long long unsigned nb = N_BORDERS;
-    long long unsigned a, b, c, d, e, f;
-    a = add_cost;
-    b = mult_cost;
-    c = div_cost;
-    d = sqrt_cost;
-    e = exp_cost;
-    f = fabs_cost;
-    long long unsigned flops = n * (3 * a + 2 * b + 2 * c * d) +
-                               n * 2 * b +
-                               n * (2 * a + 4 * b + 2 * c) +
-                               (n * n - n) * (15 * a + 22 * b + 13 * c + 4 * d + 2 * e) +
-                               (nb * n) * (a + 4 * b + 6 * c + 2 * e + f) +
-                               n * (n + nb) * 2 * a +
-                               n * (a * 6 + 12 * b + 3 * c + 2 * d);
-    return flops;
+    return ((double) compute_simplified_flops(n)) / lower_memory_bound_float(n); 
+}
+
+// used for vectorized_3 and vectorized_4
+double compute_operational_intensity_optimized_float(int n)
+{
+    return ((double) compute_simplified_flops(n)) / lower_memory_bound_optimized_float(n); 
+}
+
+double compute_operational_intensity_double(int n)
+{
+    return ((double) compute_simplified_flops(n)) / lower_memory_bound_double(n); 
+}
+
+// used for vectorized_3 and vectorized_4
+double compute_operational_intensity_optimized_double(int n)
+{
+    return ((double) compute_simplified_flops(n)) / lower_memory_bound_optimized_double(n); 
 }
 
 /*
@@ -713,17 +711,79 @@ long long unsigned compute_251_flops(int number_of_people)
     return res;
 }
 
+// returns a lower bound for the number of bytes
+long long unsigned lower_memory_bound_float(int number_of_people)
+{
+    long long unsigned n = number_of_people;
+    long long unsigned res = 0;
+
+    // sum up
+    res = (2 * n)       // position
+          + n           // speed
+          + (2 * n)     // desired direction
+          + (2 * n)     // final destination
+          + 2           // borders
+          + (2 * n)     // actual velocity
+          + (2 * n)     // acceleration term
+          + (2 * n * n) // people repulsion term
+          + (4 * n)     // border repulsion term
+          + (2 * n)     // social force
+          + n           // desired speed
+          + n;          // desired max speed
+
+    res *= 4;
+
+    return res;
+}
+
+// returns a lower bound for the number of bytes
+long long unsigned lower_memory_bound_optimized_float(int number_of_people)
+{
+    long long unsigned n = number_of_people;
+    long long unsigned res = 0;
+
+    // sum up
+    res = (2 * n)    // position
+          + n        // speed
+          + (2 * n)  // desired direction
+          + (2 * n)  // final destination
+          + 2        // borders
+          + (2 * n)  // actual velocity
+          + (2 * n)  // acceleration term
+          + (16 * n) // people repulsion term
+          + (4 * n)  // border repulsion term
+          + (2 * n)  // social force
+          + n        // desired speed
+          + n;       // desired max speed
+
+    res *= 4;
+
+    return res;
+}
+
+// returns a lower bound for the number of bytes
+long long unsigned lower_memory_bound_double(int number_of_people)
+{
+    return 2 * lower_memory_bound_float(number_of_people);
+}
+
+// returns a lower bound for the number of bytes
+long long unsigned lower_memory_bound_optimized_double(int number_of_people)
+{
+    return 2 * lower_memory_bound_optimized_float(number_of_people);
+}
+
 unsigned int flush_cache(int n)
 {
-    size_t size_L3_cache = 1<<20;
+    size_t size_L3_cache = 1 << 20;
     unsigned int res = 0;
-    int* arr = malloc(sizeof(int) * size_L3_cache);
-    for(size_t i = 0; i < size_L3_cache; i++)
+    int *arr = malloc(sizeof(int) * size_L3_cache);
+    for (size_t i = 0; i < size_L3_cache; i++)
     {
         arr[i] = i + n;
     }
 
-    for(size_t i = 0; i < size_L3_cache; i++)
+    for (size_t i = 0; i < size_L3_cache; i++)
     {
         res += i;
     }
