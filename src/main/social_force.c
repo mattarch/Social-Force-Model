@@ -419,9 +419,9 @@ void run_bench_float(sim_t sim)
     double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;
-
+    int num_runs = 2;
     int number_of_people = arguments.n_people;
-    int n_timesteps = 1;
+    int n_timesteps = 20;
     
     // allocate memory
 
@@ -473,9 +473,12 @@ void run_bench_float(sim_t sim)
     // Warm-up phase
     do
     {
-        n_timesteps = n_timesteps * multiplier;
+        num_runs = num_runs * multiplier;
         start = start_tsc();
-        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        for(size_t i = 0; i < num_runs; i++)
+        {
+            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        }
         end = stop_tsc(start);
 
         cycles = (double)end;
@@ -498,10 +501,13 @@ void run_bench_float(sim_t sim)
     {
         //useless_sum += flush_cache(j);
         start = start_tsc();
-        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        for(size_t i = 0; i < num_runs; i++)
+        {
+            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        }
         end = stop_tsc(start);
 
-        cycles = ((double)end);
+        cycles = ((double)end) / num_runs;
         // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
         // total_cycles += cycles;
 
@@ -526,7 +532,7 @@ void run_bench_float(sim_t sim)
     free(cycles_list);
     double performance = (double)flops / cycles;
     //Useless sum is used to create a dependency for the flush cache function
-    printf("%s %d %llu %.2f %.3f %.2f %lu\n", name, number_of_people, flops, cycles, performance, op_intensity, useless_sum);
+    printf("%s %d %llu %.2f %.3f %.2f\n", name, number_of_people, flops, cycles, performance, op_intensity);
 }
 
 /*
@@ -541,10 +547,10 @@ void run_bench_double(sim_t sim)
     char *fun_name = sim.name;
     double cycles = 0.;
     double multiplier = 1;
-    myInt64 start, end;
-
+    myInt64 start, end;    
+    int num_runs = 2;
     int number_of_people = arguments.n_people;
-    int n_timesteps = 1;
+    int n_timesteps = 20;
     
     // allocate memory
 
@@ -596,15 +602,19 @@ void run_bench_double(sim_t sim)
     // Warm-up phase
     do
     {
-        n_timesteps = n_timesteps * multiplier;
+        num_runs = num_runs * multiplier;
         start = start_tsc();
-        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        for(size_t i = 0; i < num_runs; i++)
+        {
+                f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        }
         end = stop_tsc(start);
 
         cycles = (double)end;
         // printf("%Lf\t%llu\n", cycles, end);
         multiplier = (CYCLES_REQUIRED) / (cycles);
     } while (multiplier > 2);
+
     double op_intensity = op_f(number_of_people, n_timesteps);
     long long unsigned flops = n_timesteps * flops_f(number_of_people);
     double *cycles_list = malloc(sizeof(double) * REP);
@@ -620,10 +630,13 @@ void run_bench_double(sim_t sim)
     {
         //useless_sum += flush_cache(j);
         start = start_tsc();
-        f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        for(size_t i = 0; i < num_runs; i++)
+        {
+            f(number_of_people, n_timesteps, position, speed, desired_direction, final_destination, borders, actual_velocity, acceleration_term, people_repulsion_term, border_repulsion_term, social_force, desired_speed, desired_max_speed);
+        }
         end = stop_tsc(start);
 
-        cycles = ((double)end);
+        cycles = ((double)end) / num_runs;
         // printf("%llu\t%Lf\t%d\n", end, cycles, n_timesteps);
         // total_cycles += cycles;
 
@@ -648,7 +661,7 @@ void run_bench_double(sim_t sim)
     free(cycles_list);
     double performance = (double)flops / cycles;
     //Useless sum is used to create a dependency for the flush cache function
-    printf("%s %d %llu %.2f %.3f %.2f %lu\n", name, number_of_people, flops, cycles, performance, op_intensity, useless_sum);
+    printf("%s %d %llu %.2f %.3f %.2f\n", name, number_of_people, flops, cycles, performance, op_intensity);
 }
 
 /*
