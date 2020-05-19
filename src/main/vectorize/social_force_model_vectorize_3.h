@@ -9,6 +9,7 @@
 
 #include <immintrin.h>
 
+__m256 exp_fast_vec_float_3(__m256 x);
 void update_desired_direction_vectorize_3(float *position, float *final_destination, float *desired_direction, int n);
 void update_acceleration_term_vectorize_3(float *desired_direction, float *acceleration_term, float *actual_velocity, float *desired_speed, int n);
 void update_people_repulsion_term_vectorize_3(float *position, float *desired_direction, float *actual_speed, float *Repulsion_term, int n);

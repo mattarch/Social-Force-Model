@@ -15,7 +15,23 @@
 
 extern char filename_global[80];
 
-
+__m256d exp_fast_vec_double_2(__m256d x)
+{
+  x = _mm256_fmadd_pd(x, _mm256_set1_pd(0.000244140625), _mm256_set1_pd(1.0));
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  return x;
+}
 
 /*
   This function updates the desired direction for all people.
@@ -245,7 +261,7 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
   __m256d mask;
 
   __m256d timestep_vec = _mm256_set1_pd(-TIMESTEP);
-  __m256d minus_sigma_inv_vec = _mm256_set1_pd(-1.0/SIGMA);
+  __m256d minus_sigma_inv_vec = _mm256_set1_pd(-1.0 / SIGMA);
   __m256d div_factor_vec = _mm256_set1_pd(DIV_FACTOR);
   __m256d projection_factor_vec = _mm256_set1_pd(PROJECTION_FACTOR);
   __m256d influencer_vec = _mm256_set1_pd(INFLUENCE);
@@ -306,7 +322,7 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
       b = _mm256_mul_pd(b, half_vec);
 
       exp = _mm256_mul_pd(b, minus_sigma_inv_vec);
-      exp = exp_fast_vec_double(exp);
+      exp = exp_fast_vec_double_2(exp);
 
       common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
       common_factor = _mm256_div_pd(common_factor, b);
@@ -317,7 +333,7 @@ void update_people_repulsion_term_vectorize_2_double(double *position, double *d
 
       // compute norm r_ab
       repulsion_2_y = _mm256_mul_pd(repulsion_y, repulsion_y);
-      threshold = _mm256_sqrt_pd(_mm256_fmadd_pd(repulsion_x,repulsion_x, repulsion_2_y));
+      threshold = _mm256_sqrt_pd(_mm256_fmadd_pd(repulsion_x, repulsion_x, repulsion_2_y));
 
       check_y = _mm256_mul_pd(e_a_y, repulsion_y);
       check = _mm256_fmadd_pd(e_a_x, repulsion_x, check_y);
@@ -450,7 +466,7 @@ void update_border_repulsion_term_vectorize_2_double(double *position, double *b
 
       exp = _mm256_div_pd(r_aB_norm, r_vec);
       exp = _mm256_mul_pd(exp, minus1);
-      exp = exp_fast_vec_double(exp);
+      exp = exp_fast_vec_double_2(exp);
 
       common_factor = _mm256_div_pd(u_alpha_b_vec, r_vec);
       common_factor = _mm256_div_pd(common_factor, r_aB_norm);
@@ -770,7 +786,7 @@ void update_position_vectorize_2_double(double *position, double *desired_direct
 }
 
 void simulation_basic_vectorize_2_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                                  double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
+                                         double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {
   // start simulation
   CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));

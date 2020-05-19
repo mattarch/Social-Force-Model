@@ -10,7 +10,6 @@
 extern struct arguments arguments;
 extern char filename_global[80];
 
-#include <immintrin.h>
 
 /* function defined in the header file itself */
 int contains_substring(char* haystack, char *needle);
@@ -25,9 +24,6 @@ void output_to_file_constants_double(char *);
 void free_all(int n, ...);
 float exp_fast_float(float x);
 double exp_fast_double(double x);
-
-__m256d exp_fast_vec_double(__m256d x);
-__m256 exp_fast_vec_float(__m256 x);
 
 float exp_taylor(float x);
 

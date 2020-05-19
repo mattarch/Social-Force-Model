@@ -15,7 +15,23 @@
 
 extern char filename_global[80];
 
-
+__m256 exp_fast_vec_float_3(__m256 x)
+{
+  x = _mm256_fmadd_ps(x, _mm256_set1_ps(0.000244140625), _mm256_set1_ps(1.0));
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  return x;
+}
 
 /*
   This function updates the desired direction for all people.
@@ -304,7 +320,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
       b = _mm256_mul_ps(b, half_vec);
 
       exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
-      exp = exp_fast_vec_float(exp);
+      exp = exp_fast_vec_float_3(exp);
 
       common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
       common_factor = _mm256_div_ps(common_factor, b);
@@ -426,7 +442,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
         b = _mm256_mul_ps(b, half_vec);
 
         exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
-        exp = exp_fast_vec_float(exp);
+        exp = exp_fast_vec_float_3(exp);
 
         common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
         common_factor = _mm256_div_ps(common_factor, b);
@@ -515,7 +531,7 @@ void update_people_repulsion_term_vectorize_3(float *position, float *desired_di
         b = _mm256_mul_ps(b, half_vec);
 
         exp = _mm256_mul_ps(b, minus_sigma_inv_vec);
-        exp = exp_fast_vec_float(exp);
+        exp = exp_fast_vec_float_3(exp);
 
         common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
         common_factor = _mm256_div_ps(common_factor, b);
@@ -656,7 +672,7 @@ void update_border_repulsion_term_vectorize_3(float *position, float *borders, f
       r_aB_norm = _mm256_blendv_ps(r_aB_minus_y, r_aB_y, mask_y);
 
       exp = _mm256_mul_ps(r_aB_norm, minus_r_vec_inv);
-      exp = exp_fast_vec_float(exp);
+      exp = exp_fast_vec_float_3(exp);
 
       common_factor = _mm256_mul_ps(u_alpha_b_vec, _mm256_rcp_ps(r_aB_norm));
       common_factor = _mm256_mul_ps(exp, common_factor);

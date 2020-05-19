@@ -284,41 +284,8 @@ double exp_fast_double(double x)
     return x;
 }
 
-__m256d exp_fast_vec_double(__m256d x)
-{
-  x = _mm256_fmadd_pd(x, _mm256_set1_pd(0.000244140625), _mm256_set1_pd(1.0));
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  x = _mm256_mul_pd(x, x);
-  return x;
-}
 
-__m256 exp_fast_vec_float(__m256 x)
-{
-  x = _mm256_fmadd_ps(x, _mm256_set1_ps(0.000244140625), _mm256_set1_ps(1.0));
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  x = _mm256_mul_ps(x, x);
-  return x;
-}
+
 
 float exp_taylor(float x)
 {

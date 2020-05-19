@@ -15,6 +15,25 @@
 
 extern char filename_global[80];
 
+__m256d exp_fast_vec_double_1(__m256d x)
+{
+  x = _mm256_fmadd_pd(x, _mm256_set1_pd(0.000244140625), _mm256_set1_pd(1.0));
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  return x;
+}
+
+
 /*
   This function updates the desired direction for all people.
   This function corresponds to formula (1) from the paper.
@@ -303,7 +322,7 @@ void update_people_repulsion_term_vectorize_1_double(double *position, double *d
 
       exp = _mm256_div_pd(b, sigma_vec);
       exp = _mm256_mul_pd(exp, minus1_vec);
-      exp = exp_fast_vec_double(exp);
+      exp = exp_fast_vec_double_1(exp);
 
       common_factor = _mm256_mul_pd(norm_sum, div_factor_vec);
       common_factor = _mm256_div_pd(common_factor, b);
@@ -449,7 +468,7 @@ void update_border_repulsion_term_vectorize_1_double(double *position, double *b
 
       exp = _mm256_div_pd(r_aB_norm, r_vec);
       exp = _mm256_mul_pd(exp, minus1);
-      exp = exp_fast_vec_double(exp);
+      exp = exp_fast_vec_double_1(exp);
 
       common_factor = _mm256_div_pd(u_alpha_b_vec, r_vec);
       common_factor = _mm256_div_pd(common_factor, r_aB_norm);

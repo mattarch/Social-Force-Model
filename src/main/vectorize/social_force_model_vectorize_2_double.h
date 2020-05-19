@@ -9,7 +9,7 @@
 
 
 #include <immintrin.h>
-
+__m256d exp_fast_vec_double_2(__m256d x);
 void update_desired_direction_vectorize_2_double(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term_vectorize_2_double(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
 //void compute_actual_velocity_vectorize_2_double(double *actual_speed, double *desired_direction, double *actual_velocity, int n);

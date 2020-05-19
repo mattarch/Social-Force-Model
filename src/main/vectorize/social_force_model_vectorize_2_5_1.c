@@ -14,6 +14,24 @@
 #include "../social_force.h"
 #include "../utility.h"
 
+__m256 exp_fast_vec_float_2_5_1(__m256 x)
+{
+  x = _mm256_fmadd_ps(x, _mm256_set1_ps(0.000244140625), _mm256_set1_ps(1.0));
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  return x;
+}
+
 void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, float *position, float *speed, float *desired_direction, float *final_destination,
                                       float *borders, float *actual_velocity, float *acceleration_term, float *people_repulsion_term, float *border_repulsion_term,
                                       float *social_force, float *desired_speed, float *desired_max_speed)
@@ -155,7 +173,7 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
 
           exp = _mm256_mul_ps(b, sigma_vec);
           exp = _mm256_mul_ps(_mm256_rcp_ps(exp), minus1_vec);
-          exp = exp_fast_vec_float(exp);
+          exp = exp_fast_vec_float_2_5_1(exp);
 
           common_factor = _mm256_mul_ps(norm_sum, div_factor_vec);
           common_factor = _mm256_mul_ps(common_factor, b);
@@ -263,14 +281,14 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
       // UPDATE BORDER REPULSION TERM
       /************************************************/
       __m256 ryaB0 = _mm256_sub_ps(rya, fb_vec);
-      __m256 se0 = exp_fast_vec_float(_mm256_mul_ps(ryaB0, invr_vec));
+      __m256 se0 = exp_fast_vec_float_2_5_1(_mm256_mul_ps(ryaB0, invr_vec));
       se0 = _mm256_mul_ps(se0, utimesr_vec);
       se0 = _mm256_div_ps(se0, ryaB0);
       se0 = _mm256_mul_ps(se0, minus_one);
       __m256 rb0 = _mm256_mul_ps(se0, ryaB0);
 
       __m256 ryaB1 = _mm256_sub_ps(rya, sb_vec);
-      __m256 se1 = exp_fast_vec_float(_mm256_mul_ps(_mm256_mul_ps(ryaB1,minus_one), invr_vec));
+      __m256 se1 = exp_fast_vec_float_2_5_1(_mm256_mul_ps(_mm256_mul_ps(ryaB1,minus_one), invr_vec));
       se1 = _mm256_mul_ps(se1, utimesr_vec);
       se1 = _mm256_div_ps(se1, ryaB1);
       __m256 rb1 = _mm256_mul_ps(se1, ryaB1);
@@ -357,12 +375,12 @@ void simulation_basic_vectorize_2_5_1(int number_of_people, int n_timesteps, flo
         babnorm = _mm256_mul_ps(babnorm, two);
         bbanorm = _mm256_mul_ps(bbanorm, two);
 
-        __m256 cfab = exp_fast_vec_float(_mm256_mul_ps(_mm256_rcp_ps(babnorm), inv_sigma_vec));
+        __m256 cfab = exp_fast_vec_float_2_5_1(_mm256_mul_ps(_mm256_rcp_ps(babnorm), inv_sigma_vec));
         cfab = _mm256_mul_ps(cfab, div_factor_vec);
         cfab = _mm256_mul_ps(cfab, normsumab);
         cfab = _mm256_mul_ps(cfab, babnorm);
 
-        __m256 cfba = exp_fast_vec_float(_mm256_mul_ps(_mm256_rcp_ps(bbanorm), inv_sigma_vec));
+        __m256 cfba = exp_fast_vec_float_2_5_1(_mm256_mul_ps(_mm256_rcp_ps(bbanorm), inv_sigma_vec));
         cfba = _mm256_mul_ps(cfba, div_factor_vec);
         cfba = _mm256_mul_ps(cfba, normsumba);
         cfba = _mm256_mul_ps(cfba, bbanorm);
