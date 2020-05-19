@@ -73,11 +73,13 @@ int main(int argc, char *argv[])
     //simulations and tests list
     sim_t *sim_list_float[50];
     sim_t *sim_list_double[50];
+    sim_t *sim_list_double_restructured[50];
 
     sim_t *test_functions_list[50];
 
     int sim_counter_float = 0;
     int sim_counter_double = 0;
+    int sim_counter_double_restructured = 0;
 
     int test_func_counter = 0;
 
@@ -96,12 +98,14 @@ int main(int argc, char *argv[])
 
     add_implementations_float(sim_list_float, &sim_counter_float, test_functions_list, &test_func_counter);
     add_implementations_double(sim_list_double, &sim_counter_double, test_functions_list, &test_func_counter);
+    add_implementations_double_restructured(sim_list_double_restructured, &sim_counter_double_restructured, test_functions_list, &test_func_counter);
 
     if (arguments.test || arguments.visual)
     {
         //seed = j;
         run_tests(sim_list_float, sim_counter_float);
         run_tests_double(sim_list_double, sim_counter_double);
+        run_tests_double(sim_list_double_restructured, sim_counter_double_restructured);
 
         for (int i = 0; i < test_func_counter; i++)
         {
@@ -128,6 +132,11 @@ int main(int argc, char *argv[])
                 sim_t sim = *sim_list_double[i];
                 run_bench_double(sim);
             }
+            for (int i = 0; i < sim_counter_double_restructured; i++)
+            {
+                sim_t sim = *sim_list_double_restructured[i];
+                run_bench_double(sim);
+            }
         }
         else
         {
@@ -145,6 +154,15 @@ int main(int argc, char *argv[])
             for (int i = 0; i < sim_counter_double; i++)
             {
                 sim_t sim = *sim_list_double[i];
+
+                if (contains_substring(arguments.benchmark, sim.name))
+                {
+                    run_bench_double(sim);
+                }
+            }
+            for (int i = 0; i < sim_counter_double_restructured; i++)
+            {
+                sim_t sim = *sim_list_double_restructured[i];
 
                 if (contains_substring(arguments.benchmark, sim.name))
                 {
@@ -180,11 +198,16 @@ void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_optimized_double, "vectorize_4_double");
 
     add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double");
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_optv_3_2, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_3_2_double");
 
     add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
 }
 
+void add_implementations_double_restructured(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)
+{
+    add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double_restructured, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "simplified_double");
+
+    add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_4, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "stdc_optv_2_4_double");
+}
 /*
 *   Appends a simulation function to the list
 */

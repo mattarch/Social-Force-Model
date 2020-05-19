@@ -76,8 +76,8 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
       double r_aB_0_norm = ry_aB_0 > 0 ? ry_aB_0 : -ry_aB_0;
       double r_aB_1_norm = ry_aB_1 > 0 ? ry_aB_1 : -ry_aB_1;
 
-      double shared_expression_0 = exp_fast((-r_aB_0_norm) * INV_R) * UTIMESR / r_aB_0_norm; //1 exp, 2 mult, 1 div
-      double shared_expression_1 = exp_fast((-r_aB_1_norm) * INV_R) * UTIMESR / r_aB_1_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_0 = exp_fast_double((-r_aB_0_norm) * INV_R) * UTIMESR / r_aB_0_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_1 = exp_fast_double((-r_aB_1_norm) * INV_R) * UTIMESR / r_aB_1_norm; //1 exp, 2 mult, 1 div
 
       double repulsion_0 = shared_expression_0 * ry_aB_0; //1 mult
       double repulsion_1 = shared_expression_1 * ry_aB_1; //1 mult
@@ -92,8 +92,8 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
       double r_a_1B_0_norm = ry_a_1B_0 > 0 ? ry_a_1B_0 : -ry_a_1B_0;
       double r_a_1B_1_norm = ry_a_1B_1 > 0 ? ry_a_1B_1 : -ry_a_1B_1;
 
-      double shared_expression_0_1 = exp_fast((-r_a_1B_0_norm) * INV_R) * UTIMESR / r_a_1B_0_norm; //1 exp, 2 mult, 1 div
-      double shared_expression_1_1 = exp_fast((-r_a_1B_1_norm) * INV_R) * UTIMESR / r_a_1B_1_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_0_1 = exp_fast_double((-r_a_1B_0_norm) * INV_R) * UTIMESR / r_a_1B_0_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_1_1 = exp_fast_double((-r_a_1B_1_norm) * INV_R) * UTIMESR / r_a_1B_1_norm; //1 exp, 2 mult, 1 div
 
       double repulsion_0_1 = shared_expression_0_1 * ry_a_1B_0; //1 mult
       double repulsion_1_1 = shared_expression_1_1 * ry_a_1B_1; //1 mult
@@ -135,8 +135,8 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
       double b_a = sqrt(norm_sum_a * norm_sum_a - delta_a_1 * delta_a_1) * 0.5; //1 add, 3 mult, 1 sqrt
       double b_a1 = sqrt(norm_sum_a1 * norm_sum_a1 - delta_a * delta_a) * 0.5; //1 add, 3 mult, 1 sqrt
 
-      double common_factor_a = exp_fast(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
-      double common_factor_a1 = exp_fast(-b_a1 * inv_sigma) * norm_sum_a1 * DIV_FACTOR / b_a1; //2 mult, 2 div, 1 exp
+      double common_factor_a = exp_fast_double(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
+      double common_factor_a1 = exp_fast_double(-b_a1 * inv_sigma) * norm_sum_a1 * DIV_FACTOR / b_a1; //2 mult, 2 div, 1 exp
 
       repulsion_x *= common_factor_a; //1 mult
       repulsion_x_a1 *= common_factor_a1; //1 mult
@@ -212,10 +212,10 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
         double b_a1b = sqrt(norm_sum_a1b * norm_sum_a1b - delta_b * delta_b) * 0.5; //1 add, 3 mult, 1 sqrt
         double b_ba1 = sqrt(norm_sum_ba1 * norm_sum_ba1 - delta_a_1 * delta_a_1) * 0.5; //1 add, 3 mult, 1 sqrt
 
-        double common_factor_a = exp_fast(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
-        double common_factor_b = exp_fast(-b_b * inv_sigma) * norm_sum_b * DIV_FACTOR / b_b; //2 mult, 2 div, 1 exp
-        double common_factor_a1b = exp_fast(-b_a1b * inv_sigma) * norm_sum_a1b * DIV_FACTOR / b_a1b; //2 mult, 2 div, 1 exp
-        double common_factor_ba1 = exp_fast(-b_ba1 * inv_sigma) * norm_sum_ba1 * DIV_FACTOR / b_ba1; //2 mult, 2 div, 1 exp
+        double common_factor_a = exp_fast_double(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
+        double common_factor_b = exp_fast_double(-b_b * inv_sigma) * norm_sum_b * DIV_FACTOR / b_b; //2 mult, 2 div, 1 exp
+        double common_factor_a1b = exp_fast_double(-b_a1b * inv_sigma) * norm_sum_a1b * DIV_FACTOR / b_a1b; //2 mult, 2 div, 1 exp
+        double common_factor_ba1 = exp_fast_double(-b_ba1 * inv_sigma) * norm_sum_ba1 * DIV_FACTOR / b_ba1; //2 mult, 2 div, 1 exp
 
         repulsion_x *= common_factor_a; //1 mult
         repulsion_x_b *= common_factor_b; //1 mult
@@ -414,8 +414,8 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
       double r_aB_0_norm = ry_aB_0 > 0 ? ry_aB_0 : -ry_aB_0;
       double r_aB_1_norm = ry_aB_1 > 0 ? ry_aB_1 : -ry_aB_1;
 
-      double shared_expression_0 = exp_fast((-r_aB_0_norm) * INV_R) * UTIMESR / r_aB_0_norm; //1 exp, 2 mult, 1 div
-      double shared_expression_1 = exp_fast((-r_aB_1_norm) * INV_R) * UTIMESR / r_aB_1_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_0 = exp_fast_double((-r_aB_0_norm) * INV_R) * UTIMESR / r_aB_0_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_1 = exp_fast_double((-r_aB_1_norm) * INV_R) * UTIMESR / r_aB_1_norm; //1 exp, 2 mult, 1 div
 
       double repulsion_0 = shared_expression_0 * ry_aB_0; //1 mult
       double repulsion_1 = shared_expression_1 * ry_aB_1; //1 mult
@@ -430,8 +430,8 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
       double r_a_1B_0_norm = ry_a_1B_0 > 0 ? ry_a_1B_0 : -ry_a_1B_0;
       double r_a_1B_1_norm = ry_a_1B_1 > 0 ? ry_a_1B_1 : -ry_a_1B_1;
 
-      double shared_expression_0_1 = exp_fast((-r_a_1B_0_norm) * INV_R) * UTIMESR / r_a_1B_0_norm; //1 exp, 2 mult, 1 div
-      double shared_expression_1_1 = exp_fast((-r_a_1B_1_norm) * INV_R) * UTIMESR / r_a_1B_1_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_0_1 = exp_fast_double((-r_a_1B_0_norm) * INV_R) * UTIMESR / r_a_1B_0_norm; //1 exp, 2 mult, 1 div
+      double shared_expression_1_1 = exp_fast_double((-r_a_1B_1_norm) * INV_R) * UTIMESR / r_a_1B_1_norm; //1 exp, 2 mult, 1 div
 
       double repulsion_0_1 = shared_expression_0_1 * ry_a_1B_0; //1 mult
       double repulsion_1_1 = shared_expression_1_1 * ry_a_1B_1; //1 mult
@@ -473,8 +473,8 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
       double b_a = sqrt(norm_sum_a * norm_sum_a - delta_a_1 * delta_a_1) * 0.5; //1 add, 3 mult, 1 sqrt
       double b_a1 = sqrt(norm_sum_a1 * norm_sum_a1 - delta_a * delta_a) * 0.5; //1 add, 3 mult, 1 sqrt
 
-      double common_factor_a = exp_fast(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
-      double common_factor_a1 = exp_fast(-b_a1 * inv_sigma) * norm_sum_a1 * DIV_FACTOR / b_a1; //2 mult, 2 div, 1 exp
+      double common_factor_a = exp_fast_double(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
+      double common_factor_a1 = exp_fast_double(-b_a1 * inv_sigma) * norm_sum_a1 * DIV_FACTOR / b_a1; //2 mult, 2 div, 1 exp
 
       repulsion_x *= common_factor_a; //1 mult
       repulsion_x_a1 *= common_factor_a1; //1 mult
@@ -550,10 +550,10 @@ void simulation_basic_optv_2_4(int number_of_people, int n_timesteps, double *po
         double b_a1b = sqrt(norm_sum_a1b * norm_sum_a1b - delta_b * delta_b) * 0.5; //1 add, 3 mult, 1 sqrt
         double b_ba1 = sqrt(norm_sum_ba1 * norm_sum_ba1 - delta_a_1 * delta_a_1) * 0.5; //1 add, 3 mult, 1 sqrt
 
-        double common_factor_a = exp_fast(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
-        double common_factor_b = exp_fast(-b_b * inv_sigma) * norm_sum_b * DIV_FACTOR / b_b; //2 mult, 2 div, 1 exp
-        double common_factor_a1b = exp_fast(-b_a1b * inv_sigma) * norm_sum_a1b * DIV_FACTOR / b_a1b; //2 mult, 2 div, 1 exp
-        double common_factor_ba1 = exp_fast(-b_ba1 * inv_sigma) * norm_sum_ba1 * DIV_FACTOR / b_ba1; //2 mult, 2 div, 1 exp
+        double common_factor_a = exp_fast_double(-b_a * inv_sigma) * norm_sum_a * DIV_FACTOR / b_a; //2 mult, 2 div, 1 exp
+        double common_factor_b = exp_fast_double(-b_b * inv_sigma) * norm_sum_b * DIV_FACTOR / b_b; //2 mult, 2 div, 1 exp
+        double common_factor_a1b = exp_fast_double(-b_a1b * inv_sigma) * norm_sum_a1b * DIV_FACTOR / b_a1b; //2 mult, 2 div, 1 exp
+        double common_factor_ba1 = exp_fast_double(-b_ba1 * inv_sigma) * norm_sum_ba1 * DIV_FACTOR / b_ba1; //2 mult, 2 div, 1 exp
 
         repulsion_x *= common_factor_a; //1 mult
         repulsion_x_b *= common_factor_b; //1 mult

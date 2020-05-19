@@ -23,7 +23,7 @@ void output_to_file_initial_state_double(char *filename, double *position, doubl
 void output_to_file_persons_double(char *filename, double *position, double *actual_speed, double *desired_direction, double *final_destination, int n, int n_timestep);
 void output_to_file_constants_double(char *);
 void free_all(int n, ...);
-float exp_fast(float x);
+float exp_fast_float(float x);
 double exp_fast_double(double x);
 
 __m256d exp_fast_vec_double(__m256d x);

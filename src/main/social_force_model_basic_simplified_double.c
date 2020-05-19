@@ -340,6 +340,28 @@ void simulation_basic_simplified_double(int number_of_people, int n_timesteps, d
   CONSOLE_PRINT(("Simulation terminated\n"));
 }
 
+void simulation_basic_simplified_double_restructured(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                                                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
+{
+  // start simulation
+  CONSOLE_PRINT(("Start simulation with %d persons\n", number_of_people));
+
+  // simulate steps
+  for (int step = 0; step < n_timesteps; step++)
+  {
+    // update variables
+    update_acceleration_term_simplified_double(desired_direction, acceleration_term, actual_velocity, desired_speed, number_of_people);
+    update_people_repulsion_term_simplified_double(position, desired_direction, speed, people_repulsion_term, number_of_people);
+    update_border_repulsion_term_simplified_double(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
+    compute_social_force_simplified_double(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
+    update_position_simplified_double(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
+    update_desired_direction_simplified_double(position, final_destination, desired_direction, number_of_people);
+    CONSOLE_PRINT(("Finished iteration %d\n", (step + 1)));
+  }
+
+  CONSOLE_PRINT(("Simulation terminated\n"));
+}
+
 void test_simulation_basic_simplified_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
                                              double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed)
 {

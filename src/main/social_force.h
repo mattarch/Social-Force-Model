@@ -85,6 +85,7 @@ typedef struct
 
 void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter);
 void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter);
+void add_implementations_double_restructured(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter);
 
 void add_function(sim_t **sim_list, int *sim_counter, sim_func f, sim_func_double f_double, flops_func flops_f, int is_double, op_int_func op_f, char *name);
 void add_test_function(sim_t **test_functions_list, sim_func f, sim_func_double f_double, int is_double, int *test_func_counter);

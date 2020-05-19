@@ -71,7 +71,9 @@ int compare_simulations_double(sim_t **sim_list, int sim_counter)
 {
     int error_check = 0;
     int number_of_people = 80;
-    int n_timesteps = 1;
+    int n_timesteps_simplified = 1;
+    int n_timesteps_optimized = 1;
+
     int n_test_timesteps = 300;
     double *oracle_position, *oracle_speed, *oracle_desired_direction, *oracle_final_destination,
         *oracle_borders, *oracle_actual_velocity, *oracle_acceleration_term, *oracle_people_repulsion_term,
@@ -107,6 +109,17 @@ int compare_simulations_double(sim_t **sim_list, int sim_counter)
     initialize_borders_double(starting_borders, N_BORDERS);
     for (int i = 1; i < sim_counter; i++)
     {
+        error_check = 0;
+
+        if (contains_substring(sim_list[i]->name, "2_4"))
+        {
+            n_timesteps_simplified = 2;
+            printf("Iamin");
+        }
+        else
+        {
+            n_timesteps_simplified = 1;
+        }
 
         copy_init_double(starting_position, starting_desired_direction, starting_final_destination, starting_borders, starting_desired_speed, starting_desired_max_speed,
                          &oracle_position, &oracle_desired_direction, &oracle_final_destination, &oracle_borders, &oracle_desired_speed, &oracle_desired_max_speed, number_of_people);
@@ -120,17 +133,16 @@ int compare_simulations_double(sim_t **sim_list, int sim_counter)
 
         for (int j = 0; j < n_test_timesteps; j++)
         {
-            error_check = 0;
+            int check = 0;
+
             sim_func_double f = sim_list[0]->f_double;
-            f(number_of_people, n_timesteps, oracle_position, oracle_speed, oracle_desired_direction, oracle_final_destination,
+            f(number_of_people, n_timesteps_simplified, oracle_position, oracle_speed, oracle_desired_direction, oracle_final_destination,
               oracle_borders, oracle_actual_velocity, oracle_acceleration_term,
               oracle_people_repulsion_term, oracle_border_repulsion_term, oracle_social_force, oracle_desired_speed, oracle_desired_max_speed);
             //test all implementations
 
-            int check = 0;
-
             f = sim_list[i]->f_double;
-            f(number_of_people, n_timesteps, current_position, current_speed, current_desired_direction, current_final_destination,
+            f(number_of_people, n_timesteps_optimized, current_position, current_speed, current_desired_direction, current_final_destination,
               current_borders, current_actual_velocity, current_acceleration_term,
               current_people_repulsion_term, current_border_repulsion_term, current_social_force, current_desired_speed, current_desired_max_speed);
 
@@ -142,12 +154,9 @@ int compare_simulations_double(sim_t **sim_list, int sim_counter)
                 error_check = 1;
             }
             else
-            {
-               // printf("%s iteration %d CORRECT!\n", sim_list[i]->name, j);
-            }
 
-            copy_state_double(oracle_position, oracle_desired_direction, oracle_final_destination, oracle_borders, oracle_desired_speed, oracle_desired_max_speed,
-                              &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people, *sim_list[i]);
+                copy_state_double(oracle_position, oracle_desired_direction, oracle_final_destination, oracle_borders, oracle_desired_speed, oracle_desired_max_speed,
+                                  &current_position, &current_desired_direction, &current_final_destination, &current_borders, &current_desired_speed, &current_desired_max_speed, number_of_people, *sim_list[i]);
         }
 
         //check_absolute_distance_double_vec_double(oracle_position, current_position, error_vector, 2 * number_of_people);
@@ -300,13 +309,14 @@ void copy_state_double(double *s_pos, double *s_dir, double *s_fdes, double *s_b
                        double **pos, double **dir, double **fdes, double **bor, double **spe, double **mspe, int n, sim_t sim)
 {
     memcpy(*pos, s_pos, n * 2 * sizeof(double)); //
-    if (!(contains_substring(sim.name, "2_5_1") || contains_substring(sim.name, "stdc")))
+    memcpy(*fdes, s_fdes, n * 2 * sizeof(double));
+    memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
+    memcpy(*spe, s_spe, n * sizeof(double));
+    memcpy(*mspe, s_mspe, n * sizeof(double));
+    
+    if (!(contains_substring(sim.name, "2_5_1")))
     {
         memcpy(*dir, s_dir, n * 2 * sizeof(double));
-        memcpy(*fdes, s_fdes, n * 2 * sizeof(double));
-        memcpy(*bor, s_bor, N_BORDERS * sizeof(double));
-        memcpy(*spe, s_spe, n * sizeof(double));
-        memcpy(*mspe, s_mspe, n * sizeof(double));
     }
 }
 

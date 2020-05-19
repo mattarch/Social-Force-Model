@@ -248,7 +248,7 @@ int contains_substring(char *haystack, char *needle)
     return strstr(haystack, needle) != NULL;
 }
 
-float exp_fast(float x)
+float exp_fast_float(float x)
 {
     x = 1.0 + x * 0.000244140625;
     x *= x;

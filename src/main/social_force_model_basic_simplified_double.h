@@ -16,9 +16,12 @@ void update_border_repulsion_term_simplified_double(double *position, double *bo
 void compute_social_force_simplified_double(double *acceleration_term, double *people_repulsion_term, double *border_repulsion_term, double *social_force, int n, int n_borders);
 void update_position_simplified_double(double *position, double *desired_direction, double *actual_speed, double *social_force, double *actual_velocity, double *desired_max_speed, int n);
 void simulation_basic_simplified_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                      double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double* desired_max_speed);
+                                        double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed);
+
+void simulation_basic_simplified_double_restructured(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
+                                                     double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed);
 
 void test_simulation_basic_simplified_double(int number_of_people, int n_timesteps, double *position, double *speed, double *desired_direction, double *final_destination, double *borders, double *actual_velocity, double *acceleration_term,
-                           double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double* desired_max_speed);
+                                             double *people_repulsion_term, double *border_repulsion_term, double *social_force, double *desired_speed, double *desired_max_speed);
 
 #endif
