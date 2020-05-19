@@ -71,7 +71,7 @@ typedef void (*sim_func)(int, int, float *, float *, float *, float *, float *, 
 typedef void (*sim_func_double)(int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
 typedef long long unsigned int (*flops_func)(int);
-typedef double (*op_int_func)(int);
+typedef double (*op_int_func)(int, int);
 
 typedef struct
 {
@@ -105,12 +105,12 @@ void run_bench_double(sim_t sim);
 int compare(const void *a, const void *b);
 long long unsigned int compute_simplified_flops(int number_of_people);
 long long unsigned compute_251_flops(int number_of_people);
-double compute_operational_intensity_251(int number_of_people);
-double compute_operational_intensity_0(int n);
-double compute_operational_intensity_float(int n);
-double compute_operational_intensity_optimized_float(int n);
-double compute_operational_intensity_double(int n);
-double compute_operational_intensity_optimized_double(int n);
+double compute_operational_intensity_251(int number_of_people, int number_of_timesteps);
+// double compute_operational_intensity_0(int n, int number_of_timesteps);
+double compute_operational_intensity_float(int n, int number_of_timesteps);
+double compute_operational_intensity_optimized_float(int n, int number_of_timesteps);
+double compute_operational_intensity_double(int n, int number_of_timesteps);
+double compute_operational_intensity_optimized_double(int n, int number_of_timesteps);
 long long unsigned lower_memory_bound_float(int number_of_people);
 long long unsigned lower_memory_bound_optimized_float(int number_of_people);
 long long unsigned lower_memory_bound_double(int number_of_people);
