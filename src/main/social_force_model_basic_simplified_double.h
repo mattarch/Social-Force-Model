@@ -7,8 +7,6 @@
 #ifndef SIMPLIFIED_DOUBLE_H_ /* Include guard */
 #define SIMPLIFIED_DOUBLE_H_
 
-extern char fiename_global[80];
-
 //void initialize_max_speed_double(double *desired_speed, double *desired_max_speed, int n);
 void update_desired_direction_simplified_double(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term_simplified_double(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);

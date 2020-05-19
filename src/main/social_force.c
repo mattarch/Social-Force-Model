@@ -161,11 +161,11 @@ int main(int argc, char *argv[])
 */
 void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)
 {
-    // add_function(sim_list, sim_counter, simulation_basic_simplified, NULL, compute_simplified_flops, IS_FLOAT,compute_operational_intensity_0, "simplified_float");
+    add_function(sim_list, sim_counter, simulation_basic_simplified, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "simplified_float");
 
-    // add_function(sim_list, sim_counter, simulation_basic_vectorize_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_1");
-    // add_function(sim_list, sim_counter, simulation_basic_vectorize_2, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_2");
-    // add_function(sim_list, sim_counter, simulation_basic_vectorize_3, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_3");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_1");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_2, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_2");
+    add_function(sim_list, sim_counter, simulation_basic_vectorize_3, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_0, "vectorize_3");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_4, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_optimized_float, "vectorize_4");
     add_function(sim_list, sim_counter, simulation_basic_vectorize_2_5_1, NULL, compute_simplified_flops, IS_FLOAT, compute_operational_intensity_251, "vectorize_2_5_1");
 
@@ -174,9 +174,9 @@ void add_implementations_float(sim_t **sim_list, int *sim_counter, sim_t **test_
 
 void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)
 {
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "simplified_double");
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_1_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_1_double");
-    // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_2_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_simplified_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "simplified_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_1_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_1_double");
+    add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_0, "vectorize_2_double");
     add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_optimized_double, "vectorize_4_double");
 
     add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double");
@@ -647,24 +647,24 @@ double compute_operational_intensity_0(int n)
 
 double compute_operational_intensity_float(int n)
 {
-    return ((double) compute_simplified_flops(n)) / lower_memory_bound_float(n); 
+    return ((double)compute_simplified_flops(n)) / lower_memory_bound_float(n);
 }
 
 // used for vectorized_3 and vectorized_4
 double compute_operational_intensity_optimized_float(int n)
 {
-    return ((double) compute_simplified_flops(n)) / lower_memory_bound_optimized_float(n); 
+    return ((double)compute_simplified_flops(n)) / lower_memory_bound_optimized_float(n);
 }
 
 double compute_operational_intensity_double(int n)
 {
-    return ((double) compute_simplified_flops(n)) / lower_memory_bound_double(n); 
+    return ((double)compute_simplified_flops(n)) / lower_memory_bound_double(n);
 }
 
 // used for vectorized_3 and vectorized_4
 double compute_operational_intensity_optimized_double(int n)
 {
-    return ((double) compute_simplified_flops(n)) / lower_memory_bound_optimized_double(n); 
+    return ((double)compute_simplified_flops(n)) / lower_memory_bound_optimized_double(n);
 }
 
 /*

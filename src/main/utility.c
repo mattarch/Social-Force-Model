@@ -18,6 +18,8 @@
 #include "aligned_free.h"
 #include "aligned_malloc.h"
 
+#include <immintrin.h>
+
 extern struct arguments arguments;
 extern char filename_global[80];
 
@@ -248,9 +250,7 @@ int contains_substring(char *haystack, char *needle)
 
 float exp_fast(float x)
 {
-    x = 1.0 + x / 16384;
-    x *= x;
-    x *= x;
+    x = 1.0 + x * 0.000244140625;
     x *= x;
     x *= x;
     x *= x;
@@ -264,6 +264,60 @@ float exp_fast(float x)
     x *= x;
     x *= x;
     return x;
+}
+
+double exp_fast_double(double x)
+{
+    x = 1.0 + x * 0.000244140625;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    return x;
+}
+
+__m256d exp_fast_vec_double(__m256d x)
+{
+  x = _mm256_fmadd_pd(x, _mm256_set1_pd(0.000244140625), _mm256_set1_pd(1.0));
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  x = _mm256_mul_pd(x, x);
+  return x;
+}
+
+__m256 exp_fast_vec_float(__m256 x)
+{
+  x = _mm256_fmadd_ps(x, _mm256_set1_ps(0.000244140625), _mm256_set1_ps(1.0));
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  x = _mm256_mul_ps(x, x);
+  return x;
 }
 
 float exp_taylor(float x)

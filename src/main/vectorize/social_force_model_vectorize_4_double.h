@@ -7,10 +7,8 @@
 #ifndef VECTORIZE_4_DOUBLE_H_ /* Include guard */
 #define VECTORIZE_4_DOUBLE_H_
 
-extern char fiename_global[80];
 #include <immintrin.h>
 
-__m256d exp_fast_vec_4_double(__m256d x, __m256d one, __m256d exp_constant);
 void update_desired_direction_vectorize_4_double(double *position, double *final_destination, double *desired_direction, int n);
 void update_acceleration_term_vectorize_4_double(double *desired_direction, double *acceleration_term, double *actual_velocity, double *desired_speed, int n);
 //void compute_actual_velocity_vectorize_4_double(double *actual_speed, double *desired_direction, double *actual_velocity, int n);

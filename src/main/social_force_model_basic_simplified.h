@@ -7,8 +7,6 @@
 #ifndef SIMPLIFIED_H_ /* Include guard */
 #define SIMPLIFIED_H_
 
-extern char fiename_global[80];
-
 //void initialize_max_speed_float(float *desired_speed, float *desired_max_speed, int n);
 void update_desired_direction_simplified(float *position, float *final_destination, float *desired_direction, int n);
 void update_acceleration_term_simplified(float *desired_direction, float *acceleration_term, float *actual_velocity, float *desired_speed, int n);

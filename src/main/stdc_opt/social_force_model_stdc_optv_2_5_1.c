@@ -136,14 +136,14 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       double ryaB60 = rya6 - fb; 
       double ryaB70 = rya7 - fb; 
 
-      double se00 = exp_fast(ryaB00 * INV_R) * UTIMESR / (-ryaB00); //1 exp, 2 mult, 1 div
-      double se10 = exp_fast(ryaB10 * INV_R) * UTIMESR / (-ryaB10); //1 exp, 2 mult, 1 div
-      double se20 = exp_fast(ryaB20 * INV_R) * UTIMESR / (-ryaB20); //1 exp, 2 mult, 1 div
-      double se30 = exp_fast(ryaB30 * INV_R) * UTIMESR / (-ryaB30); //1 exp, 2 mult, 1 div
-      double se40 = exp_fast(ryaB40 * INV_R) * UTIMESR / (-ryaB40); //1 exp, 2 mult, 1 div
-      double se50 = exp_fast(ryaB50 * INV_R) * UTIMESR / (-ryaB50); //1 exp, 2 mult, 1 div
-      double se60 = exp_fast(ryaB60 * INV_R) * UTIMESR / (-ryaB60); //1 exp, 2 mult, 1 div
-      double se70 = exp_fast(ryaB70 * INV_R) * UTIMESR / (-ryaB70); //1 exp, 2 mult, 1 div
+      double se00 = exp_fast_double(ryaB00 * INV_R) * UTIMESR / (-ryaB00); //1 exp, 2 mult, 1 div
+      double se10 = exp_fast_double(ryaB10 * INV_R) * UTIMESR / (-ryaB10); //1 exp, 2 mult, 1 div
+      double se20 = exp_fast_double(ryaB20 * INV_R) * UTIMESR / (-ryaB20); //1 exp, 2 mult, 1 div
+      double se30 = exp_fast_double(ryaB30 * INV_R) * UTIMESR / (-ryaB30); //1 exp, 2 mult, 1 div
+      double se40 = exp_fast_double(ryaB40 * INV_R) * UTIMESR / (-ryaB40); //1 exp, 2 mult, 1 div
+      double se50 = exp_fast_double(ryaB50 * INV_R) * UTIMESR / (-ryaB50); //1 exp, 2 mult, 1 div
+      double se60 = exp_fast_double(ryaB60 * INV_R) * UTIMESR / (-ryaB60); //1 exp, 2 mult, 1 div
+      double se70 = exp_fast_double(ryaB70 * INV_R) * UTIMESR / (-ryaB70); //1 exp, 2 mult, 1 div
 
       double rb00 = se00 * ryaB00; // repulsion border 0 , 1 mult
       double rb10 = se10 * ryaB10; // repulsion border 0 , 1 mult
@@ -163,14 +163,14 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       double ryaB61 = rya6 - sb; //1 add
       double ryaB71 = rya7 - sb; //1 add
 
-      double se01 = exp_fast(-ryaB01 * INV_R) * UTIMESR / (ryaB01); //1 exp, 2 mult, 1 div
-      double se11 = exp_fast(-ryaB11 * INV_R) * UTIMESR / (ryaB11); //1 exp, 2 mult, 1 div
-      double se21 = exp_fast(-ryaB21 * INV_R) * UTIMESR / (ryaB21); //1 exp, 2 mult, 1 div
-      double se31 = exp_fast(-ryaB31 * INV_R) * UTIMESR / (ryaB31); //1 exp, 2 mult, 1 div
-      double se41 = exp_fast(-ryaB41 * INV_R) * UTIMESR / (ryaB41); //1 exp, 2 mult, 1 div
-      double se51 = exp_fast(-ryaB51 * INV_R) * UTIMESR / (ryaB51); //1 exp, 2 mult, 1 div
-      double se61 = exp_fast(-ryaB61 * INV_R) * UTIMESR / (ryaB61); //1 exp, 2 mult, 1 div
-      double se71 = exp_fast(-ryaB71 * INV_R) * UTIMESR / (ryaB71); //1 exp, 2 mult, 1 div
+      double se01 = exp_fast_double(-ryaB01 * INV_R) * UTIMESR / (ryaB01); //1 exp, 2 mult, 1 div
+      double se11 = exp_fast_double(-ryaB11 * INV_R) * UTIMESR / (ryaB11); //1 exp, 2 mult, 1 div
+      double se21 = exp_fast_double(-ryaB21 * INV_R) * UTIMESR / (ryaB21); //1 exp, 2 mult, 1 div
+      double se31 = exp_fast_double(-ryaB31 * INV_R) * UTIMESR / (ryaB31); //1 exp, 2 mult, 1 div
+      double se41 = exp_fast_double(-ryaB41 * INV_R) * UTIMESR / (ryaB41); //1 exp, 2 mult, 1 div
+      double se51 = exp_fast_double(-ryaB51 * INV_R) * UTIMESR / (ryaB51); //1 exp, 2 mult, 1 div
+      double se61 = exp_fast_double(-ryaB61 * INV_R) * UTIMESR / (ryaB61); //1 exp, 2 mult, 1 div
+      double se71 = exp_fast_double(-ryaB71 * INV_R) * UTIMESR / (ryaB71); //1 exp, 2 mult, 1 div
 
       double rb01 = rb00 + se01 * ryaB01; //1 mult
       double rb11 = rb10 + se11 * ryaB11; //1 mult
@@ -933,75 +933,75 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
 
       double ba7a6norm = sqrt(ba7a6) * 0.5;
 
-      double cfa0a1 = exp_fast(-ba0a1norm * inv_sigma) * normsuma0a1 * DIV_FACTOR / ba0a1norm;
-      double cfa0a2 = exp_fast(-ba0a2norm * inv_sigma) * normsuma0a2 * DIV_FACTOR / ba0a2norm;
-      double cfa0a3 = exp_fast(-ba0a3norm * inv_sigma) * normsuma0a3 * DIV_FACTOR / ba0a3norm;
-      double cfa0a4 = exp_fast(-ba0a4norm * inv_sigma) * normsuma0a4 * DIV_FACTOR / ba0a4norm;
-      double cfa0a5 = exp_fast(-ba0a5norm * inv_sigma) * normsuma0a5 * DIV_FACTOR / ba0a5norm;
-      double cfa0a6 = exp_fast(-ba0a6norm * inv_sigma) * normsuma0a6 * DIV_FACTOR / ba0a6norm;
-      double cfa0a7 = exp_fast(-ba0a7norm * inv_sigma) * normsuma0a7 * DIV_FACTOR / ba0a7norm;
+      double cfa0a1 = exp_fast_double(-ba0a1norm * inv_sigma) * normsuma0a1 * DIV_FACTOR / ba0a1norm;
+      double cfa0a2 = exp_fast_double(-ba0a2norm * inv_sigma) * normsuma0a2 * DIV_FACTOR / ba0a2norm;
+      double cfa0a3 = exp_fast_double(-ba0a3norm * inv_sigma) * normsuma0a3 * DIV_FACTOR / ba0a3norm;
+      double cfa0a4 = exp_fast_double(-ba0a4norm * inv_sigma) * normsuma0a4 * DIV_FACTOR / ba0a4norm;
+      double cfa0a5 = exp_fast_double(-ba0a5norm * inv_sigma) * normsuma0a5 * DIV_FACTOR / ba0a5norm;
+      double cfa0a6 = exp_fast_double(-ba0a6norm * inv_sigma) * normsuma0a6 * DIV_FACTOR / ba0a6norm;
+      double cfa0a7 = exp_fast_double(-ba0a7norm * inv_sigma) * normsuma0a7 * DIV_FACTOR / ba0a7norm;
 
-      double cfa1a0 = exp_fast(-ba1a0norm * inv_sigma) * normsuma1a0 * DIV_FACTOR / ba1a0norm;
-      double cfa2a0 = exp_fast(-ba2a0norm * inv_sigma) * normsuma2a0 * DIV_FACTOR / ba2a0norm;
-      double cfa3a0 = exp_fast(-ba3a0norm * inv_sigma) * normsuma3a0 * DIV_FACTOR / ba3a0norm;
-      double cfa4a0 = exp_fast(-ba4a0norm * inv_sigma) * normsuma4a0 * DIV_FACTOR / ba4a0norm;
-      double cfa5a0 = exp_fast(-ba5a0norm * inv_sigma) * normsuma5a0 * DIV_FACTOR / ba5a0norm;
-      double cfa6a0 = exp_fast(-ba6a0norm * inv_sigma) * normsuma6a0 * DIV_FACTOR / ba6a0norm;
-      double cfa7a0 = exp_fast(-ba7a0norm * inv_sigma) * normsuma7a0 * DIV_FACTOR / ba7a0norm;
+      double cfa1a0 = exp_fast_double(-ba1a0norm * inv_sigma) * normsuma1a0 * DIV_FACTOR / ba1a0norm;
+      double cfa2a0 = exp_fast_double(-ba2a0norm * inv_sigma) * normsuma2a0 * DIV_FACTOR / ba2a0norm;
+      double cfa3a0 = exp_fast_double(-ba3a0norm * inv_sigma) * normsuma3a0 * DIV_FACTOR / ba3a0norm;
+      double cfa4a0 = exp_fast_double(-ba4a0norm * inv_sigma) * normsuma4a0 * DIV_FACTOR / ba4a0norm;
+      double cfa5a0 = exp_fast_double(-ba5a0norm * inv_sigma) * normsuma5a0 * DIV_FACTOR / ba5a0norm;
+      double cfa6a0 = exp_fast_double(-ba6a0norm * inv_sigma) * normsuma6a0 * DIV_FACTOR / ba6a0norm;
+      double cfa7a0 = exp_fast_double(-ba7a0norm * inv_sigma) * normsuma7a0 * DIV_FACTOR / ba7a0norm;
 
-      double cfa1a2 = exp_fast(-ba1a2norm * inv_sigma) * normsuma1a2 * DIV_FACTOR / ba1a2norm;
-      double cfa1a3 = exp_fast(-ba1a3norm * inv_sigma) * normsuma1a3 * DIV_FACTOR / ba1a3norm;
-      double cfa1a4 = exp_fast(-ba1a4norm * inv_sigma) * normsuma1a4 * DIV_FACTOR / ba1a4norm;
-      double cfa1a5 = exp_fast(-ba1a5norm * inv_sigma) * normsuma1a5 * DIV_FACTOR / ba1a5norm;
-      double cfa1a6 = exp_fast(-ba1a6norm * inv_sigma) * normsuma1a6 * DIV_FACTOR / ba1a6norm;
-      double cfa1a7 = exp_fast(-ba1a7norm * inv_sigma) * normsuma1a7 * DIV_FACTOR / ba1a7norm;
+      double cfa1a2 = exp_fast_double(-ba1a2norm * inv_sigma) * normsuma1a2 * DIV_FACTOR / ba1a2norm;
+      double cfa1a3 = exp_fast_double(-ba1a3norm * inv_sigma) * normsuma1a3 * DIV_FACTOR / ba1a3norm;
+      double cfa1a4 = exp_fast_double(-ba1a4norm * inv_sigma) * normsuma1a4 * DIV_FACTOR / ba1a4norm;
+      double cfa1a5 = exp_fast_double(-ba1a5norm * inv_sigma) * normsuma1a5 * DIV_FACTOR / ba1a5norm;
+      double cfa1a6 = exp_fast_double(-ba1a6norm * inv_sigma) * normsuma1a6 * DIV_FACTOR / ba1a6norm;
+      double cfa1a7 = exp_fast_double(-ba1a7norm * inv_sigma) * normsuma1a7 * DIV_FACTOR / ba1a7norm;
 
-      double cfa2a1 = exp_fast(-ba2a1norm * inv_sigma) * normsuma2a1 * DIV_FACTOR / ba2a1norm;
-      double cfa3a1 = exp_fast(-ba3a1norm * inv_sigma) * normsuma3a1 * DIV_FACTOR / ba3a1norm;
-      double cfa4a1 = exp_fast(-ba4a1norm * inv_sigma) * normsuma4a1 * DIV_FACTOR / ba4a1norm;
-      double cfa5a1 = exp_fast(-ba5a1norm * inv_sigma) * normsuma5a1 * DIV_FACTOR / ba5a1norm;
-      double cfa6a1 = exp_fast(-ba6a1norm * inv_sigma) * normsuma6a1 * DIV_FACTOR / ba6a1norm;
-      double cfa7a1 = exp_fast(-ba7a1norm * inv_sigma) * normsuma7a1 * DIV_FACTOR / ba7a1norm;
+      double cfa2a1 = exp_fast_double(-ba2a1norm * inv_sigma) * normsuma2a1 * DIV_FACTOR / ba2a1norm;
+      double cfa3a1 = exp_fast_double(-ba3a1norm * inv_sigma) * normsuma3a1 * DIV_FACTOR / ba3a1norm;
+      double cfa4a1 = exp_fast_double(-ba4a1norm * inv_sigma) * normsuma4a1 * DIV_FACTOR / ba4a1norm;
+      double cfa5a1 = exp_fast_double(-ba5a1norm * inv_sigma) * normsuma5a1 * DIV_FACTOR / ba5a1norm;
+      double cfa6a1 = exp_fast_double(-ba6a1norm * inv_sigma) * normsuma6a1 * DIV_FACTOR / ba6a1norm;
+      double cfa7a1 = exp_fast_double(-ba7a1norm * inv_sigma) * normsuma7a1 * DIV_FACTOR / ba7a1norm;
 
-      double cfa2a3 = exp_fast(-ba2a3norm * inv_sigma) * normsuma2a3 * DIV_FACTOR / ba2a3norm;
-      double cfa2a4 = exp_fast(-ba2a4norm * inv_sigma) * normsuma2a4 * DIV_FACTOR / ba2a4norm;
-      double cfa2a5 = exp_fast(-ba2a5norm * inv_sigma) * normsuma2a5 * DIV_FACTOR / ba2a5norm;
-      double cfa2a6 = exp_fast(-ba2a6norm * inv_sigma) * normsuma2a6 * DIV_FACTOR / ba2a6norm;
-      double cfa2a7 = exp_fast(-ba2a7norm * inv_sigma) * normsuma2a7 * DIV_FACTOR / ba2a7norm;
+      double cfa2a3 = exp_fast_double(-ba2a3norm * inv_sigma) * normsuma2a3 * DIV_FACTOR / ba2a3norm;
+      double cfa2a4 = exp_fast_double(-ba2a4norm * inv_sigma) * normsuma2a4 * DIV_FACTOR / ba2a4norm;
+      double cfa2a5 = exp_fast_double(-ba2a5norm * inv_sigma) * normsuma2a5 * DIV_FACTOR / ba2a5norm;
+      double cfa2a6 = exp_fast_double(-ba2a6norm * inv_sigma) * normsuma2a6 * DIV_FACTOR / ba2a6norm;
+      double cfa2a7 = exp_fast_double(-ba2a7norm * inv_sigma) * normsuma2a7 * DIV_FACTOR / ba2a7norm;
 
-      double cfa3a2 = exp_fast(-ba3a2norm * inv_sigma) * normsuma3a2 * DIV_FACTOR / ba3a2norm;
-      double cfa4a2 = exp_fast(-ba4a2norm * inv_sigma) * normsuma4a2 * DIV_FACTOR / ba4a2norm;
-      double cfa5a2 = exp_fast(-ba5a2norm * inv_sigma) * normsuma5a2 * DIV_FACTOR / ba5a2norm;
-      double cfa6a2 = exp_fast(-ba6a2norm * inv_sigma) * normsuma6a2 * DIV_FACTOR / ba6a2norm;
-      double cfa7a2 = exp_fast(-ba7a2norm * inv_sigma) * normsuma7a2 * DIV_FACTOR / ba7a2norm;
+      double cfa3a2 = exp_fast_double(-ba3a2norm * inv_sigma) * normsuma3a2 * DIV_FACTOR / ba3a2norm;
+      double cfa4a2 = exp_fast_double(-ba4a2norm * inv_sigma) * normsuma4a2 * DIV_FACTOR / ba4a2norm;
+      double cfa5a2 = exp_fast_double(-ba5a2norm * inv_sigma) * normsuma5a2 * DIV_FACTOR / ba5a2norm;
+      double cfa6a2 = exp_fast_double(-ba6a2norm * inv_sigma) * normsuma6a2 * DIV_FACTOR / ba6a2norm;
+      double cfa7a2 = exp_fast_double(-ba7a2norm * inv_sigma) * normsuma7a2 * DIV_FACTOR / ba7a2norm;
 
-      double cfa3a4 = exp_fast(-ba3a4norm * inv_sigma) * normsuma3a4 * DIV_FACTOR / ba3a4norm;
-      double cfa3a5 = exp_fast(-ba3a5norm * inv_sigma) * normsuma3a5 * DIV_FACTOR / ba3a5norm;
-      double cfa3a6 = exp_fast(-ba3a6norm * inv_sigma) * normsuma3a6 * DIV_FACTOR / ba3a6norm;
-      double cfa3a7 = exp_fast(-ba3a7norm * inv_sigma) * normsuma3a7 * DIV_FACTOR / ba3a7norm;
+      double cfa3a4 = exp_fast_double(-ba3a4norm * inv_sigma) * normsuma3a4 * DIV_FACTOR / ba3a4norm;
+      double cfa3a5 = exp_fast_double(-ba3a5norm * inv_sigma) * normsuma3a5 * DIV_FACTOR / ba3a5norm;
+      double cfa3a6 = exp_fast_double(-ba3a6norm * inv_sigma) * normsuma3a6 * DIV_FACTOR / ba3a6norm;
+      double cfa3a7 = exp_fast_double(-ba3a7norm * inv_sigma) * normsuma3a7 * DIV_FACTOR / ba3a7norm;
 
-      double cfa4a3 = exp_fast(-ba4a3norm * inv_sigma) * normsuma4a3 * DIV_FACTOR / ba4a3norm;
-      double cfa5a3 = exp_fast(-ba5a3norm * inv_sigma) * normsuma5a3 * DIV_FACTOR / ba5a3norm;
-      double cfa6a3 = exp_fast(-ba6a3norm * inv_sigma) * normsuma6a3 * DIV_FACTOR / ba6a3norm;
-      double cfa7a3 = exp_fast(-ba7a3norm * inv_sigma) * normsuma7a3 * DIV_FACTOR / ba7a3norm;
+      double cfa4a3 = exp_fast_double(-ba4a3norm * inv_sigma) * normsuma4a3 * DIV_FACTOR / ba4a3norm;
+      double cfa5a3 = exp_fast_double(-ba5a3norm * inv_sigma) * normsuma5a3 * DIV_FACTOR / ba5a3norm;
+      double cfa6a3 = exp_fast_double(-ba6a3norm * inv_sigma) * normsuma6a3 * DIV_FACTOR / ba6a3norm;
+      double cfa7a3 = exp_fast_double(-ba7a3norm * inv_sigma) * normsuma7a3 * DIV_FACTOR / ba7a3norm;
 
-      double cfa4a5 = exp_fast(-ba4a5norm * inv_sigma) * normsuma4a5 * DIV_FACTOR / ba4a5norm;
-      double cfa4a6 = exp_fast(-ba4a6norm * inv_sigma) * normsuma4a6 * DIV_FACTOR / ba4a6norm;
-      double cfa4a7 = exp_fast(-ba4a7norm * inv_sigma) * normsuma4a7 * DIV_FACTOR / ba4a7norm;
+      double cfa4a5 = exp_fast_double(-ba4a5norm * inv_sigma) * normsuma4a5 * DIV_FACTOR / ba4a5norm;
+      double cfa4a6 = exp_fast_double(-ba4a6norm * inv_sigma) * normsuma4a6 * DIV_FACTOR / ba4a6norm;
+      double cfa4a7 = exp_fast_double(-ba4a7norm * inv_sigma) * normsuma4a7 * DIV_FACTOR / ba4a7norm;
 
-      double cfa5a4 = exp_fast(-ba5a4norm * inv_sigma) * normsuma5a4 * DIV_FACTOR / ba5a4norm;
-      double cfa6a4 = exp_fast(-ba6a4norm * inv_sigma) * normsuma6a4 * DIV_FACTOR / ba6a4norm;
-      double cfa7a4 = exp_fast(-ba7a4norm * inv_sigma) * normsuma7a4 * DIV_FACTOR / ba7a4norm;
+      double cfa5a4 = exp_fast_double(-ba5a4norm * inv_sigma) * normsuma5a4 * DIV_FACTOR / ba5a4norm;
+      double cfa6a4 = exp_fast_double(-ba6a4norm * inv_sigma) * normsuma6a4 * DIV_FACTOR / ba6a4norm;
+      double cfa7a4 = exp_fast_double(-ba7a4norm * inv_sigma) * normsuma7a4 * DIV_FACTOR / ba7a4norm;
 
-      double cfa5a6 = exp_fast(-ba5a6norm * inv_sigma) * normsuma5a6 * DIV_FACTOR / ba5a6norm;
-      double cfa5a7 = exp_fast(-ba5a7norm * inv_sigma) * normsuma5a7 * DIV_FACTOR / ba5a7norm;
+      double cfa5a6 = exp_fast_double(-ba5a6norm * inv_sigma) * normsuma5a6 * DIV_FACTOR / ba5a6norm;
+      double cfa5a7 = exp_fast_double(-ba5a7norm * inv_sigma) * normsuma5a7 * DIV_FACTOR / ba5a7norm;
 
-      double cfa6a5 = exp_fast(-ba6a5norm * inv_sigma) * normsuma6a5 * DIV_FACTOR / ba6a5norm;
-      double cfa7a5 = exp_fast(-ba7a5norm * inv_sigma) * normsuma7a5 * DIV_FACTOR / ba7a5norm;
+      double cfa6a5 = exp_fast_double(-ba6a5norm * inv_sigma) * normsuma6a5 * DIV_FACTOR / ba6a5norm;
+      double cfa7a5 = exp_fast_double(-ba7a5norm * inv_sigma) * normsuma7a5 * DIV_FACTOR / ba7a5norm;
 
-      double cfa6a7 = exp_fast(-ba6a7norm * inv_sigma) * normsuma6a7 * DIV_FACTOR / ba6a7norm;
+      double cfa6a7 = exp_fast_double(-ba6a7norm * inv_sigma) * normsuma6a7 * DIV_FACTOR / ba6a7norm;
 
-      double cfa7a6 = exp_fast(-ba7a6norm * inv_sigma) * normsuma7a6 * DIV_FACTOR / ba7a6norm;
+      double cfa7a6 = exp_fast_double(-ba7a6norm * inv_sigma) * normsuma7a6 * DIV_FACTOR / ba7a6norm;
 
       double repxa0a11 = repxa0a1 * cfa0a1;
       double repya0a11 = repya0a1 * cfa0a1;
@@ -1560,23 +1560,23 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
         double bbanorm6 = sqrt(bba6) * 0.5;
         double bbanorm7 = sqrt(bba7) * 0.5;
 
-        double cfab0 = exp_fast(-babnorm0 * inv_sigma) * normsumab0 * DIV_FACTOR / babnorm0;
-        double cfab1 = exp_fast(-babnorm1 * inv_sigma) * normsumab1 * DIV_FACTOR / babnorm1;
-        double cfab2 = exp_fast(-babnorm2 * inv_sigma) * normsumab2 * DIV_FACTOR / babnorm2;
-        double cfab3 = exp_fast(-babnorm3 * inv_sigma) * normsumab3 * DIV_FACTOR / babnorm3;
-        double cfab4 = exp_fast(-babnorm4 * inv_sigma) * normsumab4 * DIV_FACTOR / babnorm4;
-        double cfab5 = exp_fast(-babnorm5 * inv_sigma) * normsumab5 * DIV_FACTOR / babnorm5;
-        double cfab6 = exp_fast(-babnorm6 * inv_sigma) * normsumab6 * DIV_FACTOR / babnorm6;
-        double cfab7 = exp_fast(-babnorm7 * inv_sigma) * normsumab7 * DIV_FACTOR / babnorm7;
+        double cfab0 = exp_fast_double(-babnorm0 * inv_sigma) * normsumab0 * DIV_FACTOR / babnorm0;
+        double cfab1 = exp_fast_double(-babnorm1 * inv_sigma) * normsumab1 * DIV_FACTOR / babnorm1;
+        double cfab2 = exp_fast_double(-babnorm2 * inv_sigma) * normsumab2 * DIV_FACTOR / babnorm2;
+        double cfab3 = exp_fast_double(-babnorm3 * inv_sigma) * normsumab3 * DIV_FACTOR / babnorm3;
+        double cfab4 = exp_fast_double(-babnorm4 * inv_sigma) * normsumab4 * DIV_FACTOR / babnorm4;
+        double cfab5 = exp_fast_double(-babnorm5 * inv_sigma) * normsumab5 * DIV_FACTOR / babnorm5;
+        double cfab6 = exp_fast_double(-babnorm6 * inv_sigma) * normsumab6 * DIV_FACTOR / babnorm6;
+        double cfab7 = exp_fast_double(-babnorm7 * inv_sigma) * normsumab7 * DIV_FACTOR / babnorm7;
 
-        double cfba0 = exp_fast(-bbanorm0 * inv_sigma) * normsumba0 * DIV_FACTOR / bbanorm0; //2 mult, 2 div, 1 exp
-        double cfba1 = exp_fast(-bbanorm1 * inv_sigma) * normsumba1 * DIV_FACTOR / bbanorm1; //2 mult, 2 div, 1 exp
-        double cfba2 = exp_fast(-bbanorm2 * inv_sigma) * normsumba2 * DIV_FACTOR / bbanorm2; //2 mult, 2 div, 1 exp
-        double cfba3 = exp_fast(-bbanorm3 * inv_sigma) * normsumba3 * DIV_FACTOR / bbanorm3; //2 mult, 2 div, 1 exp
-        double cfba4 = exp_fast(-bbanorm4 * inv_sigma) * normsumba4 * DIV_FACTOR / bbanorm4; //2 mult, 2 div, 1 exp
-        double cfba5 = exp_fast(-bbanorm5 * inv_sigma) * normsumba5 * DIV_FACTOR / bbanorm5; //2 mult, 2 div, 1 exp
-        double cfba6 = exp_fast(-bbanorm6 * inv_sigma) * normsumba6 * DIV_FACTOR / bbanorm6; //2 mult, 2 div, 1 exp
-        double cfba7 = exp_fast(-bbanorm7 * inv_sigma) * normsumba7 * DIV_FACTOR / bbanorm7; //2 mult, 2 div, 1 exp
+        double cfba0 = exp_fast_double(-bbanorm0 * inv_sigma) * normsumba0 * DIV_FACTOR / bbanorm0; //2 mult, 2 div, 1 exp
+        double cfba1 = exp_fast_double(-bbanorm1 * inv_sigma) * normsumba1 * DIV_FACTOR / bbanorm1; //2 mult, 2 div, 1 exp
+        double cfba2 = exp_fast_double(-bbanorm2 * inv_sigma) * normsumba2 * DIV_FACTOR / bbanorm2; //2 mult, 2 div, 1 exp
+        double cfba3 = exp_fast_double(-bbanorm3 * inv_sigma) * normsumba3 * DIV_FACTOR / bbanorm3; //2 mult, 2 div, 1 exp
+        double cfba4 = exp_fast_double(-bbanorm4 * inv_sigma) * normsumba4 * DIV_FACTOR / bbanorm4; //2 mult, 2 div, 1 exp
+        double cfba5 = exp_fast_double(-bbanorm5 * inv_sigma) * normsumba5 * DIV_FACTOR / bbanorm5; //2 mult, 2 div, 1 exp
+        double cfba6 = exp_fast_double(-bbanorm6 * inv_sigma) * normsumba6 * DIV_FACTOR / bbanorm6; //2 mult, 2 div, 1 exp
+        double cfba7 = exp_fast_double(-bbanorm7 * inv_sigma) * normsumba7 * DIV_FACTOR / bbanorm7; //2 mult, 2 div, 1 exp
 
         double repxab10 = repxab00 * cfab0; //1 mult
         double repyab10 = repyab00 * cfab0; //1 mult
@@ -1771,8 +1771,8 @@ void simulation_basic_optv_2_5_1(int number_of_people, int n_timesteps, double *
       social_force[IndexX(i + 7)] = sfx7;
       social_force[IndexY(i + 7, n)] = sfy7;
       //n/8 * 
-      // ( 689 add, 1106 mult, 280 div, 140 sqrt, 56 exp_fast +
-      //   (n-(i+8))*(200 add, 320 mult, 80 div, 56 sqrt, 16 exp_fast) + 
+      // ( 689 add, 1106 mult, 280 div, 140 sqrt, 56 exp_fast_double +
+      //   (n-(i+8))*(200 add, 320 mult, 80 div, 56 sqrt, 16 exp_fast_double) + 
       //   32 add, 32 mult 
       // )
     }

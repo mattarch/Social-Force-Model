@@ -152,7 +152,7 @@ void update_people_repulsion_term_simplified_double(double *position, double *de
 
       double b = sqrt(norm_sum * norm_sum - delta_b * delta_b) / 2; //1 add, 2 mult, 1 div, 1 sqrt
 
-      double common_factor = exp_fast(-b / SIGMA) * norm_sum * DIV_FACTOR / b; //2 mult, 2 div, 1 exp
+      double common_factor = exp_fast_double(-b / SIGMA) * norm_sum * DIV_FACTOR / b; //2 mult, 2 div, 1 exp
 
       repulsion_x *= common_factor; //1 mult
       repulsion_y *= common_factor; //1 mult
@@ -202,7 +202,7 @@ void update_border_repulsion_term_simplified_double(double *position, double *bo
 
       double r_aB_norm = ry_aB > 0 ? ry_aB : -ry_aB;
 
-      double shared_expression = exp_fast((-r_aB_norm) / R) * U_ALPHA_B / R / r_aB_norm; // 1 exp, 3 div, 1 mult => 4 flops + 1 exp
+      double shared_expression = exp_fast_double((-r_aB_norm) / R) * U_ALPHA_B / R / r_aB_norm; // 1 exp, 3 div, 1 mult => 4 flops + 1 exp
 
       double repulsion_x = shared_expression * rx_aB; // 1 mult => 1 flop
 
