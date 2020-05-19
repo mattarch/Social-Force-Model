@@ -29,6 +29,8 @@
 
 // benchmark parameters
 #define REP 15
+#define STARTING_NUM_RUNS 2
+#define N_TIMESTEPS 20
 #define CYCLES_REQUIRED 1e9
 
 #define NTESTS_FINITE_DIFFERENCES 10
