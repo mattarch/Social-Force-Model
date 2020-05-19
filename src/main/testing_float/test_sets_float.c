@@ -64,16 +64,16 @@ int border_n0 = 2;
 int border_nb0 = 2;
 
 // basic social force test for 4 persons and 2 walls
-float social_acc0[] = {1, 2, -3, 5, 2, 2, -4, -2};
-float social_prep0[] = {0, 0, 1, 1, 2, 3, -1, 1,
-                        -1, -1, 0, 0, 2, 2, -2, 1,
-                        -2, -3, -2, -2, 0, 0, 3, -1,
-                        1, -1, 2, -1, -3, 1, 0, 0};
-float social_brep0[] = {0, 1, 1, 1,
-                        -1, 1, 0, 1,
-                        0, 0, 1, 2,
-                        2, 1, -1, 2};
-float social_expected0[] = {4, 9, -5, 9, 2, -2, -3, 0};
+float social_acc0[] = {1, -3, 2, -4, 2, 5, 2, -2};                            
+float social_prep0[] = {0, 1, 2, -1, -1, 0, 2, -2,
+                                -2, -2, 0, 3, 1, 2, -3, 0,
+                                0, 1, 3, 1, -1, 0, 2, 1,
+                                -3, -2, 0, -1, -1, -1, 1, 0};
+float social_brep0[] = { 0, -1, 0, 2,
+                                 1, 1, 0, 1,
+                                 1, 0, 1, -1,
+                                 1, 1, 2, 2};
+float social_expected0[] = {4, -5, 2, -3, 9, 9, -2, 0};
 int social_n0 = 4;
 int social_nb0 = 2;
 
