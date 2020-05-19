@@ -419,9 +419,9 @@ void run_bench_float(sim_t sim)
     double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;
-    int num_runs = 2;
+    int num_runs = STARTING_NUM_RUNS;
     int number_of_people = arguments.n_people;
-    int n_timesteps = 20;
+    int n_timesteps = N_TIMESTEPS;
     
     // allocate memory
 
@@ -548,9 +548,9 @@ void run_bench_double(sim_t sim)
     double cycles = 0.;
     double multiplier = 1;
     myInt64 start, end;    
-    int num_runs = 2;
+    int num_runs = STARTING_NUM_RUNS;
     int number_of_people = arguments.n_people;
-    int n_timesteps = 20;
+    int n_timesteps = N_TIMESTEPS;
     
     // allocate memory
 
