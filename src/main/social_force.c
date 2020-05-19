@@ -539,7 +539,7 @@ void run_bench_double(sim_t sim)
     double *acceleration_term = (double *)aligned_malloc(number_of_people * 2 * sizeof(double), 32);
     set_zero_double(acceleration_term, number_of_people * 2);
     double *people_repulsion_term;
-    if (contains_substring(name, "simplified") || contains_substring(name, "vectorize_2") || contains_substring(name, "vectorize_3"))
+    if (contains_substring(name, "simplified") || contains_substring(name, "vectorize_1") || contains_substring(name, "vectorize_2"))
     {
         people_repulsion_term = (double *)aligned_malloc(number_of_people * number_of_people * 2 * sizeof(double), 32);
         set_zero_double(people_repulsion_term, number_of_people * number_of_people * 2);
