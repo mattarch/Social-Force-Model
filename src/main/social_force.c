@@ -67,7 +67,7 @@ const int div_cost = 1;
 const int exp_cost = 1;
 const int sqrt_cost = 1;
 const int fabs_cost = 1;
-const int fast_exp_cost = 20;
+const int fast_exp_cost = 22;
 
 // main function
 int main(int argc, char *argv[])
