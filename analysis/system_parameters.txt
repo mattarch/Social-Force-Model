@@ -1,0 +1,7 @@
+DRAM bandwith: 17.3 GB/sec
+L3 bandwith: 37.7 GB/sec
+L2 bandwith: 69.9 GB/sec
+L1 bandwith: 218.5 GB/sec
+scalar add peak: 5.2 GFLOPS
+SP vector add peak: 41.7 GFLOPS
+SP vector fma peak: 82 GFLOPS
