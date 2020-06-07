@@ -35,16 +35,19 @@ __m256 exp256_ps2(__m256 x)
 
 __m256 exp256_ps(__m256 x)
 {
-  /* Modified code from this source: https://github.com/reyoung/avx_mathfun
+  /*
+  Copied code from https://stackoverflow.com/questions/48863719/fastest-implementation-of-exponential-function-using-avx
+  
+  Modified code from this source: https://github.com/reyoung/avx_mathfun
 
-   AVX implementation of exp
-   Based on "sse_mathfun.h", by Julien Pommier
-   http://gruntthepeon.free.fr/ssemath/
-   Copyright (C) 2012 Giovanni Garberoglio
-   Interdisciplinary Laboratory for Computational Science (LISC)
-   Fondazione Bruno Kessler and University of Trento
-   via Sommarive, 18
-   I-38123 Trento (Italy)
+  AVX implementation of exp
+  Based on "sse_mathfun.h", by Julien Pommier
+  http://gruntthepeon.free.fr/ssemath/
+  Copyright (C) 2012 Giovanni Garberoglio
+  Interdisciplinary Laboratory for Computational Science (LISC)
+  Fondazione Bruno Kessler and University of Trento
+  via Sommarive, 18
+  I-38123 Trento (Italy)
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
   arising from the use of this software.
@@ -52,21 +55,20 @@ __m256 exp256_ps(__m256 x)
   including commercial applications, and to alter it and redistribute it
   freely, subject to the following restrictions:
   1. The origin of this software must not be misrepresented; you must not
-     claim that you wrote the original software. If you use this software
-     in a product, an acknowledgment in the product documentation would be
-     appreciated but is not required.
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
   2. Altered source versions must be plainly marked as such, and must not be
-     misrepresented as being the original software.
+    misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
   (this is the zlib license)
 
 */
-  /* 
+/* 
   To increase the compatibility across different compilers the original code is
   converted to plain AVX2 intrinsics code without ingenious macro's,
   gcc style alignment attributes etc.
   Moreover, the part "express exp(x) as exp(g + n*log(2))" has been significantly simplified.
-  This modified code is not thoroughly tested!
 */
 
   __m256 exp_hi = _mm256_set1_ps(88.3762626647949f);
