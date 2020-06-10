@@ -89,54 +89,60 @@ def simplecount(filename):
     return lines
 
 def plot_rooflines():
-    x_value = 0.6  
-    x_b = 2.2
-    angle = 39
-    angle_b = 37
-    x_a = 0.035
+
+    x_value = 0.035
+
+    angle_l1_bandwidth = 37
+    angle_l2_bandwidth = 37
+    angle_l3_bandwidth = 39
+    angle_dram_bandwith = 39
+
+    x_text_vector_fma_peak_line = 0.64
+    x_text_vector_add_peak_line = 0.62
+    x_text_scalar_add_peak_line = 2.2
 
     # plot DRAM BANDWITH LINE
     x0 = [n for (n, p) in dram_bandwidth_bound]
     y0 = [p for (n, p) in dram_bandwidth_bound]
     plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-    plt.text(x_a, DRAM_BANDWIDTH * x_a + 0.03 , memory_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle, fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(x_value, DRAM_BANDWIDTH * x_value + 0.03 , memory_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_dram_bandwith, fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
     # plot L3 BANDWITH LINE
     x0 = [n for (n, p) in l3_bandwidth_bound]
     y0 = [p for (n, p) in l3_bandwidth_bound]
     plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-    plt.text(x_a, L3_BANDWIDTH * x_a + 0.06, l3_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(x_value, L3_BANDWIDTH * x_value + 0.06, l3_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_l3_bandwidth,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
     # plot L2 BANDWITH LINE
     x0 = [n for (n, p) in l2_bandwidth_bound]
     y0 = [p for (n, p) in l2_bandwidth_bound]
     plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-    plt.text(x_a, L2_BANDWIDTH * x_a + 0.15, l2_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_b,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(x_value, L2_BANDWIDTH * x_value + 0.15, l2_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_l2_bandwidth,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
     # plot L1 BANDWITH LINE
     x0 = [n for (n, p) in l1_bandwidth_bound]
     y0 = [p for (n, p) in l1_bandwidth_bound]
     plt.plot(x0, y0, '-', linewidth=1.1, color='black')
-    plt.text(x_a, L1_BANDWIDTH * x_a + 0.4, l1_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_b,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(x_value, L1_BANDWIDTH * x_value + 0.4, l1_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_l1_bandwidth,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
 
     # plot scalar add peak line
     x0 = [n for (n, p) in flops_bound]
     y0 = [p for (n, p) in flops_bound]
     plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-    plt.text(x_b, MAX_FLOPS_PER_CYCLE + 0.375, scalar_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(x_text_scalar_add_peak_line, MAX_FLOPS_PER_CYCLE + 0.375, scalar_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
     # plot vector add peak line
     x0 = [n for (n, p) in simd_double_bound]
     y0 = [p for (n, p) in simd_double_bound]
     plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-    plt.text(0.62, (MAX_FLOPS_PER_CYCLE*4) + 1.25, simd_double_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0) )
+    plt.text(x_text_vector_add_peak_line, (MAX_FLOPS_PER_CYCLE*4) + 1.25, simd_double_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0) )
 
     # plot vector fma peak line
     x0 = [n for (n, p) in simd_float_bound]
     y0 = [p for (n, p) in simd_float_bound]
     plt.plot(x0, y0, '-', linewidth=1.1,color='black')
-    plt.text(0.64, (MAX_FLOPS_PER_CYCLE*8) + 2.5, simd_float_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(x_text_vector_fma_peak_line, (MAX_FLOPS_PER_CYCLE*8) + 2.5, simd_float_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
 def myticks(x,pos):
 
