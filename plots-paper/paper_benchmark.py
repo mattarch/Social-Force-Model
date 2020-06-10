@@ -9,23 +9,8 @@ import platform, subprocess
 
 def get_processor_info():
     return "Intel Core i7-9750H CPU"
-    if platform.system() == "Windows":
-        return ' AMD Ryzen 7 3700U with Radeon Vega Mobile Gfx'
-    elif platform.system() == "Darwin":
-        return "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
-        # return " " + str(subprocess.check_output(['/usr/sbin/sysctl', "-n", "machdep.cpu.brand_string"]).strip().decode("utf-8"))
-    elif platform.system() == "Linux":
-        with open('/proc/cpuinfo') as f:
-            for line in f:
-                # Ignore the blank line separating the information between
-                # details about two processing units
-                if line.strip():
-                    if line.rstrip('\n').startswith('model name'):
-                        model_name = line.rstrip('\n').split(':')[1]
-                        return model_name
-    return "" 
-
-def plot_setup():
+    
+def plot_setup_style():
     mpl.rcParams.update({'font.size': 10})
     colors = cycler('color',
                 ['#000000', '#2F4F4F', '#696969',
@@ -81,7 +66,29 @@ def simplecount(filename):
         lines += 1
     return lines
 
-#start of code
+def plot_title_performance_12():
+    plt.gcf().text(0.076, 0.895, "Performance [Flop/Cycle] vs. input size", fontsize=12)
+    title = "Performance Plot on " + get_processor_info()
+    plt.title(title,loc='left',y=1.05,fontsize=12, weight='bold')
+
+def plot_title_performance_4():
+    plt.gcf().text(0.06, 0.895, "Performance [Flop/Cycle] vs. input size", fontsize=12)
+    title = "Performance Plot on " + get_processor_info()
+    plt.title(title,loc='left',y=1.05,fontsize=12, weight='bold')
+
+def plot_title_speedup():
+    plt.gcf().text(0.076, 0.895, "Speedup w.r.t. straightforward version vs. input size", fontsize=12)
+    title = "Speedup Plot on " + get_processor_info()
+    plt.title(title,loc='left',y=1.05,fontsize=12, weight='bold')
+
+def plot_lines(data):
+    for version in versions:
+        points = data[version]
+        x0 = [n for (n,p) in points]
+        y0 = [p for (n,p) in points]
+        plt.plot(x0,y0,all_markers[version], linewidth=2,label=version, markersize=4,color=colors[version])
+
+########################################################################################################
 
 filename = sys.argv[1]
 try:
@@ -97,8 +104,7 @@ versions = find_versions(num_lines)
 x_values_int = find_x_values_int(num_lines)
 x_values_str = find_x_values(num_lines)
 
-# parse versions
-
+# setup mappings
 performance_all = {}
 runtime_all = {}
 names = {}
@@ -136,7 +142,7 @@ all_markers["vectorize_2"] = '-D'
 all_markers["vectorize_3"] = '-H'
 all_markers["vectorize_5"] = '-o'
 
-
+# parse versions
 for version in versions:
     performance_all[version] = []
     runtime_all[version] = []
@@ -150,109 +156,91 @@ for i in range(num_lines):
     performance_all[version].append((n,performance))
     runtime_all[version].append((n,runtime))
 
-def plot_title_performance_12():
-    plt.gcf().text(0.076, 0.895, "Performance [Flop/Cycle] vs. input size", fontsize=12)
-    title = "Performance Plot on " + get_processor_info()
-    plt.title(title,loc='left',y=1.05,fontsize=12, weight='bold')
-
-def plot_title_performance_4():
-    plt.gcf().text(0.06, 0.895, "Performance [Flop/Cycle] vs. input size", fontsize=12)
-    title = "Performance Plot on " + get_processor_info()
-    plt.title(title,loc='left',y=1.05,fontsize=12, weight='bold')
-
-def plot_title_speedup():
-    plt.gcf().text(0.076, 0.895, "Speedup w.r.t. straightforward version vs. input size", fontsize=12)
-    title = "Speedup Plot on " + get_processor_info()
-    plt.title(title,loc='left',y=1.05,fontsize=12, weight='bold')
-
-def plot_lines(data):
-    for version in versions:
-        points = data[version]
-        x0 = [n for (n,p) in points]
-        y0 = [p for (n,p) in points]
-        plt.plot(x0,y0,all_markers[version], linewidth=2,label=version, markersize=4,color=colors[version])
-
-
 if(filename == "paper_max_performance.txt"):
+    # plot setup
     plt.figure(figsize=(6, 4.5))
-    plot_setup()
+    plot_setup_style()
     plot_title_performance_12()
+
+    # plot lines
     plot_lines(performance_all)
 
+    # plot labels in figure
     plt.text(3000, 10.4, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"])
     plt.text(3000, 1.3, names["stdc_optv_2_5_1_double"], weight='bold', fontsize=10, color=colors["stdc_optv_2_5_1_double"])
     plt.text(3000, 0.60, names["simplified_float"], weight='bold', fontsize=10, color=colors["simplified_float"])
 
+    # plot axes
     plt.gca().grid(which='major', axis='y')
     plt.ylim((0, 12))
     plt.yticks(fontsize=12)
     plt.axes().xaxis.set_label_coords(0.5, -0.15)
     plt.axes().tick_params(left= False)
-    #plt.yscale('log',basey=2)
-    #plt.xscale('log',basex=2)
     plt.xticks([0,1000,2000,3000,4000,5000,6000], fontsize=12, rotation=0)
 
 if(filename == "paper_std.txt"):
+    # plot setup
     plt.figure(figsize=(6, 4.5))
-    plot_setup()
+    plot_setup_style()
     plot_title_performance_4()
+
+    # plot lines
     plot_lines(performance_all)
 
+    # plot labels in figure
     plt.text(3000, 1.2, names["stdc_optv_2_5_1_double"], weight='bold', fontsize=10,color=colors["stdc_optv_2_5_1_double"])
     plt.text(3000, 0.75, names["stdc_optv_2_4_double"], weight='bold', fontsize=10, color=colors["stdc_optv_2_4_double"])
     plt.text(3000, 0.38, names["simplified_double"], weight='bold', fontsize=10, color=colors["simplified_double"])
 
+    # plot axes
     plt.gca().grid(which='major', axis='y')
     plt.ylim((0, 4))
     plt.yticks(fontsize=12)
     plt.axes().xaxis.set_label_coords(0.5, -0.15)
     plt.axes().tick_params(left= False)
-    #plt.yscale('log',basey=2)
-    #plt.xscale('log',basex=2)
     plt.yticks([0,1,2,3,4], fontsize=12, rotation=0)
-
     plt.xticks([0,1000,2000,3000,4000,5000,6000], fontsize=12, rotation=0)
 
 if(filename == "paper_simd.txt"):
+    # plot setup
     plt.figure(figsize=(6, 4.5))
-    plot_setup()
+    plot_setup_style()
     plot_title_performance_12()
+
+    # plot lines
     plot_lines(performance_all)
 
+    # plot labels in figure
     plt.text(9000, 10.2, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"])
     plt.text(9000, 8.9, names["vectorize_3"], weight='bold', fontsize=10,color=colors["vectorize_3"])
     plt.text(9000, 6.9, names["vectorize_2"], weight='bold', fontsize=10,color=colors["vectorize_2"])
     plt.text(9000, 6.20, names["vectorize_1"], weight='bold', fontsize=10,color=colors["vectorize_1"])
-
     plt.text(9000, 7.8, names["vectorize_2_5_1"], weight='bold', fontsize=10, color=colors["vectorize_2_5_1"])
     plt.text(9000, 0.35, names["simplified_float"], weight='bold', fontsize=10, color=colors["simplified_float"])
  
-
+    # plot axes
     plt.gca().grid(which='major', axis='y')
     plt.ylim((0, 12))
     plt.yticks(fontsize=12)
     plt.axes().xaxis.set_label_coords(0.5, -0.1)
-
     plt.axes().tick_params(left= False)
-    #plt.yscale('log',basey=2)
     plt.xticks(fontsize=12)
     plt.xscale('log',basex=2)
     # plt.xlabel("n",fontsize=12)
-
     # def format_func(value, tick_number):
     #     if (value%2) == 0:
     #         return r"${0}$".format(2*tick_number+1)
     #     else:
     #         return r"$2^{tick_number}$"
-
     # plt.axes().xaxis.set_major_formatter(plt.FuncFormatter(format_func))
 
 if(filename == "paper_speedup.txt"):
+    # plot setup
     plt.figure(figsize=(6, 4.5))
-    plot_setup()
+    plot_setup_style()
     plot_title_speedup()
 
-    # normalize lines
+    # normalize lines with respective straighforward version
     input_sizes_double,stf_double = zip(*runtime_all["simplified_double"])
     input_sizes_double = list(input_sizes_double)
     stf_double = list(stf_double)
@@ -272,18 +260,19 @@ if(filename == "paper_speedup.txt"):
                 version_values[i] = stf_double[i]/version_values[i]
         runtime_all[version] = list(zip(num,version_values))
 
+    # plot lines
     plot_lines(runtime_all)
 
-
+    # plot labels in figure
     plt.text(3000, 18.3, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"])
     plt.text(3000, 2.5, names["stdc_optv_2_5_1_double"], weight='bold', fontsize=10, color=colors["stdc_optv_2_5_1_double"])
     plt.text(3000, 1.15, names["simplified_float"], weight='bold', fontsize=10, color=colors["simplified_float"])
 
+    # plot axes
     plt.gca().grid(which='major', axis='y')
     plt.ylim((0, 25))
     plt.yticks(fontsize=12)
     plt.axes().xaxis.set_label_coords(0.5, -0.1)
-
     plt.axes().tick_params(left= False)
     #plt.yscale('log',basey=10)
     plt.xticks(fontsize=12)
@@ -296,9 +285,7 @@ plt.tick_params(
     top=False,         # ticks along the top edge are off
     labelbottom=True) # labels along the bottom edge are off
 
-#plt.legend(frameon = False, loc = 'center right', fontsize = 14)
 plt.subplots_adjust(top=0.85)
 plt.tight_layout()
-
 plt.savefig(filename + ".eps")
 plt.show()

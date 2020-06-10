@@ -2,12 +2,14 @@ import csv
 import numpy as np
 from matplotlib import cycler
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import matplotlib as mpl
 
 import sys
 
 import platform
 import subprocess
+
 
 ################################################################
 # PARAMETERS
@@ -46,24 +48,8 @@ simd_float_flops_bound_str = "single precision SIMD FMA peak: "+str(MAX_FLOPS_PE
 
 def get_processor_info():
     return "Intel Core i7-9750H CPU"
-    if platform.system() == "Windows":
-        return ' AMD Ryzen 7 3700U with Radeon Vega Mobile Gfx'
-    elif platform.system() == "Darwin":
-        return "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
-        # return " " + str(subprocess.check_output(['/usr/sbin/sysctl', "-n", "machdep.cpu.brand_string"]).strip().decode("utf-8"))
-    elif platform.system() == "Linux":
-        with open('/proc/cpuinfo') as f:
-            for line in f:
-                # Ignore the blank line separating the information between
-                # details about two processing units
-                if line.strip():
-                    if line.rstrip('\n').startswith('model name'):
-                        model_name = line.rstrip('\n').split(':')[1]
-                        return model_name
-    return ""
 
-
-def plot_setup():
+def plot_setup_style():
     mpl.rcParams.update({'font.size': 10})
     colors = cycler('color',
                 ['#000000', '#2F4F4F', '#696969',
@@ -102,6 +88,66 @@ def simplecount(filename):
         lines += 1
     return lines
 
+def plot_rooflines():
+    x_value = 0.6  
+    x_b = 2.2
+    angle = 39
+    angle_b = 37
+    x_a = 0.035
+
+    # plot DRAM BANDWITH LINE
+    x0 = [n for (n, p) in dram_bandwidth_bound]
+    y0 = [p for (n, p) in dram_bandwidth_bound]
+    plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
+    plt.text(x_a, DRAM_BANDWIDTH * x_a + 0.03 , memory_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle, fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+
+    # plot L3 BANDWITH LINE
+    x0 = [n for (n, p) in l3_bandwidth_bound]
+    y0 = [p for (n, p) in l3_bandwidth_bound]
+    plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
+    plt.text(x_a, L3_BANDWIDTH * x_a + 0.06, l3_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+
+    # plot L2 BANDWITH LINE
+    x0 = [n for (n, p) in l2_bandwidth_bound]
+    y0 = [p for (n, p) in l2_bandwidth_bound]
+    plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
+    plt.text(x_a, L2_BANDWIDTH * x_a + 0.15, l2_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_b,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+
+    # plot L1 BANDWITH LINE
+    x0 = [n for (n, p) in l1_bandwidth_bound]
+    y0 = [p for (n, p) in l1_bandwidth_bound]
+    plt.plot(x0, y0, '-', linewidth=1.1, color='black')
+    plt.text(x_a, L1_BANDWIDTH * x_a + 0.4, l1_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_b,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+
+
+    # plot scalar add peak line
+    x0 = [n for (n, p) in flops_bound]
+    y0 = [p for (n, p) in flops_bound]
+    plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
+    plt.text(x_b, MAX_FLOPS_PER_CYCLE + 0.375, scalar_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+
+    # plot vector add peak line
+    x0 = [n for (n, p) in simd_double_bound]
+    y0 = [p for (n, p) in simd_double_bound]
+    plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
+    plt.text(0.62, (MAX_FLOPS_PER_CYCLE*4) + 1.25, simd_double_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0) )
+
+    # plot vector fma peak line
+    x0 = [n for (n, p) in simd_float_bound]
+    y0 = [p for (n, p) in simd_float_bound]
+    plt.plot(x0, y0, '-', linewidth=1.1,color='black')
+    plt.text(0.64, (MAX_FLOPS_PER_CYCLE*8) + 2.5, simd_float_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+
+def myticks(x,pos):
+
+    if x == 0: return "$0$"
+
+    if(x >= 1):
+        return r"${:4.0f}$".format(x)
+    else:
+        return r"{0}".format(x)
+
+########################################################################################################
 
 filename = sys.argv[-1]
 try:
@@ -112,8 +158,6 @@ except:
 fileAsList = f.readlines()
 num_lines = len(open(filename).readlines())
 versions = find_versions(num_lines)
-
-myDict = {}
 
 performance_all = {}
 runtime_all = {}
@@ -151,112 +195,53 @@ all_markers["vectorize_2"] = '-D'
 all_markers["vectorize_3"] = '-H'
 all_markers["vectorize_5"] = '-o'
 
-
 for version in versions:
-    myDict[version] = []
+    performance_all[version] = []
 
 for i in range(num_lines):
     line = fileAsList[i].split()
     version = line[0]
     intensity = float(line[2])  # I(n)
     performance = float(line[1]) / FREQUENCY
-    myDict[version].append((intensity, performance))
+    performance_all[version].append((intensity, performance))
 
-
+# plot setup
 plt.figure(figsize=(6, 4.5))
-
-plot_setup()
-
-x_value = 0.6
-x_b = 2.2
-
-angle = 39
-angle_b = 37
-x_a = 0.035
-
-
-x0 = [n for (n, p) in dram_bandwidth_bound]
-y0 = [p for (n, p) in dram_bandwidth_bound]
-plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-plt.text(x_a, DRAM_BANDWIDTH * x_a + 0.03 , memory_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle, fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
-
-x0 = [n for (n, p) in l3_bandwidth_bound]
-y0 = [p for (n, p) in l3_bandwidth_bound]
-plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-plt.text(x_a, L3_BANDWIDTH * x_a + 0.06, l3_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
-
-
-x0 = [n for (n, p) in l2_bandwidth_bound]
-y0 = [p for (n, p) in l2_bandwidth_bound]
-plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-plt.text(x_a, L2_BANDWIDTH * x_a + 0.15, l2_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_b,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
-
-x0 = [n for (n, p) in l1_bandwidth_bound]
-y0 = [p for (n, p) in l1_bandwidth_bound]
-plt.plot(x0, y0, '-', linewidth=1.1, color='black')
-plt.text(x_a, L1_BANDWIDTH * x_a + 0.4, l1_bound_str, {'ha': 'left', 'va': 'bottom'}, rotation=angle_b,fontsize=10,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
-
-
-x0 = [n for (n, p) in flops_bound]
-y0 = [p for (n, p) in flops_bound]
-plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-plt.text(x_b, MAX_FLOPS_PER_CYCLE + 0.375, scalar_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
-
-x0 = [n for (n, p) in simd_double_bound]
-y0 = [p for (n, p) in simd_double_bound]
-plt.plot(x0, y0, '--', linewidth=1.1, color='grey')
-plt.text(0.62, (MAX_FLOPS_PER_CYCLE*4) + 1.25, simd_double_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0) )
-
-x0 = [n for (n, p) in simd_float_bound]
-y0 = [p for (n, p) in simd_float_bound]
-plt.plot(x0, y0, '-', linewidth=1.1,color='black')
-plt.text(0.64, (MAX_FLOPS_PER_CYCLE*8) + 2.5, simd_float_flops_bound_str,bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
-
-for version in versions:
-    points = myDict[version]
-    x0 = [n for (n, p) in points]
-    y0 = [p for (n, p) in points]
-    plt.plot(x0, y0, '.-',color=colors[version], markersize=14, label=version)
-
+plot_setup_style()
 plt.gcf().text(0.085, 0.895,
                "Performance [Flop/Cycle] vs. Operational Intensity [Flop/Bytes]", fontsize=12)
 title = "Roofline Plot on " + get_processor_info()
 plt.title(title, loc='left', y=1.06, fontsize=12,weight='bold')
 
-plt.text(1.45, 10.495, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"],horizontalalignment='left',verticalalignment='center')
+plot_rooflines()
+
+# plot points
+for version in versions:
+    points = performance_all[version]
+    x0 = [n for (n, p) in points]
+    y0 = [p for (n, p) in points]
+    plt.plot(x0, y0, '.-',color=colors[version], markersize=14, label=version)
+
+# add labels to points
+plt.text(1.45, 27.28/FREQUENCY, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"],horizontalalignment='left',verticalalignment='center')
 plt.text(0.49, 0.945/FREQUENCY, names["simplified_float"], weight='bold', fontsize=10,color=colors["simplified_float"],horizontalalignment='left',verticalalignment='center')
 plt.text(0.32, 1.409/FREQUENCY, names["simplified_double"], weight='bold', fontsize=10,color=colors["simplified_double"],horizontalalignment='left',verticalalignment='center')
 plt.text(0.16, 2.618/FREQUENCY, names["stdc_optv_2_5_1_double"], weight='bold', fontsize=10,color=colors["stdc_optv_2_5_1_double"],horizontalalignment='left',verticalalignment='center',bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 plt.text(1.45, 19.615/FREQUENCY, names["vectorize_2_5_1"], weight='bold', fontsize=10,color=colors["vectorize_2_5_1"],horizontalalignment='left',verticalalignment='center',bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
 
-#plt.text(1.45, 22.89/FREQUENCY, names["vectorize_3"], weight='bold', fontsize=10,color=colors["vectorize_3"],horizontalalignment='left',verticalalignment='center')
-
+# plot axes
 ax = plt.gca()
 ax.grid(which='major', axis='y')
 plt.ylim((1/(2**2), 50))
 plt.xlim((1/(2**5), 10))
 plt.yticks(fontsize=12)
-# plt.axes().xaxis.set_label_coords(0.5, 0.15)
 plt.axes().tick_params(left=False)
 plt.yscale('log',basey=2)
 plt.xscale('log',basex=10)
 plt.yticks([0.5,1,2,4,8,16,32],fontsize=12)
-
 plt.xticks([0.1,1,10],fontsize=12)
-
-import matplotlib.ticker as ticker
-def myticks(x,pos):
-
-    if x == 0: return "$0$"
-
-    if(x >= 1):
-        return r"${:4.0f}$".format(x)
-    else:
-        return r"{0}".format(x)
-
 plt.axes().xaxis.set_major_formatter(ticker.FuncFormatter(myticks))
 plt.axes().yaxis.set_major_formatter(ticker.FuncFormatter(myticks))
-
 
 plt.tick_params(
     axis='x',          # changes apply to the x-axis
@@ -265,8 +250,6 @@ plt.tick_params(
     top=False,         # ticks along the top edge are off
     labelbottom=True)  # labels along the bottom edge are off
 
-# plt.legend()
 plt.tight_layout()
-
 plt.savefig(filename + ".eps")
 plt.show()
