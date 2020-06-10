@@ -1,0 +1,6 @@
+n_people, GFLOPS, AI
+simplified_float 72 1.009 0.425
+simplified_float 216 0.95 0.430
+simplified_float 648 0.941 0.431
+simplified_float 1944 0.944 0.432
+simplified_float 5832 1.202 0.434

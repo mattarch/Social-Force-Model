@@ -1,0 +1,7 @@
+n_people, GFLOPS, AI
+vectorize_4 72 25.767 1.281
+vectorize_4 216 26.866 1.381
+vectorize_4 648 26.755 1.418
+vectorize_4 1944 26.82 1.431
+vectorize_4 5832 27.02 1.435
+vectorize_4 17496 26.126 1.437

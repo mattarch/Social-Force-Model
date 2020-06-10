@@ -1,0 +1,14 @@
+vectorize_1 22.89 1.238
+vectorize_2 23.84 1.220
+vectorize_3 26.49 1.415
+vectorize_float_4 26.755 1.418
+vectorize_5 27.287 1.317
+vectorize_2_5_1 19.615 1.318
+simplified_float 0.945 0.431
+simplified_double 1.409 0.287
+vectorize_double_1 6.585 0.529
+vectorize_double_2 7.697 0.588
+vectorize_double_4 7.792 0.686
+stdc_optv_2_5_1_double 2.618 0.144
+stdc_optv_2_4_double 2.304 0.241
+

@@ -1,0 +1,4 @@
+vectorize_float_4 26.755 1.418
+vectorize_float_2_5_1 19.615 1.318
+basic_simplified_float 0.945 0.431
+vectorize_double_4 7.792 0.686
