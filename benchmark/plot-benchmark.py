@@ -134,7 +134,6 @@ plt.figure(figsize=(8, 4.5))
 plot_setup_style()
 plot_title()
 plot_axes()
-plt.legend(frameon = False, loc = 'center right', fontsize = 12)
 
 #plot all versions 
 for version in versions:
@@ -144,5 +143,6 @@ for version in versions:
     y0 = [p for (n,p) in points]
     plt.plot(x0,y0,markers[marker_counter % len(markers)], linewidth=2,label=version, markersize=4)
 
+plt.legend(frameon = False, loc = 'center right', fontsize = 10)
 plt.savefig(filename + ".pdf")
 plt.show()
