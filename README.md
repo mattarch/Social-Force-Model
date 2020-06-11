@@ -8,7 +8,7 @@ This repository contains all C and Python code that was used to generate and ana
 
 
 ## Compilation
-Compile the code with running the bash script 'src\main\run_simulation.sh'. After compilation was succesfull the user has 3 different option:
+Compile the code with running the bash script 'src/main/run_simulation.sh'. After compilation was succesfull the user has 3 different option:
 1. Benchmark
 2. Test
 3. Visualization and Test
