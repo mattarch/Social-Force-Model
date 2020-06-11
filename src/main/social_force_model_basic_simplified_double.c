@@ -386,9 +386,11 @@ void test_simulation_basic_simplified_double(int number_of_people, int n_timeste
     update_people_repulsion_term_simplified_double(position, desired_direction, speed, people_repulsion_term, number_of_people);
     update_border_repulsion_term_simplified_double(position, borders, border_repulsion_term, number_of_people, N_BORDERS);
 
-    test_people_repulsion_with_FD_double(people_repulsion_term, number_of_people, position, desired_direction, speed);
-    test_border_repulsion_with_FD_double(border_repulsion_term, position, borders, N_BORDERS, number_of_people);
-
+    if(arguments.test)
+    {
+      test_people_repulsion_with_FD_double(people_repulsion_term, number_of_people, position, desired_direction, speed);
+      test_border_repulsion_with_FD_double(border_repulsion_term, position, borders, N_BORDERS, number_of_people);
+    }
     compute_social_force_simplified_double(acceleration_term, people_repulsion_term, border_repulsion_term, social_force, number_of_people, N_BORDERS);
     update_position_simplified_double(position, desired_direction, speed, social_force, actual_velocity, desired_max_speed, number_of_people);
 

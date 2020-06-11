@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     add_implementations_double(sim_list_double, &sim_counter_double, test_functions_list, &test_func_counter);
     add_implementations_double_restructured(sim_list_double_restructured, &sim_counter_double_restructured, test_functions_list, &test_func_counter);
 
-    if (arguments.test || arguments.visual)
+    if (arguments.test)
     {
         //seed = j;
         run_tests(sim_list_float, sim_counter_float);
@@ -203,10 +203,10 @@ void add_implementations_double(sim_t **sim_list, int *sim_counter, sim_t **test
     // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_2_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_double, "vectorize_2_double");
     // add_function(sim_list, sim_counter, NULL, simulation_basic_vectorize_4_double, compute_simplified_flops, IS_DOUBLE, compute_operational_intensity_optimized_double, "vectorize_4_double");
 
-    add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double");
-    add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1_test, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double_test");
+    //add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double");
+    //add_function(sim_list, sim_counter, NULL, simulation_basic_optv_2_5_1_test, compute_251_flops, IS_DOUBLE, compute_operational_intensity_251, "stdc_optv_2_5_1_double_test");
 
-    // add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
+     add_test_function(test_functions_list, NULL, test_simulation_basic_simplified_double, IS_DOUBLE, test_func_counter);
 }
 
 void add_implementations_double_restructured(sim_t **sim_list, int *sim_counter, sim_t **test_functions_list, int *test_func_counter)

@@ -56,8 +56,8 @@ select opt in $options; do
     echo "Perform Tests:"
     ./$prog --test
     exit
-  elif [ $opt == "Visualization/Test" ]; then
-    echo "Perform Visualization/Tests:"
+  elif [ $opt == "Visualization" ]; then
+    echo "Perform Visualization:"
     ./$prog --visual  --filename=$timelabel
 
     # open visualization
