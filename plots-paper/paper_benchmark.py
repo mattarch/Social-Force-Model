@@ -211,12 +211,12 @@ if(filename == "paper_simd.txt"):
     plot_lines(performance_all)
 
     # plot labels in figure
-    plt.text(9000, 10.2, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"])
-    plt.text(9000, 8.9, names["vectorize_3"], weight='bold', fontsize=10,color=colors["vectorize_3"])
-    plt.text(9000, 6.9, names["vectorize_2"], weight='bold', fontsize=10,color=colors["vectorize_2"])
-    plt.text(9000, 6.20, names["vectorize_1"], weight='bold', fontsize=10,color=colors["vectorize_1"])
-    plt.text(9000, 7.8, names["vectorize_2_5_1"], weight='bold', fontsize=10, color=colors["vectorize_2_5_1"])
-    plt.text(9000, 0.35, names["simplified_float"], weight='bold', fontsize=10, color=colors["simplified_float"])
+    plt.text(9000, 9.9, names["vectorize_5"], weight='bold', fontsize=10,color=colors["vectorize_5"],bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(9000, 8.9, names["vectorize_3"], weight='bold', fontsize=10,color=colors["vectorize_3"],bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(9000, 6.9, names["vectorize_2"], weight='bold', fontsize=10,color=colors["vectorize_2"],bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(9000, 6.20, names["vectorize_1"], weight='bold', fontsize=10,color=colors["vectorize_1"],bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(9000, 7.8, names["vectorize_2_5_1"], weight='bold', fontsize=10, color=colors["vectorize_2_5_1"],bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
+    plt.text(9000, 0.35, names["simplified_float"], weight='bold', fontsize=10, color=colors["simplified_float"],bbox=dict(facecolor='#E6E6E6', alpha=1,pad=0.0))
  
     # plot axes
     plt.gca().grid(which='major', axis='y')
