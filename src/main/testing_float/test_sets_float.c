@@ -15,7 +15,7 @@
 
 #include "../parse_args.h"
 #include "../social_force.h"
-#include "../social_force_model_basic_simplified.h"
+#include "../social_force_model_straightforward_float.h"
 #include "../utility.h"
 
 #include "compare_simulations_float.h"
@@ -131,16 +131,16 @@ void add_testcases()
 void add_function_implementations()
 {
     //update direction implementations
-    add_direction_implementation(update_desired_direction_simplified);
+    add_direction_implementation(update_desired_direction_float);
 
     //update acceleration implementations
-    add_acceleration_implementation(update_acceleration_term_simplified);
+    add_acceleration_implementation(update_acceleration_term_float);
 
     //compute social force implementations
-    add_social_implementation(compute_social_force_simplified);
+    add_social_implementation(compute_social_force_float);
 
     //update position implementations
-    add_pos_implementation(update_position_simplified);
+    add_pos_implementation(update_position_float);
 }
 
 int run_tests(sim_t **sim_list, int sim_counter)

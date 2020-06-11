@@ -44,7 +44,7 @@ def plot_title():
 def plot_axes():
     ax = plt.gca()
     ax.grid(which='major', axis='y')
-    plt.ylim((0, 12))
+    #plt.ylim((0, 12))
     plt.yticks(fontsize=12)
     plt.axes().xaxis.set_label_coords(0.5, -0.15)
     plt.axes().tick_params(left= False)

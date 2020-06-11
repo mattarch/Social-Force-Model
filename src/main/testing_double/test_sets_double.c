@@ -15,7 +15,7 @@
 
 #include "../parse_args.h"
 #include "../social_force.h"
-#include "../social_force_model_basic_simplified_double.h"
+#include "../social_force_model_straightforward_double.h"
 #include "../utility.h"
 
 #include "compare_simulations_double.h"
@@ -131,16 +131,16 @@ void add_testcases_double()
 void add_function_implementations_double()
 {
     //update direction implementations
-    add_direction_implementation_double(update_desired_direction_simplified_double);
+    add_direction_implementation_double(update_desired_direction_double);
 
     //update acceleration implementations
-    add_acceleration_implementation_double(update_acceleration_term_simplified_double);
+    add_acceleration_implementation_double(update_acceleration_term_double);
 
     //compute social force implementations
-    add_social_implementation_double(compute_social_force_simplified_double);
+    add_social_implementation_double(compute_social_force_double);
 
     //update position implementations
-    add_pos_implementation_double(update_position_simplified_double);
+    add_pos_implementation_double(update_position_double);
 }
 
 int run_tests_double(sim_t **sim_list, int sim_counter)

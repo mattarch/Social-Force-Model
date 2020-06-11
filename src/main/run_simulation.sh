@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # set variables
-options="Benchmark Test Visualization/Test"
+options="Benchmark Test Visualization"
 timesteps=(25) # talk about number of iterations
-persons=(24 72 216 648 1944 5832 17496 52488 157464)
+persons=(24 72 216) #648 1944 5832 17496 52488 157464)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
