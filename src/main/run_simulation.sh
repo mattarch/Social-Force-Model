@@ -3,7 +3,7 @@
 # set variables
 options="Benchmark Test Visualization/Test"
 timesteps=(25) # talk about number of iterations
-persons=(8 16 32 64 128 256 512 1024)
+persons=(24 72 216 648 1944 5832 17496 52488 157464)
 os=$(uname)
 currentdate=$(date +"%Y-%m-%d")
 currenttime=$(date +"%H-%M-%S")
@@ -16,7 +16,7 @@ firstarg=basic
 # compile program
 # if macOS -> use gcc-9, else -> gcc
 if [ $os == "Darwin" ]; then
-  gcc-9 *.c  vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
+  gcc-9 *.c vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 else
   gcc *.c vectorize/*.c stdc_opt/*.c testing_double/*.c testing_float/*.c  -lm -O3 -mavx2 -mfma -ffast-math -g -o $prog
 fi
