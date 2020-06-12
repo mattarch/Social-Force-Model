@@ -25,8 +25,8 @@ The test option allows the user to run testcases and finite-difference tests for
 ## Visualization
 This option outputs a visualization of the straightforward implementation. A text file, saved under the folder 'test', contains all the values computed during the simulation. Later a python script will visualize the results.
 
-If the user wants to visualize a previously run simulation, then the output can be visualized in test with:
-`python3 visualization_basic.py <filename>`
+A previously run simulation can be visualized by running the visualization script in the folder 'test' with:
+`python3 visualization_basic.py <filename>` 
 
 
 
