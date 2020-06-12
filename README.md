@@ -1,5 +1,5 @@
-# ASL_project
-This is the GitLap repository of group 48.
+# Advanced Systems Lab - Spring 2020
+This is the GitLab repository of group 48.
 Project topic: Social Force Model for Pedestrian Dynamics
 
 Goal was to implement a fast social force model. The final report includes an analysis and results of the work.
