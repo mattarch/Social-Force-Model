@@ -2,7 +2,7 @@
 This is the GitLab repository of group 48.
 Project topic: Social Force Model for Pedestrian Dynamics
 
-Goal was to implement a fast social force model. The final report includes an analysis and results of the work.
+The goal was to implement a fast social force model. The final report includes an analysis and results of the work.
 
 This repository contains all C and Python code that was used to generate and analyze the data.
 
